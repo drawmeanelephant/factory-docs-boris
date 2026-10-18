@@ -1,0 +1,218 @@
+---
+id: guides/droid-exec/code-review
+title: "Automated Code Review"
+status: published
+summary: "Set up automated pull request and merge request reviews with Droid"
+parent: guides/droid-exec/index
+tags: [guides, code-review, pr-review, pull-request, github-actions, automation, droid-exec, github-app]
+relations: [relates_to=jp/guides/droid-exec/code-review]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Automated Code Review</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Set up automated pull request and merge request reviews with Droid</p>
+
+
+Set up automated code review for GitHub or GitLab repositories. Droid analyzes pull requests and merge requests, identifies issues, and posts feedback as inline comments. For GitHub repositories, the setup flow checks the Factory Droid GitHub App installation as part of configuring review automation.
+
+<div style="display:flex; gap:1rem; flex-wrap:wrap">
+  <div style="flex:1; min-width:300px">
+    <img src="./code-review-picture-1.png" alt="Factory Droid bot posting a code review summary with issues found" />
+  </div>
+  <div style="flex:1; min-width:300px">
+    <img src="./code-review-picture-2.png" alt="Factory Droid bot posting inline code review comment on specific lines" />
+  </div>
+</div>
+
+## Setup {#setup}
+
+Use the `/install-code-review` command to set up automated code review for GitHub or GitLab:
+
+```bash
+droid
+> /install-code-review
+```
+
+The guided flow will:
+1. Detect your SCM platform (GitHub or GitLab)
+2. Verify prerequisites (CLI tools, permissions)
+3. Walk you through review configuration (depth, security, triggers)
+4. Create a PR/MR with the workflow files
+
+## How it works {#how-it-works}
+
+Once enabled, the Droid Review workflow:
+
+1. Triggers on pull request events (opened, synchronize, reopened, ready for review)
+2. Skips draft PRs to avoid noise during development
+3. Fetches the PR diff and existing comments
+4. Analyzes code changes for bugs, security issues, and correctness problems
+5. Posts inline comments on problematic lines
+6. Submits an approval when no issues are found
+
+## Authentication {#authentication}
+
+Automated review needs two separate kinds of access: permission to run Droid, and permission to post on your pull requests. You set them up independently.
+
+### 1. Factory API key (run Droid) {#1-factory-api-key-run-droid}
+
+Droid runs using your Factory API key. Create one at [app.factory.ai/settings/api-keys](https://app.factory.ai/settings/api-keys), then add it to your repository or organization as a secret named `FACTORY_API_KEY`. The workflow passes it in like this:
+
+```yaml
+- uses: Factory-AI/droid-action@main
+  with:
+    factory_api_key: ${{ secrets.FACTORY_API_KEY }}
+```
+
+This is required for every run.
+
+### 2. GitHub access (post reviews) {#2-github-access-post-reviews}
+
+To leave comments and approvals on your PRs, Droid needs a GitHub token. There are two ways to provide one:
+
+- **Factory Droid GitHub App (default, recommended).** If you don't supply a token, the action securely requests one for the installed Factory Droid GitHub App. For most teams this is all you need: install the app on your repositories from [app.factory.ai/settings/organization](https://app.factory.ai/settings/organization) and you're done. It requires the `id-token: write` permission so the action can request the token:
+
+  ```yaml
+  permissions:
+    contents: write
+    pull-requests: write
+    issues: write
+    id-token: write # required for GitHub App auth
+  ```
+
+- **Your own token (override).** If you'd rather use a personal access token or your own GitHub App, for example on GitHub Enterprise or to control which account posts comments, pass it as `github_token`. When set, Droid uses it directly and skips the app. The token needs write access to pull requests and repository contents.
+
+  ```yaml
+  - uses: Factory-AI/droid-action@main
+    with:
+      factory_api_key: ${{ secrets.FACTORY_API_KEY }}
+      github_token: ${{ secrets.MY_GITHUB_TOKEN }}
+  ```
+
+
+
+<Aside kind="note">
+On GitLab, the same two pieces apply: set `FACTORY_API_KEY` and `GITLAB_TOKEN` as CI/CD variables. The `/install-code-review` flow configures both for you.
+</Aside>
+
+
+
+For the security architecture behind the GitHub App, see [[enterprise/github-integration-security|GitHub Integration Security]].
+
+## Review depth {#review-depth}
+
+The `review_depth` input controls the thoroughness and cost of each review. You choose the depth during `/install-code-review` setup, or set it directly in your workflow.
+
+- **`deep`** (default) — Thorough analysis with higher reasoning effort. Catches more subtle bugs but costs more per review. Best for production code and security-sensitive repos.
+- **`shallow`** — Faster, more cost-effective reviews that cover surface-level issues. Good for high-volume repos, draft PRs, or teams watching spend.
+
+```yaml
+with:
+  automatic_review: true
+  review_depth: deep  # or shallow
+```
+
+You can also override the model or reasoning effort directly with `review_model` and `reasoning_effort`, which take precedence over the depth preset.
+
+## Security review {#security-review}
+
+Security review is a dedicated workflow for STRIDE, OWASP, OWASP LLM Top 10, and supply-chain analysis. See [[enterprise/security-review|Security Review]] for automatic PR security reviews, scheduled scans, and local full-codebase audits with the built-in `security-review` skill.
+
+## What Droid reviews {#what-droid-reviews}
+
+The automated reviewer focuses on clear bugs and issues:
+
+- Dead/unreachable code
+- Broken control flow (missing break, fallthrough bugs)
+- Async/await mistakes
+- Null/undefined dereferences
+- Resource leaks
+- SQL/XSS injection vulnerabilities
+- Missing error handling
+- Off-by-one errors
+- Race conditions
+
+It skips stylistic concerns, minor optimizations, and architectural opinions.
+
+## Customizing the workflow {#customizing-the-workflow}
+
+After the workflow is created, you can customize it by editing `.github/workflows/droid-review.yml` in your repository.
+
+### Change the trigger conditions {#change-the-trigger-conditions}
+
+Modify when reviews run:
+
+```yaml
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'src/**'  # Only review changes in src/
+      - '!**/*.test.ts'  # Skip test files
+```
+
+### Custom review guidelines {#custom-review-guidelines}
+
+Add repository-specific review guidelines by creating a `.factory/skills/review-guidelines/SKILL.md` file in your repo:
+
+```markdown
+<!-- .factory/skills/review-guidelines/SKILL.md -->
+
+Additional checks for this codebase:
+- React hooks rules violations
+- Missing TypeScript types on public APIs
+- Prisma query performance issues
+```
+
+These guidelines are automatically picked up and injected into every review run. No workflow changes needed.
+
+### Change the model {#change-the-model}
+
+Use a different model for reviews:
+
+```yaml
+droid exec --auto high --model claude-sonnet-4-5-20250929 -f prompt.txt
+# Or use a faster model for quicker feedback:
+droid exec --auto high --model claude-haiku-4-5-20251001 -f prompt.txt
+```
+
+### Skip certain PRs {#skip-certain-prs}
+
+Add conditions to skip reviews for specific cases:
+
+```yaml
+jobs:
+  code-review:
+    # Skip bot PRs and PRs with [skip-review] in title
+    if: |
+      github.event.pull_request.draft == false &&
+      !contains(github.event.pull_request.user.login, '[bot]') &&
+      !contains(github.event.pull_request.title, '[skip-review]')
+```
+
+### Limit comment count {#limit-comment-count}
+
+Adjust the maximum number of comments in the prompt:
+
+```
+Guidelines:
+- Submit at most 5 comments total, prioritizing the most critical issues
+```
+
+## All workflow inputs {#all-workflow-inputs}
+
+| Input | Default | Description |
+|-------|---------|-------------|
+| `automatic_review` | `false` | Automatically review PRs without `@droid review` |
+| `review_depth` | `deep` | Review preset: `deep` (thorough) or `shallow` (fast) |
+| `review_model` | (from depth) | Override model for code review |
+| `reasoning_effort` | (from depth) | Override reasoning effort |
+| `include_suggestions` | `true` | Include code suggestion blocks in comments |
+
+Security review inputs are documented in [[enterprise/security-review#configuration|Security Review]].
+
+## See also {#see-also}
+
+- [[enterprise/security-review|Security Review]] - Security-focused PR reviews and full-codebase audits
+- [[enterprise/github-integration-security|GitHub Integration Security]] - Security architecture for the GitHub App integration
+- [[guides/droid-exec/github-actions|GitHub Actions examples]] - More automation workflows
+- [[cli/droid-exec/overview|Droid Exec]] - Running Droid in CI/CD environments

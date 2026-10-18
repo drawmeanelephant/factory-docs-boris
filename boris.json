@@ -1,0 +1,58 @@
+{
+  "format": "boris-publication-profile",
+  "schema_version": 1,
+  "input": "content",
+  "site": {
+    "url": "https://drawmeanelephant.github.io/factory-docs-boris",
+    "title": "Factory Documentation",
+    "description": "Agent-Native Software Development Documentation"
+  },
+  "publication": {
+    "target": "github-pages",
+    "base_url": "https://drawmeanelephant.github.io/factory-docs-boris",
+    "origin": "https://drawmeanelephant.github.io",
+    "base_path": "/factory-docs-boris"
+  },
+  "targets": [
+    {
+      "name": "public",
+      "output": "dist",
+      "public": true,
+      "theme": "themes/factory",
+      "layout_rules": [
+        {
+          "selector": "id:index",
+          "layout": "themes/factory/layouts/trunk.html"
+        },
+        {
+          "selector": "id:jp/index",
+          "layout": "themes/factory/layouts/trunk.html"
+        }
+      ],
+      "static": {
+        "dir": "static"
+      },
+      "sitemap": {
+        "path": "sitemap.xml"
+      },
+      "rss": {
+        "path": "rss.xml",
+        "limit": 20
+      },
+      "head": {
+        "enabled": true,
+        "base_url": "https://drawmeanelephant.github.io/factory-docs-boris",
+        "ogp": "required",
+        "defaults": {
+          "description": "Agent-Native Software Development Documentation",
+          "image": {
+            "source": "static",
+            "path": "images/FACTORY_SOCIAL.jpg",
+            "alt": "Factory Documentation"
+          },
+          "twitter_card": "summary_large_image"
+        }
+      }
+    }
+  ]
+}

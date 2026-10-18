@@ -1,0 +1,72 @@
+---
+id: jp/cli/byok/deepinfra
+title: "DeepInfra"
+status: published
+summary: "幅広いオープンソースモデル向けの費用対効果の高い推論"
+parent: jp/cli/byok/index
+tags: [cli, deepinfra, api-key, byok, open-source, inference, custom-model]
+relations: [relates_to=cli/byok/deepinfra]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">DeepInfra</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">幅広いオープンソースモデル向けの費用対効果の高い推論</p>
+
+
+DeepInfraの最適化されたインフラストラクチャで、幅広いオープンソースモデルに対するコスト効率的な推論にアクセスできます。
+
+## 設定 {#configuration}
+
+`~/.factory/settings.json`に追加してください：
+
+```json
+{
+  "customModels": [
+    {
+      "model": "zai-org/GLM-4.7",
+      "displayName": "GLM-4.7 [DeepInfra]",
+      "baseUrl": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "YOUR_DEEPINFRA_TOKEN",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 16384
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-V3.1-Terminus",
+      "displayName": "DeepSeek V3.1 Terminus [DeepInfra]",
+      "baseUrl": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "YOUR_DEEPINFRA_TOKEN",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 16384
+    },
+    {
+      "model": "moonshotai/Kimi-K2-Instruct-0905",
+      "displayName": "Kimi K2 Instruct [DeepInfra]",
+      "baseUrl": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "YOUR_DEEPINFRA_TOKEN",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 32768
+    },
+    {
+      "model": "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+      "displayName": "Qwen3 Coder 480B [DeepInfra]",
+      "baseUrl": "https://api.deepinfra.com/v1/openai",
+      "apiKey": "YOUR_DEEPINFRA_TOKEN",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 32768
+    }
+  ]
+}
+```
+
+## はじめに {#getting-started}
+
+1. [deepinfra.com](https://deepinfra.com)でサインアップしてください
+2. ダッシュボードからAPI tokenを取得してください
+3. [model list](https://deepinfra.com/models)で利用可能なモデルを確認してください
+4. 希望するモデルを設定に追加してください
+
+## 注意事項 {#notes}
+
+- Base URLの形式：`https://api.deepinfra.com/v1/openai`
+- モデル名はHugging Faceのリポジトリ形式に一致します
+- OpenAI互換のAPIをサポートしています
+- 新しいバージョンがリリースされた際の自動モデル更新

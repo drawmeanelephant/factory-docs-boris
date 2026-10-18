@@ -1,0 +1,166 @@
+---
+id: jp/cli/features/droid-computers
+title: "概要"
+status: published
+summary: "Droid用の永続的で長寿命なコンピュート環境"
+parent: jp/cli/features/index
+tags: [cli]
+relations: [relates_to=cli/features/droid-computers]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">概要</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Droid用の永続的で長寿命なコンピュート環境</p>
+
+
+Droid Computersは、Droidがセッション間で接続して作業できる永続的なコンピュート環境です。各セッション後に破棄される一時的なクラウドテンプレートとは異なり、コンピューターは**状態を保持**します。インストールされたパッケージ、ファイル、実行中のサービス、設定はすべてセッション間で永続化されます。
+
+## Droid Computerの種類 {#droid-computer-types}
+
+Factoryは、Droid Computersを使用する2つの方法をサポートしています:
+
+- **Bring Your Own Machine (BYOM)** — VPS、ワークステーション、オンプレミスサーバーなど、既に管理しているマシンを登録します
+- **Managed Droid Computers** — Factoryが基盤となるクラウドコンピュート環境をプロビジョニングし、管理します
+
+両方のタイプは**設定 → Droid Computers**に表示され、Droidセッションの長期間使用可能なターゲットとして使用できます。
+
+## セッションでDroid Computersを使用する {#using-droid-computers-in-sessions}
+
+### Factory App {#factory-app}
+
+新しいセッションモーダルで、**Computer**タブを選択し、アクティブなDroid Computerを選択して、作業ディレクトリ（例: `/home/factory-user/projects/my-app`）を設定し、セッションを開始します。
+
+接続ステータス（接続中 / 接続済み / エラー）がリアルタイムで表示されます。
+
+### Slack {#slack}
+
+Droid Computersは、Slack連携を介してセッションを作成する際にも選択できます。
+
+## Droid Computersの管理 {#managing-droid-computers}
+
+**設定 → Droid Computers**から、以下の操作ができます:
+
+- 独自のローカルDroid Computerを設定
+- 利用可能なDroid Computersを参照
+- Droid Computer名を変更
+- Droid Computerを削除
+- ステータスと接続情報の詳細ページを開く（Managed Droid Computersのみ）
+
+## 独自マシンの使用（BYOM） {#bring-your-own-machine-byom}
+
+VPS、クラウドVM、オンプレミスサーバーなど、所有している任意のマシンをDroid Computerとして登録できます。完全なBYOMセットアップフロー、リモートアクセスガイダンス、管理に関する注意事項については、[[jp/cli/features/droid-computers-byom|独自マシンの使用（BYOM）]]を参照してください。
+
+## Managed Droid Computers {#managed-droid-computers}
+
+開始する最も速い方法は、Factory AppからDroid Computerを直接作成することです。
+
+1. **設定 → Droid Computers**に移動します。
+2. **作成**をクリックします。
+3. Droid Computerに名前を付けます。
+
+Factoryは自動的にクラウドDroid Computer（4 CPU、8GB RAM、6GBスワップ）をプロビジョニングします。プロビジョニングの進行状況は、UIで以下のステップを通してライブ追跡されます:
+
+1. **Droid Computerを作成中** — クラウドDroid Computerの割り当て
+2. **ユーザー設定中** — sudo権限を持つ`factory-user`アカウントの作成
+3. **環境設定中** — 環境設定、SSHキー、サービスファイルの書き込み
+4. **Droidインストール中** — Droidバイナリのダウンロードとインストール
+5. **サービス開始中** — SSHとDroidデーモンサービスの起動
+
+プロビジョニングが完了すると、Droid Computerのステータスが**アクティブ**に変わり、セッションで使用可能になります。プラットフォーム管理のDroid Computersは、アイドル時に自動一時停止し、新しいセッションがそれらをターゲットにすると自動再開します。また、プロビジョニングの詳細、リソースメトリクス、リモート更新フローも公開されます。
+
+## CLIコマンド {#cli-commands}
+
+### 一般 {#general}
+
+| コマンド | 説明 |
+|---------|-------------|
+| `droid computer list` | すべてのDroid Computersを一覧表示（名前、ID、ステータスを表示し、現在のマシンをマーク） |
+| `droid computer ssh <name>` | 任意のDroid ComputerへのインタラクティブSSHセッションを開く |
+| `droid computer port-forward <name> <mappings...>` | ローカルポートをリレー経由でDroid Computerに転送 |
+
+### BYOMセットアップ {#byom-setup}
+
+| コマンド | 説明 |
+|---------|-------------|
+| `droid computer register [name]` | 現在のマシンをBYOM Droid Computerとして登録 |
+| `droid computer remove` | 現在のマシンの登録を解除し、ローカル設定をクリーンアップ |
+
+### SSHオプション {#ssh-options}
+
+`ssh`サブコマンドは以下のフラグをサポートします:
+
+- `--proxy` — stdioプロキシとして実行（`ProxyCommand`として使用）
+- `--port <port>` — リモートマシンのターゲットポート（デフォルト: 22）
+- `--debug` — 詳細接続ログを有効化
+
+## ポート転送 {#port-forwarding}
+
+`droid computer port-forward <name> <mappings...>`は、`droid computer ssh`が使用するのと同じリレートンネルを介して、ローカルTCPポートをDroid Computerに転送します。直接のポート公開は必要ありません。Managed Droid Computersは、接続が確立される前に自動的に起動されます。
+
+マッピングは1つのコマンドで複数指定できます:
+
+- `LOCAL:REMOTE` — `LOCAL`をローカルにバインドし、`REMOTE`に転送（例: `8080:80`）
+- `REMOTE` — 両側で同じポートを使用（例: `5432`）
+- `:REMOTE` — 空いているローカルポートをランダムに使用（例: `:9000`）
+
+```
+# ローカル8080をリモート80に、ローカル5432をリモート5432に転送
+droid computer port-forward mycomputer 8080:80 5432
+```
+
+`port-forward`サブコマンドは以下のフラグをサポートします:
+
+- `--address <addr>` — バインドするローカルアドレス（デフォルト: `127.0.0.1`）
+- `--debug` — デバッグ出力を有効化
+
+TCPのみがサポートされます。
+
+## 監視 {#monitoring}
+
+**設定 → Droid Computers**で任意のDroid Computerをクリックして、詳細ページを開きます。プラットフォーム管理のDroid Computersの場合、詳細ページにライブリソースメトリクスが表示されます:
+
+- **CPU使用率** — 時間経過におけるパーセンテージ使用率
+- **メモリ使用量** — 使用済み vs. 総メモリ
+- **ディスク使用量** — 使用済み vs. 総ディスク容量
+
+詳細ページには、現在の**デーモンバージョン**と接続ステータスも表示されます。可能なDroid Computerステータスは:
+
+- **プロビジョニング中** — 初期セットアップが進行中
+- **アクティブ** — セッション準備完了
+- **エラー** — プロビジョニングまたはランタイム障害
+
+## デーモンの更新 {#updating-the-daemon}
+
+Droid Computerの詳細ページには、実行中のデーモンバージョンが利用可能な最新バージョンと並んで表示されます。更新が利用可能な場合、**更新**ボタンが表示されます。クリックするとリモート更新がトリガーされ、デーモンが新しいバイナリをダウンロードし、再起動して自動的に再接続します。
+
+## Git認証情報 {#force-reboot}
+
+- **BYOM** — Droidはマシンに既に設定されているgit認証情報を使用します。
+- **Managed Droid Computers** — Factoryとの個人GitHub連携がある場合、認証されたリポジトリアクセスのために認証情報が自動的に追加されます。新しいGitHub Appインストールを追加したり、リポジトリアクセスを変更したりすると、次回のセッション接続時に認証情報が自動的に更新されます。
+
+## SSH & IDE連携 {#git-credentials}
+
+`droid computer ssh <name>`は、デーモンを通じてセキュアなWebSocketトンネルを確立します。直接SSHポートの公開は必要ありません。Factoryは専用のEd25519 SSHキーペアを生成・管理し（`~/.factory/.ssh/`に保存）、個人のSSHキーとは分離されます。公開キーは各接続時にパスワードなし認証のために注入されます。
+
+### VS Code Remote-SSH {#ssh-ide-integration}
+
+VS Code Remote-SSHの`ProxyCommand`として`droid computer ssh`を使用できます。以下を`~/.ssh/config`に追加してください：
+```
+Host factory-*
+  ProxyCommand droid computer ssh %h --proxy
+  User factory-user
+  StrictHostKeyChecking accept-new
+  UserKnownHostsFile ~/.factory/.ssh/known_hosts
+  IdentityFile ~/.factory/.ssh/id_ed25519
+  IdentitiesOnly yes
+```
+
+ワイルドカードの`factory-*`ホストはすべてのDroid Computerに適用され、`%h`がホスト名をCLIに渡します。そのため、コンピューターごとにスタンザを追加することなく、`factory-<computer-name>`（例: `factory-mycomputer`）に接続できます。ホストキーは初回接続時に専用の`~/.factory/.ssh/known_hosts`ファイルに記録され（`StrictHostKeyChecking accept-new`）、キーが変更された場合はサイレントに受け入れられる代わりにSSH警告が表示されます。
+
+これにより、Droid Computer上でフルなVS Codeリモートセッションを開くことができます。
+
+## セキュリティ {#vs-code-remote-ssh}
+
+- **ファイアウォール** — プラットフォーム管理のDroid Computersはiptablesルールを使用して、デーモンポートのみへのインバウンドトラフィックを制限します。他のすべてのポートはデフォルトでブロックされます。`factory-user`はパスワードなしでsudoアクセス権を持ち、これらのルールを変更できることにご注意ください。ハードなネットワークレベルの境界には、インフラストラクチャレベルですべてのパブリックトラフィックをブロックするリレーモードを使用してください。
+- **SSH強化** — rootログインとパスワード認証は無効化されています。
+- **リレーモード** — BYOM Droid ComputersはすべてのトラフィックをFactoryのリレーサービス経由でルーティングするため、パブリックポートは公開されません。プラットフォーム管理のDroid Computersも、より厳格なネットワーク分離のために組織レベルでリレーモードを使用するよう設定できます。
+- **Git認証情報** — プラットフォーム管理のDroid Computers上で、認証されたリポジトリアクセスのためにユーザーごとに自動的に設定されます。

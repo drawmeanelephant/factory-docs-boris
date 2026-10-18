@@ -1,0 +1,406 @@
+---
+id: jp/guides/skills/ai-data-analyst
+title: "AIデータアナリスト"
+status: published
+summary: "コードインタープリター形式のワークフローで包括的なデータ分析、可視化、統計モデリングを行う再利用可能なスキル。"
+parent: jp/guides/skills/index
+tags: [guides, data-analyst, data-analysis, visualization, statistics, python, skill, charts]
+relations: [relates_to=guides/skills/ai-data-analyst]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">AIデータアナリスト</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">コードインタープリター形式のワークフローで包括的なデータ分析、可視化、統計モデリングを行う再利用可能なスキル。</p>
+
+
+このスキルは、DroidをAI駆動のデータアナリストとして機能させ、探索的データ分析、統計モデリング、データ可視化、および構造化・非構造化データからの洞察生成を実行できるようにします。特定用途のデータ分析ツールとは異なり、このスキルは完全にローカル環境で動作し、Pythonエコシステムへのフルアクセスとカスタマイズ機能を提供します。
+
+## セットアップ手順 {#setup-instructions}
+
+このスキルをFactoryで使用するには、リポジトリに以下のディレクトリ構造を作成してください：
+
+```
+.factory/skills/ai-data-analyst/
+├── SKILL.md
+├── visualization-templates.md (任意)
+├── statistical-methods.md (任意)
+└── example-analyses.md (任意)
+```
+
+### クイックスタート {#quick-start}
+
+1. **スキルディレクトリを作成する：**
+   ```bash
+   mkdir -p .factory/skills/ai-data-analyst
+   ```
+
+2. **以下のスキルコンテンツを`.factory/skills/ai-data-analyst/SKILL.md`（または`skill.mdx`）にコピーする**
+
+
+
+<Aside kind="tip">
+Factoryにデータ分析、可視化作成、統計モデル構築を依頼すると、タスク説明に基づいてこのスキルが自動的に呼び出されます。
+</Aside>
+
+
+
+## スキル定義 {#skill-definition}
+
+以下の内容を`.factory/skills/ai-data-analyst/SKILL.md`にコピーしてください：
+
+````md
+---
+name: ai-data-analyst
+description: 自己完結したPythonスクリプトを書いて実行し、包括的なデータ分析、統計モデリング、データ可視化を行います。データセットの分析、統計検定、可視化作成、再現可能なコードベースのワークフローによる予測モデル構築が必要な場合に使用します。
+---
+# スキル: AIデータアナリスト
+
+## 目的
+
+自己完結したPythonスクリプトを書いて実行し、包括的なデータ分析、統計モデリング、データ可視化を行います。データファイルやデータベースから、公開品質のチャート、統計レポート、実行可能な洞察を生成します。
+
+## このスキルを使うタイミング
+
+- パターン、傾向、関係性を理解するために**データセットを分析**する必要がある。
+- **統計検定**を実行する、または予測モデルを構築したい。
+- 発見事項を伝えるために**データ可視化**（チャート、グラフ、ダッシュボード）が必要。
+- データ構造と品質を理解するために**探索的データ分析**（EDA）を行っている。
+- 分析のためにデータセットを**クリーニング、変換、結合**する必要がある。
+- 手法とコードが文書化された**再現可能な分析**が必要。
+
+## 主な機能
+
+単機能のデータ分析ツールとは異なり、以下を提供します:
+
+- **完全なPythonエコシステム**: pandas、numpy、scikit-learn、statsmodels、matplotlib、seaborn、plotlyなどを利用できます。
+- **ローカルで実行**: データは自分のマシンに残り、サードパーティサービスにアップロードされません。
+- **再現可能**: すべての分析はコードベースで、バージョン管理できます。
+- **カスタマイズ可能**: 任意のPythonライブラリやカスタム分析ロジックで拡張できます。
+- **公開品質の出力**: プロフェッショナルなチャートとレポートを生成します。
+- **統計的な厳密さ**: 包括的な統計ライブラリとMLライブラリを利用できます。
+
+## 入力
+
+- **データソース**: CSVファイル、Excelファイル、JSON、Parquet、またはデータベース接続。
+- **分析目標**: 答えるべき質問、または検証する仮説。
+- **関心のある変数**: 注目する特定の列、メトリクス、ディメンション。
+- **出力の希望**: チャート種別、レポート形式、必要な統計検定。
+- **コンテキスト**: ビジネスドメイン、データディクショナリ、既知のデータ品質問題。
+
+## 対象外
+
+- リアルタイムストリーミングデータ分析（適切なストリーミングツールを使用）。
+- 分散コンピューティングが必要な非常に大規模なデータセット（代わりにSpark/Daskを使用）。
+- 本番MLモデルのデプロイ（MLOpsツールとインフラを使用）。
+- ライブダッシュボード（運用ダッシュボードにはTableau/LookerなどのBIツールを使用）。
+
+## 規約とベストプラクティス
+
+### Python環境
+- 依存関係を分離するために**仮想環境**を使用する。
+- 特定の分析に必要なパッケージのみをインストールする。
+- すべての依存関係を`requirements.txt`または`environment.yml`に記録する。
+
+### コード構造
+- 他の人が再実行できる**自己完結したスクリプト**を書く。
+- **明確な変数名**を使い、複雑なロジックにはコメントを追加する。
+- **関心を分離**する: データ読み込み、クリーニング、分析、可視化。
+- 分析が複数段階の場合は**中間結果**をファイルに保存する。
+
+### データ処理
+- **元データファイルを変更しない** — コピーまたはメモリ上のデータフレームで作業する。
+- **データ変換**をコードコメントで明確に記録する。
+- **欠損値**を明示的に処理し、その方法を記録する。
+- 分析前に**データ品質を検証**する（null、外れ値、重複を確認）。
+
+### 可視化のベストプラクティス
+- データと問いに合った**適切なチャート種別**を選ぶ。
+- すべてのチャートで**明確なラベル、タイトル、凡例**を使用する。
+- **適切な配色**を適用する（可能なら色覚バリアフリー）。
+- 関連する場合は**サンプルサイズと信頼区間**を含める。
+- 可視化を**高解像度形式**で保存する（PNG 300 DPI、ベクターにはSVG）。
+
+### 統計分析
+- 統計検定の**前提条件**を明確に述べる。
+- 検定適用前に**前提条件を確認**する（正規性、等分散性など）。
+- p値だけでなく**効果量**を報告する。
+- 多重比較には**適切な補正**を使用する。
+- 統計的有意性に加えて**実務上の重要性**を説明する。
+
+## 必須の動作
+
+1. **問いを理解する**: 分析が支援すべき洞察や意思決定を明確にする。
+2. **データを探索する**: 構造、型、欠損値、分布、外れ値を確認する。
+3. **クリーニングと準備を行う**: 欠損データ、外れ値、変換を適切に処理する。
+4. **体系的に分析する**: 適切な統計手法またはML手法を適用する。
+5. **効果的に可視化する**: 問いに答える明確で有益なチャートを作成する。
+6. **洞察を生成する**: 統計的な発見を実行可能なビジネス洞察に変換する。
+7. **徹底的に文書化する**: 手法、前提、制限、結論を説明する。
+8. **再現可能にする**: 他の人が分析を再実行し、同じ結果を得られるようにする。
+
+## 必須の成果物
+
+- **分析スクリプト**: 分析を実行する、十分に文書化されたPythonコード。
+- **可視化**: 高品質な画像ファイル（PNG/SVG）として保存されたチャート。
+- **分析レポート**: 以下を要約したMarkdownまたはテキスト文書:
+  - リサーチクエスチョンと手法
+  - データ説明と品質評価
+  - 裏付け統計を伴う主要な発見
+  - 解釈付きの可視化
+  - 制限と注意点
+  - 推奨事項または次のステップ
+- **依存関係ファイル**: すべての依存関係を含む`requirements.txt`。
+- **サンプルデータ**（適切かつ非機密の場合）: 再現性のための小さなサンプル。
+
+## 実装チェックリスト
+
+### 1. データ探索と準備
+- [ ] データを読み込み、構造（形状、列、型）を確認する
+- [ ] 欠損値、重複、外れ値を確認する
+- [ ] 要約統計量（平均、中央値、標準偏差、最小、最大）を生成する
+- [ ] 主要変数の分布を可視化する
+- [ ] 見つかったデータ品質問題を記録する
+
+### 2. データクリーニングと変換
+- [ ] 欠損値を処理する（補完、削除、フラグ付け）
+- [ ] 必要に応じて外れ値に対処する（上限設定、変換、記録）
+- [ ] 必要に応じて派生変数を作成する
+- [ ] モデリング用に変数を正規化またはスケーリングする
+- [ ] 学習/テスト分析を行う場合はデータを分割する
+
+### 3. 分析の実行
+- [ ] 適切な分析手法を選択する
+- [ ] 統計的前提条件を確認する
+- [ ] 適切なパラメータで分析を実行する
+- [ ] 信頼区間と効果量を計算する
+- [ ] 適切な場合は感度分析を実行する
+
+### 4. 可視化
+- [ ] 探索的な可視化を作成する
+- [ ] 公開品質の最終チャートを生成する
+- [ ] すべてのチャートに明確なラベルとタイトルを付ける
+- [ ] 適切な配色とスタイルを使用する
+- [ ] 高解像度形式で保存する
+
+### 5. レポート作成
+- [ ] 使用した手法を明確に要約する
+- [ ] 裏付け証拠とともに主要な発見を提示する
+- [ ] 結果の実務上の重要性を説明する
+- [ ] 制限と前提を記録する
+- [ ] 実行可能な推奨事項を提示する
+
+### 6. 再現性
+- [ ] クリーンな環境でスクリプトが実行できることをテストする
+- [ ] すべての依存関係を記録する
+- [ ] 自明でないコードを説明するコメントを追加する
+- [ ] 分析の実行手順を含める
+
+## 検証
+
+分析を検証するには以下を実行します:
+
+```bash
+# 仮想環境を作成
+python3 -m venv venv
+source venv/bin/activate  # Windowsでは `venv\Scripts\activate`
+
+# 依存関係をインストール
+pip install -r requirements.txt
+
+# 分析スクリプトを実行
+python analysis.py
+
+# 生成された出力を確認
+ls -lh outputs/
+```
+
+以下を満たしたらスキルは完了です:
+
+- 分析スクリプトがクリーンな環境からエラーなく実行できる。
+- 必要な可視化がすべて高品質で生成されている。
+- レポートが手法、発見、制限を明確に説明している。
+- 結果が解釈可能で実行可能である。
+- コードが十分に文書化され、再現可能である。
+
+## よくある分析パターン
+
+### 探索的データ分析（EDA）
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# データの読み込みと検査
+df = pd.read_csv('data.csv')
+print(df.info())
+print(df.describe())
+
+# 欠損値の確認
+print(df.isnull().sum())
+
+# 分布の可視化
+df.hist(figsize=(12, 10), bins=30)
+plt.tight_layout()
+plt.savefig('distributions.png', dpi=300)
+
+# 相関の確認
+corr = df.corr()
+sns.heatmap(corr, annot=True, cmap='coolwarm')
+plt.savefig('correlations.png', dpi=300)
+```
+
+### 時系列分析
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+# 時系列データの読み込み
+df = pd.read_csv('timeseries.csv', parse_dates=['date'])
+df.set_index('date', inplace=True)
+
+# 時系列の分解
+decomposition = seasonal_decompose(df['value'], model='additive', period=30)
+fig = decomposition.plot()
+fig.set_size_inches(12, 8)
+plt.savefig('decomposition.png', dpi=300)
+
+# 移動統計量の計算
+df['rolling_mean'] = df['value'].rolling(window=7).mean()
+df['rolling_std'] = df['value'].rolling(window=7).std()
+
+# トレンドを含むプロット
+plt.figure(figsize=(12, 6))
+plt.plot(df['value'], label='元データ')
+plt.plot(df['rolling_mean'], label='7日移動平均', linewidth=2)
+plt.fill_between(df.index,
+                 df['rolling_mean'] - df['rolling_std'],
+                 df['rolling_mean'] + df['rolling_std'],
+                 alpha=0.3)
+plt.legend()
+plt.savefig('trends.png', dpi=300)
+```
+
+### 統計的仮説検定
+```python
+from scipy import stats
+import numpy as np
+
+# 2つのグループの比較
+group_a = df[df['group'] == 'A']['metric']
+group_b = df[df['group'] == 'B']['metric']
+
+# 正規性の確認
+_, p_norm_a = stats.shapiro(group_a)
+_, p_norm_b = stats.shapiro(group_b)
+
+# 適切なテストの選択
+if p_norm_a > 0.05 and p_norm_b > 0.05:
+    # パラメトリックテスト（t検定）
+    statistic, p_value = stats.ttest_ind(group_a, group_b)
+    test_used = "Independent t-test"
+else:
+    # ノンパラメトリックテスト（Mann-Whitney U検定）
+    statistic, p_value = stats.mannwhitneyu(group_a, group_b)
+    test_used = "Mann-Whitney U test"
+
+# 効果量の計算（Cohen's d）
+pooled_std = np.sqrt((group_a.std()**2 + group_b.std()**2) / 2)
+cohens_d = (group_a.mean() - group_b.mean()) / pooled_std
+
+print(f"使用した検定: {test_used}")
+print(f"検定統計量: {statistic:.4f}")
+print(f"P値: {p_value:.4f}")
+print(f"効果量（Cohen's d）: {cohens_d:.4f}")
+```
+
+### 予測モデリング
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+
+# データの準備
+X = df.drop('target', axis=1)
+y = df['target']
+
+# データの分割
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# モデルの訓練
+model = RandomForestRegressor(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# 評価
+y_pred = model.predict(X_test)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+r2 = r2_score(y_test, y_pred)
+
+print(f"RMSE: {rmse:.4f}")
+print(f"R²スコア: {r2:.4f}")
+
+# 特徴量重要度
+importance = pd.DataFrame({
+    'feature': X.columns,
+    'importance': model.feature_importances_
+}).sort_values('importance', ascending=False)
+
+plt.figure(figsize=(10, 6))
+plt.barh(importance['feature'][:10], importance['importance'][:10])
+plt.xlabel('特徴量の重要度')
+plt.title('重要度上位10件の特徴量')
+plt.tight_layout()
+plt.savefig('feature_importance.png', dpi=300)
+```
+
+## 推奨Pythonライブラリ
+
+### データ操作
+- **pandas**: データ操作と分析
+- **numpy**: 数値計算
+- **polars**: 高性能DataFrameライブラリ（pandasの代替）
+
+### 可視化
+- **matplotlib**: 基本的なプロットライブラリ
+- **seaborn**: 統計可視化
+- **plotly**: インタラクティブチャート
+- **altair**: 宣言的な統計可視化
+
+### 統計分析
+- **scipy.stats**: 統計関数と検定
+- **statsmodels**: 統計モデリング
+- **pingouin**: 明確な出力を持つ統計検定
+
+### 機械学習
+- **scikit-learn**: MLアルゴリズムとツール
+- **xgboost**: 勾配ブースティング
+- **lightgbm**: 高速な勾配ブースティング
+
+### 時系列
+- **statsmodels.tsa**: 時系列分析
+- **prophet**: 予測ツール
+- **pmdarima**: Auto ARIMA
+
+### 専門用途
+- **networkx**: ネットワーク分析
+- **geopandas**: 地理空間データ分析
+- **textblob** / **spacy**: 自然言語処理
+
+## 安全性とエスカレーション
+
+- **データプライバシー**: 適切な承認なしにPIIを含むデータを分析または共有しない。
+- **統計的妥当性**: 信頼できる推論にはサンプルサイズが小さすぎる場合は明示する。
+- **因果主張**: 相関分析から因果を示唆しない。制限を明確にする。
+- **モデルの制限**: モデルが一般化しない可能性や予測を信頼すべきでない場合を記録する。
+- **データ品質**: データ品質問題が結論に重大な影響を与える可能性がある場合は目立つように示す。
+
+## 他のスキルとの連携
+
+このスキルは以下と組み合わせられます:
+
+- **内部データクエリ**: 分析用にウェアハウスやデータベースからデータを取得する。
+- **Webアプリビルダー**: 分析結果を表示するインタラクティブダッシュボードを作成する。
+- **内部ツール**: 非技術系ステークホルダー向けの分析ツールを構築する。
+````

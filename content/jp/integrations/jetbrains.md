@@ -1,0 +1,175 @@
+---
+id: jp/integrations/jetbrains
+title: "JetBrains IDE"
+status: published
+summary: "ACP経由でJetBrains IDE内のAIエージェントとしてFactory Droidを使用する。"
+parent: jp/integrations/index
+tags: [integrations]
+relations: [relates_to=integrations/jetbrains]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">JetBrains IDE</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">ACP経由でJetBrains IDE内のAIエージェントとしてFactory Droidを使用する。</p>
+
+
+## セットアップ {#setup}
+
+JetBrains AI を搭載した JetBrains IDE（2025.3以降）で（最新版に更新してください）：
+
+1. **設定 > ツール > AI Assistant > Agents** を開くか、エージェントピッカーメニューで **「ACP Registry からインストール...」** を選択します。
+2. **Factory Droid** を見つけます。
+3. **インストール** をクリックします。
+4. AI チャットパネルを開き、エージェントドロップダウンから **Factory Droid** を選択します。
+5. 認証されていない場合は、認証が必要であることを示すメッセージが表示されます。
+   1. 表示されたデバイスコードを控えて、「ログイン」ボタンをクリックします。
+   2. ウェブブラウザが開き、Factory へのログイン/サインアップ、その後デバイスコードの確認画面が表示されます。
+
+## （代替）手動セットアップ {#alternative-manual-setup}
+
+JetBrains 内で Droid を手動で設定したい場合は、以下の手順に従ってください。
+
+1. **Droid CLI のインストール（Windows ARM マシンを除くすべてのオペレーティングシステムでサポート）**
+   - 以下を使用してインストール：
+
+     ```bash
+     curl -fsSL https://app.factory.ai/cli | sh
+     ```
+
+   - `droid` バイナリが PATH に含まれていることを確認してください（または完全パスをメモしてください）。
+
+2. **（オプション）Factory API キー** - ログインフローの代わりに API キーを設定できます：
+   - https://app.factory.ai でサインアップします。
+   - プロンプトが表示されたら支払い方法を追加します。
+   - https://app.factory.ai/settings/api-keys で API キーを作成します。
+   - シェルで `FACTORY_API_KEY` 環境変数を設定します（例：シェルプロファイルに `export FACTORY_API_KEY=your_key_here` を追加）。
+
+
+
+<Aside kind="note">
+JetBrains内だけでFactoryへの登録や請求管理はできません。
+  アカウント作成とAPIキー管理は常にFactory Appで行います。
+</Aside>
+
+
+
+### Factory Droid をエージェントとして設定 {#configure-factory-droid-as-an-agent}
+
+`~/.jetbrains/acp.json` を編集し、`agent_servers` の下に **Factory Droid** エントリを追加します：
+
+```json
+{
+  "agent_servers": {
+    "Factory Droid": {
+      "command": "*path/to/droid/cli*",
+      "args": ["exec", "--output-format", "acp"]
+    }
+  }
+}
+```
+
+- `command` – `droid` バイナリの完全パス
+- `args` – Droid を exec モードで実行し、ACP を JetBrains に返す
+
+ログインフローの代わりに API キーを使用したい場合は、`env` ブロックを追加します：
+
+```json
+{
+  "agent_servers": {
+    "Factory Droid": {
+      "command": "*path/to/droid/cli*",
+      "args": ["exec", "--output-format", "acp"],
+      "env": {
+        "FACTORY_API_KEY": "*your API key from https://app.factory.ai/settings/api-keys*"
+      }
+    }
+  }
+}
+```
+
+## JetBrains で Droid セッションを開始 {#start-a-droid-session-in-jetbrains}
+
+エージェントサーバーが設定されると、AI Assistant UI を通じて Droid と完全にやり取りできます。
+
+### AI チャットパネルを開く {#open-the-ai-chat-panel}
+
+- **どこでも検索:** `Shift`+`Shift` を押し、**「AI Assistant」** と入力してツールウィンドウを開きます。
+- **メニュー:** **表示 → ツールウィンドウ → AI Assistant** に移動します（IDE により名前は若干異なる場合があります）。
+
+### Factory Droid で新しいチャットを開始 {#start-a-new-chat-with-factory-droid}
+
+1. **AI チャット** パネルで **+ 新しいチャット** をクリックします。
+2. 左下のエージェントドロップダウンで **Factory Droid** を選択します。
+3. CLI と同様にチャットを開始します。
+
+セッションは Factory Droid の最後に選択された設定（モデル、自律レベルなど）を使用します。
+
+<img src="../../images/jetbrains/new-chat.png" alt="AI Chatパネルで+ New Chatをクリックし、左下のドロップダウンでFactory Droidを選択した状態" />
+
+## 既存セッションの再開 {#resume-existing-sessions}
+
+JetBrains は CLI コマンドではなく AI チャット UI を通じてセッションを管理します。
+
+- AI チャットパネルで、右上の **時計アイコン** をクリックします。
+- 過去の会話を選択して再開します。
+
+<img
+  src="../../images/jetbrains/chat-history.png"
+  alt="過去のFactory Droidセッションが表示されたAI Chatセッション履歴ドロップダウン（時計アイコン）"
+  style="width:35%; height:auto"
+/>
+
+## モデルと自律制御 {#models-and-autonomy-controls}
+
+AI チャットフッターから直接モデルと自律レベルを変更できます。
+
+### モデルの切り替え {#switch-models}
+
+- AI チャットパネル下部の **モデルドロップダウン** を使用します。
+- Factory でサポートされている任意のモデルを選択します（例：Claude Opus/Sonnet、GPT-5.1 バリアント、または BYOK で設定されたその他のモデル）。
+
+<img
+  src="../../images/jetbrains/select-model.png"
+  alt="モデルドロップダウンを展開したAI Chatフッター"
+  style="width:50%; height:auto"
+/>
+
+### 自律レベルの変更 {#change-autonomy-level}
+
+- モデルセレクタの横の **自律ドロップダウン** を使用します。
+- リスク許容度とワークフローに適した自律レベルを選択します。
+
+推奨パターン：
+
+- 中規模および大規模なタスクでは **プランニングファースト** フロー（低自律、仕様スタイルのプロンプト）で開始します。
+- プランに満足したら、自律レベルを **Auto low** または **Auto medium** に上げて、Droid がより多くのステップを継続的な確認なしで実行できるようにします。
+
+<img
+  src="../../images/jetbrains/select-autonomy-mode.png"
+  alt="自律性ドロップダウンを展開したAI Chatフッター"
+  style="width:43%; height:auto"
+/>
+
+## エディターコンテキストと制限事項 {#editor-context-and-limitations}
+
+現在の JetBrains 統合は ACP を使用しますが、完全なエディターコンテキストを Droid に公開しません。
+
+- 開いているファイル、選択範囲、診断の自動共有なし
+- Droid パッチに直接接続された IDE ネイティブ差分ビューアーなし
+
+これを CLI へのリッチなチャットフロントエンドとして扱ってください：
+
+- 明確なプロンプトを使用し、ファイルをパスで参照し、自律モードと仕様スタイルプランニングに依存して大きな変更を管理します。
+
+## トラブルシューティング {#troubleshooting}
+
+Factory Droid が AI チャットに表示されない、または応答しない場合：
+
+- **CLI** を確認：
+  - 通常のターミナルで `droid exec --output-format acp` を実行し、バイナリと API キーが機能することを確認します。
+- **エージェントサーバー設定** を再確認：
+  - `droid` への正しいパス
+  - `args` に `exec` と `--output-format acp` の両方が含まれている
+  - `FACTORY_API_KEY` が存在し有効である
+- **Windows on ARM** ではないことを確認してください。これはまだサポートされていません。
+
+MCP 関連の問題については、各 MCP サーバーのコマンド、引数、環境変数が JetBrains の外部で実行したときに有効であることを確認してください。

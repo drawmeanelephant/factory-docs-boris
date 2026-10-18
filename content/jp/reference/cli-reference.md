@@ -1,0 +1,505 @@
+---
+id: jp/reference/cli-reference
+title: "CLIリファレンス"
+status: published
+summary: "droid コマンドラインインターフェースの完全リファレンス（コマンドとフラグを含む）"
+parent: jp/reference/index
+tags: [reference]
+relations: [relates_to=reference/cli-reference]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">CLIリファレンス</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">droid コマンドラインインターフェースの完全リファレンス（コマンドとフラグを含む）</p>
+
+
+## インストール {#installation}
+
+
+
+<div class="factory-codegroup">
+<div class="factory-codegroup-bar"><button type="button" class="factory-codegroup-tab is-active" data-tab-idx="0">macOS/Linux</button><button type="button" class="factory-codegroup-tab" data-tab-idx="1">Windows</button></div>
+
+<div class="factory-codegroup-panel is-active" data-panel-idx="0">
+
+```bash
+curl -fsSL https://app.factory.ai/cli | sh
+```
+
+</div>
+
+<div class="factory-codegroup-panel" data-panel-idx="1">
+
+```powershell
+irm https://app.factory.ai/cli/windows | iex
+```
+
+</div>
+
+</div>
+
+
+
+CLIは2つのモードで動作します：
+
+- **インタラクティブ（`droid`）** - スラッシュコマンド付きのチャット中心REPL
+- **非インタラクティブ（`droid exec`）** - 自動化とスクリプト用の単発実行
+
+## CLIコマンド {#installing-a-specific-version}
+
+| コマンド                              | 説明                                                                     | 例                                              |
+| :----------------------------------- | :--------------------------------------------------------------------- | :--------------------------------------------- |
+| `droid`                              | インタラクティブREPLを開始                                                 | `droid`                                        |
+| `droid "query"`                      | 初期プロンプトでREPLを開始                                                | `droid "explain this project"`                 |
+| `droid --resume [sessionId]`         | セッションを再開（指定がない場合は最後に変更したものを使用）。エイリアス: `-r`     | `droid --resume`                               |
+| `droid --fork <sessionId>`           | セッションを fork して新しいコピーで再開                                      | `droid --fork session-abc123`                  |
+| `droid exec "query"`                 | インタラクティブモードなしでタスクを実行                                       | `droid exec "summarize src/auth"`              |
+| `droid exec -f prompt.md`            | ファイルからプロンプトを読み込み                                              | `droid exec -f .factory/prompts/review.md`     |
+| `cat file \| droid exec`             | パイプされたコンテンツを処理                                                  | `git diff \| droid exec "draft release notes"` |
+| `droid exec -s <id> "query"`         | 既存セッションをexecモードで再開                                              | `droid exec -s session-123 "continue"`         |
+| `droid exec --list-tools`            | 利用可能なツールをリストして終了                                              | `droid exec --list-tools`                      |
+| `droid search "query"`               | ローカルセッション横断検索（メッセージ、ドキュメント、ツール結果）。エイリアス: `droid find` | `droid search "auth bug"`                      |
+| `droid mcp add <name> <url>`         | MCP サーバーを追加                                                         | `droid mcp add api https://api.example.com/mcp --type http`  |
+| `droid mcp remove <name>`            | MCP サーバーを削除                                                         | `droid mcp remove linear`                      |
+| `droid plugin install <plugin>`      | プラグインをインストール。エイリアス: `droid plugin i`                          | `droid plugin install factory/code-review`     |
+| `droid plugin uninstall <plugin>`    | プラグインをアンインストール。エイリアス: `droid plugin remove`                  | `droid plugin uninstall factory/code-review`   |
+| `droid plugin update <plugin>`       | プラグインを最新バージョンに更新                                              | `droid plugin update factory/code-review`      |
+| `droid plugin list`                  | インストール済みのプラグインを一覧表示                                         | `droid plugin list`                            |
+| `droid plugin marketplace`           | プラグインマーケットプレイスを管理                                            | `droid plugin marketplace`                     |
+| `droid computer register [name]`     | このマシンを Bring-Your-Own-Machine (BYOM) コンピューターとして登録         | `droid computer register laptop`               |
+| `droid computer remove`              | このマシンの BYOM 登録を削除                                                | `droid computer remove`                        |
+| `droid computer list`                | 登録済みの BYOM コンピューターを一覧表示                                      | `droid computer list`                          |
+| `droid computer ssh <name>`          | 登録済みの BYOM コンピューターに SSH 接続                                    | `droid computer ssh laptop`                    |
+| `droid computer port-forward <name> <mappings...>` | ローカルポートをリレー経由でコンピューターに転送             | `droid computer port-forward laptop 8080:80`   |
+| `droid daemon`                       | Factory デーモンサーバーを実行                                              | `droid daemon`                                 |
+| `droid update`                       | CLIを最新バージョンに手動更新                                                | `droid update`                                 |
+
+## CLIフラグ {#npm}
+
+コマンドラインフラグでdroidの動作をカスタマイズ：
+
+| フラグ                                 | 説明                                                                                                  | 例                                                    |
+| :----------------------------------- | :----------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------- |
+| `-f, --file <path>`                  | ファイルからプロンプトを読み込み                                                                                      | `droid exec -f plan.md`                                    |
+| `-m, --model <id>`                   | 特定の[[jp/models|モデルID]]を選択                                                                       | `droid exec -m claude-opus-4-7`                            |
+| `-s, --session-id <id>`              | 既存セッションを継続                                                                                 | `droid exec -s session-abc123`                             |
+| `--auto <level>`                     | [[jp/reference/cli-reference#autonomy-levels|自律レベル]]を設定（`low`、`medium`、`high`）                                             | `droid exec --auto medium "run tests"`                     |
+| `--restrict-tools <ids>`             | 指定したツールのみに制限（カンマまたはスペース区切り）                                                       | `droid exec --restrict-tools ApplyPatch,Bash`             |
+| `--additional-tools <ids>`           | 既定に加えて追加のツールを強制有効化（カンマまたはスペース区切り）                                                 | `droid exec --additional-tools ApplyPatch,Bash`           |
+| `--disabled-tools <ids>`             | この実行で特定のツールを無効化                                                                          | `droid exec --disabled-tools execute-cli`                  |
+| `--list-tools`                       | 利用可能なツールを表示して終了                                                                               | `droid exec --list-tools`                                  |
+| `-o, --output-format <format>`       | 出力形式（`text`、`json`、`stream-json`、`stream-jsonrpc`）                                              | `droid exec -o json "document API"`                        |
+| `--input-format <format>`            | 入力形式（マルチターン用の`stream-jsonrpc`）                                                               | `droid exec --input-format stream-jsonrpc -o stream-jsonrpc` |
+| `-r, --resume [sessionId]`           | 前回のセッションを再開。インタラクティブモードでは `-r` は `--resume`、`droid exec` では `-r` は `--reasoning-effort` にマッピングされます。 | `droid -r`                                                 |
+| `-r, --reasoning-effort <level>`     | 推論努力レベルを上書き（`off`、`none`、`low`、`medium`、`high`）。`droid exec` では `-r` はこのフラグにマッピングされます。 | `droid exec -r high "debug flaky test"`                    |
+| `--spec-model <id>`                  | 仕様計画に別の[[jp/models|モデルID]]を使用                                                              | `droid exec --spec-model claude-opus-4-7`                  |
+| `--spec-reasoning-effort <level>`    | specモードの推論努力を上書き                                                                      | `droid exec --use-spec --spec-reasoning-effort high`       |
+| `--use-spec`                         | 仕様モードで開始（実行前に計画）                                                          | `droid exec --use-spec "add user profiles"`                |
+| `--skip-permissions-unsafe`          | すべての許可プロンプトをスキップ（⚠️ 極度に注意して使用）                                                    | `droid exec --skip-permissions-unsafe`                     |
+| `--cwd <path>`                       | 特定の作業ディレクトリから実行                                                                    | `droid exec --cwd ../service "run tests"`                  |
+| `-w, --worktree [name]`              | 隔離された [[jp/reference/cli-reference#git-worktrees|Gitワークツリー]] でセッションを実行                                            | `droid --worktree fix-bug`                                 |
+| `--tag <spec>`                       | セッションタグ（名前またはJSON、繰り返し可能）                                                                       | `droid exec --tag code-review`                             |
+| `--log-group-id <id>`                | ログフィルタリング用のロググループID                                                                              | `droid exec --log-group-id grp-123`                        |
+| `--fork <id>`                        | 既存セッションを fork して新しいコピーで再開                                                                       | `droid exec --fork session-abc123`                         |
+| `--mission`                          | `droid exec` を [[jp/features/missions/overview|ミッションモード]]（マルチエージェントオーケストレーション）で実行 | `droid exec --mission -f mission.md`                       |
+| `--worker-model <id>`                | ミッションのワーカーエージェントが使用するモデル                                                                   | `droid exec --mission --worker-model claude-sonnet-4-6`    |
+| `--worker-reasoning-effort <level>`  | ミッションのワーカーエージェントの推論努力（`off`、`none`、`low`、`medium`、`high`）                              | `droid exec --mission --worker-reasoning-effort medium`    |
+| `--validator-model <id>`             | ミッションのバリデーターエージェントが使用するモデル                                                              | `droid exec --mission --validator-model claude-opus-4-7`   |
+| `--validator-reasoning-effort <level>` | ミッションのバリデーターエージェントの推論努力                                                                   | `droid exec --mission --validator-reasoning-effort high`   |
+| `--append-system-prompt <text>`      | システムプロンプトの末尾にカスタムテキストを追加                                                                  | `droid --append-system-prompt "Always run tests."`         |
+| `--append-system-prompt-file <path>` | システムプロンプトの末尾にファイルの内容を追加                                                                    | `droid --append-system-prompt-file .factory/system.md`     |
+| `-v, --version`                      | CLIバージョンを表示                                                                                          | `droid -v`                                                 |
+| `-h, --help`                         | ヘルプ情報を表示                                                                                        | `droid --help`                                             |
+
+
+
+<Aside kind="tip">
+スクリプトや自動化には`--output-format json`を使用して、droidの応答をプログラム的に解析できます。
+</Aside>
+
+
+
+## 自律レベル {#autonomy-levels}
+
+`droid exec`は階層化された自律性を使用して、エージェントが実行できる操作を制御します。環境が安全な場合にのみアクセスレベルを上げてください。
+
+| レベル                         | 想定用途             | 主要な許可事項                                                                 |
+| :---------------------------- | :----------------------- | :--------------------------------------------------------------------------------- |
+| *（デフォルト）*                   | 読み取り専用偵察 | ファイル読み取り、git diff、環境検査                                      |
+| `--auto low`                  | 安全な編集               | ファイル作成・編集、フォーマッター実行、非破壊的コマンド                        |
+| `--auto medium`               | ローカル開発        | 依存関係インストール、ビルド・テスト、ローカルgitコミット                                |
+| `--auto high`                 | CI/CD & オーケストレーション    | Git push、デプロイスクリプト、長時間実行操作                                  |
+| `--skip-permissions-unsafe`   | 隔離サンドボックス専用  | すべてのガードレールを削除（⚠️ 使い捨てコンテナでのみ使用）                      |
+
+**例：**
+```bash
+# Default (read-only)
+droid exec "Analyze the auth system and create a plan"
+
+# Low autonomy - safe edits
+droid exec --auto low "Add JSDoc comments to all functions"
+
+# Medium autonomy - development work
+droid exec --auto medium "Install deps, run tests, fix issues"
+
+# High autonomy - deployment
+droid exec --auto high "Run tests, commit, and push changes"
+```
+
+
+<Aside kind="warning">
+`--skip-permissions-unsafe`はすべての安全性チェックを削除します。Dockerコンテナなどの分離された環境で**のみ**使用してください。
+</Aside>
+
+
+
+## モデルID {#direct-binary-download}
+
+`-m, --model`または`--spec-model`には、任意の[[jp/models|利用可能なモデルID]]を使用できます。カスタムモデルについては、[[jp/cli/byok/overview|Bring Your Own Key (BYOK)]]を参照してください。
+
+どのモデルをどのタスクに使用するかの詳細なガイダンスについては、[[jp/models|モデルの選択]]をご覧ください。
+
+## インタラクティブモードの機能 {#droid-cli-commands}
+
+### キーボードショートカット {#keyboard-shortcuts}
+
+インタラクティブREPLは、ナビゲーション、オーバーレイ、入力制御のための豊富なキーボードショートカットをサポートしています：
+
+| ショートカット   | アクション                                                                          |
+| :--------------- | :--------------------------------------------------------------------------------- |
+| `Ctrl+C`         | 現在の操作をキャンセル / エージェントを中断。すばやく2回押すと終了                    |
+| `Ctrl+Z`         | プロセスをサスペンド（Unixのみ）。`fg` で再開                                          |
+| `Ctrl+O`         | 詳細なトランスクリプトビュー（メッセージ詳細）の表示を切り替え                         |
+| `Ctrl+T`         | Mission Control オーバーレイを切り替え（オーケストレーターセッションのみ）              |
+| `Ctrl+N`         | 利用可能なモデルを順に切り替え（チャット入力中）                                       |
+| `Ctrl+L`         | 自律レベルを順に切り替え（チャット入力中）                                            |
+| `Ctrl+Y`         | `/btw` のスクロールビュー（サイド質問履歴）を切り替え                                  |
+| `Ctrl+J`         | 変更履歴の表示を切り替え（非表示 / 復元）                                             |
+| `Ctrl+E`         | 承認の詳細ビューを切り替え                                                           |
+| `Ctrl+V`         | クリップボードから画像を添付として貼り付け                                            |
+| `Tab`            | 推論努力レベルを順に切り替え（`low` → `medium` → `high` → `off`）                     |
+| `Shift+Tab`      | インタラクションモードを順に切り替え（Auto → Spec → Mission）                          |
+| `@`              | ファイルパスの自動補完 — `@` を入力するとファイルのあいまい検索が起動                  |
+| `Up` / `Down`    | 入力履歴を移動（過去に送信したメッセージを順に切り替え）                              |
+| `Double Escape`  | 2 回目の押下で入力ドラフトをクリア、3 回目の Escape で巻き戻しメニューを開く           |
+| `?`              | ヘルプポップアップを切り替え（入力が空の時）                                          |
+| `Ctrl+/`         | ヘルプポップアップを切り替え（入力に内容があっても動作）                              |
+| `Ctrl+A`         | カーソルを行頭に移動                                                                 |
+| `Ctrl+W`         | カーソルの前の単語を削除                                                             |
+| `Ctrl+K`         | カーソルから行末まで削除                                                             |
+| `Ctrl+U`         | カーソルから行頭まで削除                                                             |
+| `Ctrl+D`         | 添付されたすべての画像をクリア、画像がない場合は次の文字を前方削除                     |
+| `Ctrl+R`         | ハイライト中のセッション名を変更（`/sessions` リストビュー内）                         |
+| `Ctrl+X`         | ハイライト中のセッションをアーカイブ（`/sessions` リストビュー内）                      |
+| `Alt+Up`         | トランスクリプトを上にスクロール（任意のターンに移動）                                |
+| `Alt+Down`       | トランスクリプトを下にスクロール（任意のターンに移動）                                |
+| `Alt+PageUp`     | 前のユーザーターンまでトランスクリプトを上にスクロール                                |
+| `Alt+PageDown`   | 次のユーザーターンまでトランスクリプトを下にスクロール                                |
+| `Escape`         | アクティブなオーバーレイまたはメニューを閉じる                                        |
+| `Shift+Enter`    | チャット入力に改行を挿入（複数行編集）                                                |
+| `!`              | [[jp/reference/cli-reference#bash-mode|bashモード]] を切り替え（入力が空の時）                                  |
+
+
+
+<Aside kind="tip">
+`/terminal-setup` を一度実行して、`Shift+Enter` がチャット入力で確実に改行を生成するようターミナルを設定してください。
+</Aside>
+
+
+
+### Bashモード {#bash-mode}
+
+入力が空の時に`!`を押すとbashモードを切り替えます。bashモードでは、コマンドはAIの解釈なしにシェルで直接実行されます。`git status`の確認や`npm test`の実行など、素早い操作に便利です。
+
+- **オンに切り替え:** `!`を押す（入力が空の時）
+- **コマンドの実行:** 任意のシェルコマンドを入力してEnterを押す
+- **オフに切り替え:** `Esc`を押して通常のAIチャットモードに戻る
+
+bashモードがアクティブの時、プロンプトが`>`から`$`に変わります。
+
+### Mermaid 図のレンダリング {#model-ids}
+
+Droid は Mermaid 図のコードブロックをターミナル上で直接 ASCII アートとして自動的にレンダリングします — 外部ビューアやブラウザは不要です。応答に対応する種類のフェンス付き ```` ```mermaid ```` ブロックが含まれている場合、図はトランスクリプト内にインラインで描画されます。
+
+**対応している図種類:**
+
+- `flowchart`（および `graph`）
+- `sequenceDiagram`
+- `stateDiagram`
+- `classDiagram`
+- `erDiagram`
+
+未対応の図種類（たとえば `gantt`、`pie`、`mindmap`、`timeline`、`journey`、`gitGraph`）は、生の Mermaid ソースと外部で図を表示するためのリンクの表示にフォールバックします。
+
+### スラッシュコマンド {#interactive-mode-features}
+
+`droid`をインタラクティブモードで実行している時に利用できます。プロンプトでコマンドを入力してください：
+
+| コマンド                       | 説明                                                                |
+| :----------------------------- | :------------------------------------------------------------------ |
+| `/account`                    | ブラウザでFactoryアカウント設定を開く                                  |
+| `/billing`                    | 請求設定の表示と管理                                                  |
+| `/btw <question>`             | メイントランスクリプトを汚さずにサイド質問を行う                        |
+| `/bug [title]`                | セッションデータとログを含むバグレポートの作成                          |
+| `/clear`                      | 新しいセッションを開始（`/new`のエイリアス）                            |
+| `/commands`                   | カスタムスラッシュコマンドの管理                                       |
+| `/compress [prompt]`          | セッションを圧縮し、要約と共に新しいセッションに移動                    |
+| `/context`                    | プログレスバー付きでコンテキストウィンドウの使用状況を表示              |
+| `/copy`                       | プロンプト、応答、ターン範囲、またはセッションIDをコピー                  |
+| `/cost`                       | 使用統計の表示                                                       |
+| `/create-skill`               | 現在のセッションから再利用可能なスキルを作成                            |
+| `/cwd <path>`                 | セッションの作業ディレクトリを変更                                     |
+| `/diagnostics`                | 設定の構成エラーを表示                                                |
+| `/droids`                     | カスタムDroidの管理                                                  |
+| `/missions`                   | Mission モードに入る                                                  |
+| `/fast`                       | 現在のモデルで fast モードを有効化（無効化は `/fast off`）              |
+| `/favorite`                   | 現在のセッションをお気に入りにマーク                                    |
+| `/fork`                       | すべてのメッセージを含む現在のセッションを新しいセッションに複製         |
+| `/help`                       | 利用可能なスラッシュコマンドの表示                                     |
+| `/hooks`                      | ライフサイクルフックの管理                                             |
+| `/ide`                        | IDE統合の設定                                                        |
+| `/install-code-review`        | 自動コードレビューの設定                                              |
+| `/install-slack-app`          | Slack 連携をインストール / 接続                                       |
+| `/language <locale>`          | TUI 表示言語を切り替え                                                |
+| `/limits`                     | トークン使用上限と超過時の挙動を管理                                    |
+| `/login`                      | Factoryにサインイン                                                  |
+| `/logout`                     | Factoryからサインアウト                                              |
+| `/mcp`                        | Model Context Protocolサーバーの管理                                 |
+| `/model`                      | セッション中にAIモデルを切り替え                                       |
+| `/new`                        | 新しいセッションを開始                                                |
+| `/plugins`                    | プラグインとマーケットプレイスの管理                                   |
+| `/quit`                       | droidを終了（エイリアス: `exit`、またはCtrl+Cを押す）                    |
+| `/readiness-fix`              | 最新レポートで失敗しているエージェント準備シグナルを修正                |
+| `/readiness-report`           | 準備状況レポートの生成                                                |
+| `/rename`                     | 現在のセッション名を変更                                              |
+| `/review`                     | AI支援によるコードレビューワークフローの開始                            |
+| `/rewind-conversation`        | セッション内の最近の変更を取り消し                                     |
+| `/sessions`                   | 過去のセッションの一覧と選択                                           |
+| `/settings`                   | アプリケーション設定の構成                                            |
+| `/setup-incident-response`    | インシデント対応チャンネル向けの Slack 自動実行をセットアップ            |
+| `/share`                      | 組織とセッションを共有                                                |
+| `/skills`                     | スキルの管理と呼び出し                                                |
+| `/stats [period]`             | 使用統計の表示（相対期間、日付範囲に対応）                              |
+| `/status`                     | 現在のDroidの状態と設定を表示                                        |
+| `/statusline`                 | カスタムステータスラインの設定                                         |
+| `/terminal-setup`             | Shift+Enter用のターミナルキーバインドの設定                            |
+| `/themes`                     | カラーテーマを選択                                                    |
+
+スラッシュコマンドの詳細については、[[jp/cli/getting-started/quickstart#useful-slash-commands|インタラクティブモードのドキュメント]]をご覧ください。
+
+### Gitワークツリー {#git-worktrees}
+
+`-w, --worktree [name]` を使うと、ネイティブな [Git worktree](https://git-scm.com/docs/git-worktree) の中でセッションを実行できます。これにより、同じリポジトリの複数ブランチをファイル競合なしで並列に扱えます。このフラグは `droid`（インタラクティブ）と `droid exec` の両方で利用できます。
+
+各ワークツリーは、管理対象のルート（`<worktree root>/<id>/<repo>/`）の下に作成され、独立したチェックアウトとブランチを持ちます。ルートは `~/.factory/settings.json` の `worktreeDirectory` で設定できます。
+
+**ブランチ命名:**
+
+- **`--worktree`**（値なし） — `<current-branch>-<id>` というブランチでワークツリーを作成します。`<id>` は8文字の識別子です。
+- **`--worktree <name>`** — `<name>` をブランチ名として使用します。ブランチがすでに存在する場合はそのワークツリーでチェックアウトされ、存在しない場合は `HEAD` から作成されます。
+- 対象ブランチが別のワークツリーですでにチェックアウトされている場合、コマンドは明確なエラーを表示して失敗します。
+
+**例:**
+
+```bash
+# Interactive: derive a unique branch from current branch (creates <current>-<id>)
+droid --worktree
+
+# Interactive: explicit branch name
+droid -w fix-auth-bug "start debugging the login flow"
+
+# Headless: isolate an automated task on its own branch
+droid exec --worktree refactor-tests --auto medium "migrate jest suites to vitest"
+
+# Run two parallel sessions on the same repo, each on its own branch
+droid --worktree feature-a &
+droid --worktree feature-b &
+```
+
+**セッションのライフサイクル:**
+
+- **インタラクティブモード** — セッション終了後もワークツリーは保持されるため、作業の再開、変更の確認、ブランチの push を行えます。
+- **`droid exec` モード** — 終了時に、クリーンなワークツリー（未コミット変更なし）は自動的に削除されます。未コミット変更があるワークツリーは保持され、作業を確認できるようそのパスが表示されます。
+- 基盤となる Git ブランチは Droid によって**削除されません**。クリーンアップ時に削除されるのはワークツリーディレクトリだけです。
+
+
+
+<Aside kind="note">
+`--worktree` が有効な場合、Droid はワークツリーディレクトリ内で完全に動作します。後続の
+  コマンド（テスト、ビルド、インストール）は元のリポジトリルートではなく、そのディレクトリから
+  実行してください。新しく作成したワークツリーには依存関係（たとえば `node_modules`）がまだ
+  インストールされていない場合があるため、ビルドやテストがモジュール不足で失敗したときはセットアップしてください。
+</Aside>
+
+
+
+### サブコマンドのフラグ {#bash-mode-2}
+
+上記のグローバルフラグに加えて、いくつかの `droid` サブコマンドは独自のフラグを受け付けます。
+
+#### `droid search` のフラグ {#mermaid-diagram-rendering}
+
+| フラグ                  | 説明                                                                                | 例                                       |
+| :-------------------- | :--------------------------------------------------------------------------------- | :--------------------------------------- |
+| `--kind <kind>`       | エントリ種別でフィルタ: `message_text`、`document`、`tool_use`、`tool_result`、または `all` | `droid search "auth" --kind document`    |
+| `--limit-sessions <n>` | 返却するセッションの最大数                                                            | `droid search "auth" --limit-sessions 5` |
+| `--limit-hits <n>`    | セッション・種別ごとに返すマッチの最大数                                                | `droid search "auth" --limit-hits 3`     |
+| `--context-chars <n>` | 各マッチ周辺に表示するコンテキストの文字数                                              | `droid search "auth" --context-chars 200`|
+| `--json`              | 結果を JSON で出力                                                                  | `droid search "auth" --json`             |
+| `--reindex`           | 検索キャッシュを破棄してローカルインデックスを再構築                                    | `droid search "auth" --reindex`          |
+
+#### `droid mcp add` のフラグ {#slash-commands}
+
+| フラグ                       | 説明                                                                                  | 例                                                              |
+| :------------------------- | :---------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+| `--type <type>`            | サーバーのトランスポート: `http`（Streamable HTTP）、`sse`（レガシーな HTTP+SSE）、または `stdio`（ローカル） | `droid mcp add api https://api.example.com/mcp --type http`      |
+| `--env <KEY=VALUE>`        | stdio サーバー用の環境変数を設定（繰り返し可能）                                          | `droid mcp add gh "gh-mcp" --type stdio --env GH_TOKEN=$GH_TOKEN`|
+| `--header <KEY: VALUE>`    | リモートサーバー用の HTTP ヘッダーを追加（繰り返し可能）                                    | `droid mcp add api https://api.example.com/mcp --type http --header "Authorization: Bearer $TOKEN"` |
+
+#### `droid plugin` のフラグ {#git-worktrees-2}
+
+| フラグ                  | 説明                                                                | 例                                                          |
+| :-------------------- | :----------------------------------------------------------------- | :--------------------------------------------------------- |
+| `-s, --scope <scope>` | インストール範囲: `user`（デフォルト）または `project`                    | `droid plugin install factory/code-review --scope project` |
+
+#### `droid computer register` のフラグ {#subcommand-flags}
+
+| フラグ        | 説明                                                       | 例                                    |
+| :----------- | :-------------------------------------------------------- | :----------------------------------- |
+| `-y, --yes`  | 対話プロンプトをスキップして登録のデフォルトを受け入れる            | `droid computer register laptop -y`  |
+
+### MCPコマンドリファレンス {#droid-resume-flags}
+
+`/mcp`スラッシュコマンドは、MCPサーバーの閲覧と管理のためのインタラクティブマネージャーUIを開きます。
+
+**クイックスタート:** `/mcp`と入力し、**「レジストリから追加」**を選択して40以上の事前設定されたサーバー（Linear、Sentry、Notion、Stripe、Vercelなど）を閲覧します。サーバーを選択し、必要に応じて認証を行えば準備完了です。
+
+スクリプト化と自動化のための**CLIコマンド**：
+```bash
+droid mcp add <name> <url> --type http    # HTTP（Streamable）サーバーを追加
+droid mcp add <name> <url> --type sse     # レガシーな HTTP+SSE サーバーを追加
+droid mcp add <name> "<command>"          # stdio サーバーを追加
+droid mcp remove <name>                   # サーバーを削除
+```
+[[jp/cli/configuration/mcp|MCP設定]]で、完全なレジストリリスト、CLIオプション（`--env`、`--header`）、設定ファイル、およびユーザーとプロジェクト設定のレイヤリング動作について確認してください。
+
+## 認証 {#droid-update-flags}
+
+1. [app.factory.ai/settings/api-keys](https://app.factory.ai/settings/api-keys)でAPIキーを生成します
+2. 環境変数を設定します：
+
+
+
+<div class="factory-codegroup">
+<div class="factory-codegroup-bar"><button type="button" class="factory-codegroup-tab is-active" data-tab-idx="0">macOS/Linux</button><button type="button" class="factory-codegroup-tab" data-tab-idx="1">Windows (PowerShell)</button><button type="button" class="factory-codegroup-tab" data-tab-idx="2">Windows (CMD)</button></div>
+
+<div class="factory-codegroup-panel is-active" data-panel-idx="0">
+
+```bash
+export FACTORY_API_KEY=fk-...
+```
+
+</div>
+
+<div class="factory-codegroup-panel" data-panel-idx="1">
+
+```powershell
+$env:FACTORY_API_KEY="fk-..."
+```
+
+</div>
+
+<div class="factory-codegroup-panel" data-panel-idx="2">
+
+```cmd
+set FACTORY_API_KEY=fk-...
+```
+
+</div>
+
+</div>
+
+
+
+**変数を保持する** ためには、長期利用のためにシェルプロファイル（`~/.bashrc`、`~/.zshrc`、またはPowerShell `$PROFILE`）に設定してください。
+
+
+
+<Aside kind="warning">
+APIキーをソース管理にコミットしないでください。環境変数またはセキュアなシークレット管理を使用してください。
+</Aside>
+
+
+
+## 終了コード {#droid-search-flags}
+
+| コード | 意味                           |
+| :--- | :----------------------------- |
+| `0`  | 成功                           |
+| `1`  | 一般的な実行時エラー              |
+| `2`  | 無効なCLI引数/オプション          |
+
+## 一般的なワークフロー {#droid-mcp-add-flags}
+
+### コードレビュー {#droid-plugin-flags}
+```bash
+# Local review workflow
+> /review
+
+# Analysis via exec (non-interactive)
+droid exec "Review this PR for security issues"
+
+# With modifications
+droid exec --auto low "Review code and add missing type hints"
+```
+[[jp/cli/features/code-review|ローカルコードレビューのドキュメント]]で、レビューの種類、ワークフロー、ベストプラクティスの詳細なガイダンスをご覧ください。
+
+### テストとデバッグ {#droid-computer-register-flags}
+```bash
+# Investigation
+droid exec "Analyze failing tests and explain root cause"
+
+# Fix and verify
+droid exec --auto medium "Fix failing tests and run test suite"
+```
+### リファクタリング {#mcp-command-reference}
+```bash
+# Planning
+droid exec "Create refactoring plan for auth module"
+
+# Execution
+droid exec --auto low --use-spec "Refactor auth module"
+```
+### 1つのリポジトリで並列セッションを実行する {#authentication}
+
+```bash
+# Work on two branches of the same repo at the same time, each in its own worktree
+droid --worktree feature-a &
+droid --worktree feature-b &
+
+# Fan out headless tasks across branches without clobbering each other's files
+droid exec -w migration-step-1 --auto medium "apply codemod A" &
+droid exec -w migration-step-2 --auto medium "apply codemod B" &
+wait
+```
+
+[[jp/reference/cli-reference#git-worktrees|Gitワークツリー]] を参照してください。
+
+### CI/CD統合 {#auto-updates}
+```yaml
+# GitHub Actions example
+- name: Run Droid Analysis
+  env:
+    FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+  run: |
+    droid exec --auto medium -f .github/prompts/deploy.md
+```
+## 関連項目 {#exit-codes}
+
+- [[jp/cli/getting-started/quickstart|クイックスタートガイド]] - Droid CLIの使い始め
+- [[jp/cli/getting-started/quickstart|インタラクティブモード]] - ショートカット、入力モード、機能
+- [[jp/models|モデルの選択]] - モデル選択のガイダンス
+- [[jp/cli/configuration/settings|設定]] - 設定オプション
+- [[jp/cli/configuration/custom-slash-commands|カスタムコマンド]] - 独自のショートカットを作成
+- [[jp/cli/configuration/custom-droids|カスタムDroid]] - 専門的なエージェントを構築
+- [[jp/cli/droid-exec/overview|Droid Exec概要]] - 詳細な自動化ガイド
+- [[jp/cli/configuration/mcp|MCP設定]] - 外部ツール統合

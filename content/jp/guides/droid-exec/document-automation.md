@@ -1,0 +1,353 @@
+---
+id: jp/guides/droid-exec/document-automation
+title: "自動ドキュメント生成"
+status: published
+summary: "CI/CDワークフローを使ってコード変更時にドキュメントを自動更新する"
+parent: jp/guides/droid-exec/index
+tags: [guides, documentation, docs, automation, ci-cd, github-actions, droid-exec]
+relations: [relates_to=guides/droid-exec/document-automation]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">自動ドキュメント生成</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">CI/CDワークフローを使ってコード変更時にドキュメントを自動更新する</p>
+
+
+このクックブックでは、GitHub ActionsでDroid Execを使用して、コードがmainにマージされた際に自動的にドキュメントを更新する方法を説明します。ワークフローはコードの変更を分析し、関連するドキュメントを発見して更新し、人間によるレビュー用のプルリクエストを作成します。
+
+## 仕組み {#how-it-works}
+
+エンドツーエンドの自動化ワークフロー：
+
+1. **トリガー**: mainブランチにコードがマージされる
+2. **探索**: Droid execがコードベース構造（プロジェクトタイプ、技術スタック）を探索
+3. **分析**: 変更されたファイルとその目的を特定
+4. **発見**: docs/ディレクトリ内の関連ドキュメントを検索
+5. **更新**: 影響を受けるドキュメントセクションを更新
+6. **コミット**: ワークフローがコミットを作成
+7. **PR**: Botがチームレビュー用のプルリクエストを開く
+
+## 前提条件 {#prerequisites}
+
+開始するには、以下が必要です：
+- Droidのインストール
+- Factory APIキー
+- Actions が有効化されたGitHub リポジトリ
+- リポジトリシークレット内の`FACTORY_API_KEY`（Settings → Secrets → Actions）
+- 既存のドキュメントディレクトリ
+
+
+
+<Aside kind="note">
+Droid Execのセットアップは[[jp/cli/droid-exec/overview#installation|こちら]]を参照してください。
+</Aside>
+
+
+
+## 完全なGitHub Actions ワークフロー {#complete-github-actions-workflow}
+
+
+
+<Aside kind="info">
+このワークフローはプルリクエストを自動作成します。正確性を確保するため、生成されたPRはマージ前に慎重に確認してください。
+</Aside>
+
+
+
+`.github/workflows/update-docs.yml`を作成：
+
+```yaml
+name: Auto-Update Documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**/*.ts'
+      - 'src/**/*.tsx'
+      - 'src/**/*.js'
+      - 'src/**/*.py'
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup droid CLI
+        run: |
+          curl -fsSL https://app.factory.ai/cli | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Get changed files
+        id: changes
+        run: |
+          git diff --name-only HEAD^ HEAD > changed_files.txt
+          echo "Files changed in last commit:"
+          cat changed_files.txt
+
+      - name: Update documentation
+        env:
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+        run: |
+          droid exec --auto low "
+          The following source files were just merged to main:
+          $(cat changed_files.txt)
+
+          Your task is to update the documentation to match these code changes.
+
+          First, explore the codebase to understand context:
+          1. Examine package.json, README, and main entry points
+          2. Identify key directories and their purposes
+          3. Note the tech stack (languages, frameworks, tools)
+          4. Classify the project type:
+             - **Library/SDK**: Exports functions/classes, has API docs, used as dependency
+             - **Application**: Has routes/pages, domain models, user features
+             - **Framework/Protocol**: Defines specs, client/server implementations
+             - **Monorepo**: Multiple packages/apps in one repository
+
+          Then, understand what changed:
+          1. Read each changed file carefully
+          2. Identify if changes are: API updates, new features, bug fixes, refactors
+          3. Note breaking changes or new configuration options
+
+          Next, find and update relevant documentation:
+          1. Search the docs/ directory for files that reference:
+             - The changed filenames or paths
+             - Functions, classes, or APIs that were modified
+             - Features or concepts affected by the changes
+          2. Update the found documentation:
+             - Update function signatures if they changed
+             - Update code examples to match new APIs
+             - Update configuration docs if options changed
+             - Update explanations if behavior changed
+             - Add notes about breaking changes if needed
+          3. Preserve the existing doc structure and writing style
+          4. Only modify sections that are actually affected
+
+          DO NOT commit or push changes.
+
+          Finally, create doc-update-summary.md with:
+          - List of documentation files that were updated
+          - Summary of changes made to each file
+          - Any sections that may need human review or clarification
+          "
+
+      - name: Commit documentation updates
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "docs: automated documentation updates"
+          else
+            echo "No documentation changes needed"
+            exit 0
+          fi
+
+      - name: Create Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="docs/auto-update-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b $BRANCH
+          git push origin $BRANCH
+
+          # Get summary or use default message
+          SUMMARY=$(cat doc-update-summary.md 2>/dev/null || echo "Documentation updated to reflect recent code changes.")
+
+          gh pr create \
+            --title "📚 Automated documentation updates" \
+            --body "## Automated Documentation Updates
+
+$SUMMARY
+
+### Review Checklist
+- [ ] Documentation accurately reflects code changes
+- [ ] Code examples are correct and runnable
+- [ ] No unintended changes to other sections
+- [ ] Formatting and style are consistent
+
+---
+This PR was automatically generated after code was merged to main." \
+            --label "documentation,automated"
+```
+
+**主要なワークフロー機能：**
+- ファイル変更のみに`--auto low`を使用（クックブックパターンに従う）
+- 明示的な指示：「コミットやプッシュは行わない」（関心事の分離）
+- ワークフローが別ステップでgit操作を処理
+- Droid が自律的にコードベースを探索し、関連ドキュメントを発見（マッピングファイル不要）
+
+## ベストプラクティス {#best-practices}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">トリガー範囲を慎重に設定</div>
+
+意味のあるコード変更でのみトリガーします:
+```yaml
+paths:
+  - 'src/**'
+  - '!src/**/*.test.ts'
+  - '!src/**/*.spec.ts'
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">安全のため--auto lowを使用</div>
+
+クックブックのパターンに従います:
+```bash
+droid exec --auto low "..." # File changes only
+# Workflow handles git operations separately
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">自律的な検出を信頼する</div>
+
+手動マッピングを管理するのではなく、droidに探索させて関連ドキュメントを見つけさせます:
+```bash
+"Search the docs/ directory for files that reference the changed code"
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">常に要約を生成する</div>
+
+レビュー担当者が変更を理解しやすくします:
+```bash
+"Create doc-update-summary.md explaining what was updated and why"
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">レート制限を考慮する</div>
+
+更新頻度の高いリポジトリでは、スケジュールされたバッチ更新を使用します:
+```yaml
+schedule:
+  - cron: '0 9 * * 1'  # Weekly on Monday
+```
+
+</div>
+
+</div>
+
+
+
+## バリエーション {#variations}
+
+### 週次包括レビュー {#weekly-comprehensive-review}
+
+頻繁に変更があるリポジトリの場合、更新を週次レビューにバッチ処理：
+
+```yaml
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Monday 9 AM
+  workflow_dispatch:  # Allow manual trigger
+```
+
+### 複数のドキュメントディレクトリ {#multiple-documentation-directories}
+
+ドキュメントが複数の場所に分散している場合：
+
+```bash
+droid exec --auto low "
+Search docs/, guides/, and README.md for documentation to update
+based on these code changes: $(cat changed_files.txt)
+"
+```
+
+### 言語固有のターゲティング {#language-specific-targeting}
+
+特定のファイルタイプに焦点を当てる：
+
+```yaml
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**/*.ts'
+      - 'src/**/*.tsx'
+      # TypeScript changes only
+```
+
+## トラブルシューティング {#troubleshooting}
+
+
+
+<Details summary="コードが変更されたのにPRが作成されない">
+Droidがドキュメント更新は不要と判断した可能性があります。ワークフローログを確認するか、プロンプトにより具体的な検索指示を追加してください。`doc-update-summary.md`が作成されている場合は、Droidが分析した内容を確認できます。
+</Details>
+
+
+
+
+
+<Details summary="誤ったセクションが更新される">
+探索プロンプトを改善し、何を探すかをより具体的にします。どのドキュメントセクションを変更すべきか、または変更すべきでないかを明示することを検討してください。
+</Details>
+
+
+
+
+
+<Details summary="Droidが関連ドキュメントを見つけられない">
+Droid Execに特定のディレクトリ、ファイル名、キーワードを示して、検索指示をより明確にします。候補となるドキュメントの短いリストを提供すると、精度が大きく向上します。
+</Details>
+
+
+
+
+
+<Details summary="ワークフローがタイムアウトする">
+大規模リポジトリでは以下を検討してください:
+  - ワークフローのタイムアウトを長くする
+  - ドキュメント更新をバッチで処理する
+  - すべてのマージでトリガーする代わりにスケジュール更新を使用する
+</Details>
+
+
+
+## 関連項目 {#see-also}
+
+- [[jp/cli/droid-exec/overview|Droid Exec概要]] - 自律性レベルと機能
+- [[jp/guides/droid-exec/github-actions|GitHub Actionsクックブック]] - より多くのワークフロー例
+- [[jp/guides/hooks/documentation-sync|ドキュメント同期フック]] - 予防的アプローチ

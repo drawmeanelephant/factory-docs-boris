@@ -1,0 +1,215 @@
+---
+id: jp/guides/skills/automated-qa
+title: "自動QA"
+status: published
+summary: "エンドツーエンドの自動品質保証を設定し、Web、CLI、APIインターフェース全体で実際のユーザーのようにアプリケーションをテストします。ビジュアル証拠、CI統合、障害学習機能を内蔵。"
+parent: jp/guides/skills/index
+tags: [guides, qa, testing, automated-testing, quality-assurance, agent-browser, tuistory, ci]
+relations: [relates_to=guides/skills/automated-qa]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">自動QA</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">エンドツーエンドの自動品質保証を設定し、Web、CLI、APIインターフェース全体で実際のユーザーのようにアプリケーションをテストします。ビジュアル証拠、CI統合、障害学習機能を内蔵。</p>
+
+
+コードをリリースする前に変更内容の自動テストを実行することは、最も重要な作業の一つです。単体テストやリンターは構文レベルの問題をキャッチしますが、ログインフローが実際に動作するか、リファクタリング後にCLIが正しくレンダリングされるか、新しいAPIエンドポイントが正しいデータを返すかを判断することはできません。QAスキルはそのギャップを埋めます。実際のユーザーと同じようにアプリケーションをテストし、視覚的な証拠を含む構造化されたレポートを生成します。
+
+Factoryには連携して動作する2つの組み込みスキルが含まれています：
+
+- **`/install-qa`** -- コードベースを分析し、的確な質問を行い、プロジェクトに合わせた完全なQAスキルを生成する一回限りのセットアップスキル。
+- **`/qa`** -- すべてのPRで実行される生成されたスキル。git diffを読み取り、影響を受けるアプリを特定し、関連するテストフローのみを実行します。
+
+
+
+<Aside kind="note">
+install-qaプロセスは徹底的でインタラクティブです。深いコードベース分析を実行し、多段階のアンケートを実施し、複数のファイルを生成します。時間がかかり、質問がプロンプトされることを想定してください。品質保証は基盤となるものであり、正しく実行するために時間をかけています。
+</Aside>
+
+
+
+## クイックスタート {#quick-start}
+```bash
+droid
+> /install-qa
+```
+そのスキルは3つの段階を経て動作します：
+
+1. **詳細なコードベース分析** -- アプリケーション、技術スタック、認証、環境、機能フラグ、インテグレーション、CI/CD、既存のテストを検出します。
+2. **対話的質問票** -- 自動検出できなかった項目（QAターゲット、ユーザーペルソナ、重要なフロー、クリーンアップ戦略）について質問します。
+3. **スキル生成** -- オーケストレーター、アプリごとのサブスキル、設定、レポートテンプレート、およびオプションでGitHub Actionsワークフローを生成します。
+
+セットアップ後、`/qa`でいつでもQAを呼び出すか、生成されたワークフローを通じてPR上で自動実行させることができます。
+
+## 生成されるもの {#what-gets-generated}
+
+~~~text
+.factory/skills/qa/
+  SKILL.md                  # オーケストレーター: diffを読み取り、関連サブスキルへルーティング
+  config.yaml               # すべての環境/認証/連携設定（単一の信頼できる情報源）
+  REPORT-TEMPLATE.md        # 標準化されたレポートテンプレート
+
+.factory/skills/qa-<app-name>/
+  SKILL.md                  # テスト可能なアプリごとに1つのサブスキル（例: qa-web、qa-cli）
+~~~
+`config.yaml`は、コードベース解析とアンケートの回答に基づいて`/install-qa`によって**自動生成**されます。生成後は、他のチェックイン済みファイルと同様に編集できます。例：
+```yaml
+project: MyProject
+environments:
+  development:
+    url: https://dev.example.com
+  production:
+    url: https://example.com
+    restrictions: [read-only only, never create data]
+default_target: development
+auth:
+  method: email-password
+  provider: WorkOS
+personas:
+  - name: admin
+    test_focus: [settings, user-management, billing]
+  - name: viewer
+    test_focus: [dashboards, reports]
+    cannot_do: [edit-settings, manage-users]
+apps:
+  web:
+    path_patterns: ["apps/web/**"]
+    skill: qa-web
+    test_tool: agent-browser
+  cli:
+    path_patterns: ["apps/cli/**"]
+    skill: qa-cli
+    test_tool: tuistory
+failure_learning: suggest_in_report
+```
+## QAの実行方法 {#how-qa-runs}
+
+1. **設定の読み込み** -- 環境、ペルソナ、アプリ定義について `config.yaml` を読み取ります。
+2. **差分の解析** -- `path_patterns` を使用して変更されたファイルをアプリにマッピングします。
+3. **テスト実行範囲の決定** -- 影響を受けたアプリのサブスキルのみを実行します。CLI のみの変更では、Webテストを完全にスキップします。
+4. **テストフローの実行** -- 関連するフローを実行し、特定の差分に基づいてターゲット化されたテストを生成します。
+5. **証跡の取得** -- スクリーンショット（Web）、ターミナルスナップショット（CLI）、またはAPIレスポンスデータを取得します。
+6. **レポートの生成** -- 合格/不合格/ブロックの結果を含む構造化されたレポートを生成し、PRコメントとして投稿します。
+
+## テストツール {#testing-tools}
+
+### Webアプリ: agent-browser {#web-apps-agent-browser}
+
+実際のブラウザを操作します -- ページを移動し、フォームを入力し、ボタンをクリックし、アクセシビリティツリーのスナップショットとスクリーンショットを取得します。
+```bash
+agent-browser open https://dev.example.com/login
+agent-browser snapshot -i          # 対話可能な要素を検出
+agent-browser fill @e1 "user@example.com"
+agent-browser fill @e2 "password123"
+agent-browser click @e3
+agent-browser screenshot result.png
+```
+ImageMagickがインストールされている場合、QAは視覚的回帰テストのためにUI状態のビフォー・アフターを示すアニメーションGIFの差分も生成できます。
+
+### CLI/TUIアプリ: tuistory {#clitui-apps-tuistory}
+
+アプリを仮想ターミナルで起動し、キー入力を送信して、ターミナル状態をテキストスナップショットやPNGスクリーンショットとしてキャプチャします。
+```bash
+tuistory launch "./my-cli" -s qa-test --cols 110 --rows 36
+tuistory -s qa-test wait-idle --timeout 8000
+tuistory -s qa-test snapshot --trim           # テキストスナップショット（PRコメント内にインライン表示）
+tuistory -s qa-test type "/help"
+tuistory -s qa-test press enter
+tuistory -s qa-test screenshot --format png -o /tmp/help.png  # 視覚的証拠
+```
+### APIテスト {#api-testing}
+
+UIのないバックエンドサービスでは、QAは標準的な`curl`コマンドを使用してエンドポイントをテストし、レスポンスを検証します。
+
+## CI連携 {#ci-integration}
+
+プロジェクトに`.github/`ディレクトリがある場合、install-qaは以下の機能を持つGitHub Actionsワークフローの生成を提供します：
+
+- プルリクエストでトリガー（Vercel/Netlifyを使用している場合はプレビューデプロイ後にも）
+- ツール（tuistory、ImageMagick）をインストールし、QAスキルで`droid exec`を実行
+- エビデンスをビルドアーティファクトとしてアップロードし、QAレポートをPRコメントとして投稿
+- **必須**または**オプション**のチェックとして設定可能
+
+
+
+<Aside kind="warning">
+生成されたワークフローには、`config.yaml`で参照される認証情報のGitHubシークレットが必要です。install-qaスキルは、追加すべきシークレットを正確にリストアップします。
+</Aside>
+
+
+
+## 失敗学習 {#failure-learning}
+
+QAが新しい失敗パターンに遭遇した場合、その知識をフィードバックできます：
+
+| 戦略 | 動作 |
+| --- | --- |
+| **レポートで提案**（デフォルト） | 手動レビュー用のコピー＆ペーストスニペットをレポートに含めます。 |
+| **自動コミット** | 各実行後にサブスキルファイルへの更新を自動的にコミットします。 |
+| **PRを開く** | 失敗カタログの更新を含むドラフトPRを開きます。 |
+
+## 実世界の例 {#real-world-examples}
+
+### CLIアプリ（Go TUI） -- [glow](https://github.com/nizar-test/glow/pull/1) {#cli-app-go-tui----glow}
+
+ターミナルmarkdownレンダラーのヘルプテキストとフラグ説明を更新するPR。QAはGoバイナリをビルドし、tuistoryでテストしました：
+
+| # | テストケース | 結果 | 備考 |
+|---|-----------|--------|-------|
+| 1 | ヘルプテキストが更新された説明を表示 | :white_check_mark: PASS | `--help`に新しいテキストが含まれる |
+| 2 | 行番号フラグの説明が更新 | :white_check_mark: PASS | 「TUIモードのみ」ではなく「レンダリング出力」と表示 |
+| 3 | CLIがmarkdownを正しくレンダリング | :white_check_mark: PASS | ヘッダー、リスト、コードブロックがレンダリング |
+| 4 | 幅フラグが指定された列で折り返し | :white_check_mark: PASS | `-w 40`が正しく折り返し |
+| 5 | 標準入力パイプレンダリング | :white_check_mark: PASS | パイプされたmarkdownがレンダリング |
+| 6 | 存在しないファイルでのエラー | :white_check_mark: PASS | 明確なメッセージで終了コード1 |
+| 7 | TUIブラウザ起動 | :no_entry: BLOCKED | CI PTY環境が不整合 |
+
+エビデンスにはインラインターミナルスナップショットが含まれました：
+```
+$ ./glow --help
+  Render markdown on the CLI, with pizzazz!
+  Now with improved word wrapping and line number support.
+```
+### フルスタックウェブアプリ（FastAPI + React）-- [full-stack-fastapi-template](https://github.com/nizar-test/full-stack-fastapi-template/pull/1) {#full-stack-web-app-fastapi-react----full-17ab85e9}
+
+「Remember me」チェックボックスとフッターのバージョンバッジを追加するPR。QAはCI内でPostgreSQL、Mailcatcher、FastAPIバックエンド、Reactフロントエンドを起動し、agent-browserでUIを操作しました：
+
+| # | テストケース | 結果 | 備考 |
+|---|-----------|--------|-------|
+| 1 | ログインページにRemember Meチェックボックスが表示される | :white_check_mark: PASS | フォームにEmail、Password、チェックボックス、Log Inボタンあり |
+| 2 | Remember Meをチェックしてログイン | :white_check_mark: PASS | ダッシュボードにリダイレクト |
+| 3 | Remember Meなしでログイン | :white_check_mark: PASS | チェックしなくても正常動作 |
+| 4 | 無効な認証情報（ネガティブテスト） | :white_check_mark: PASS | トーストエラー、ログインページに留まる |
+| 5 | フッターにv2.0が表示される | :white_check_mark: PASS | 全ページでバージョンバッジが表示 |
+
+以下はQA実行中にagent-browserが実際にキャプチャしたスクリーンショットです：
+
+
+
+<div class="factory-frame">
+
+<img src="../../../images/qa-examples/qa-login-page.png" alt="Remember Meチェックボックス付きログインページ" />
+
+<div class="factory-frame-caption">agent-browserでキャプチャした、新しい「Remember me for 30 days」チェックボックス付きログインページ</div>
+
+</div>
+
+
+
+
+
+<div class="factory-frame">
+
+<img src="../../../images/qa-examples/qa-dashboard.png" alt="v2.0フッター付きログイン後のダッシュボード" />
+
+<div class="factory-frame-caption">ログイン成功後のダッシュボード、v2.0フッターバッジ表示</div>
+
+</div>
+
+
+
+## ヒント {#tips}
+
+- **質問票では詳細に記述してください。** 生成されるQAスキルの品質は、提供する詳細の量に正比例します。ユーザーロール、重要なフロー、認証メカニズム、エッジケースを徹底的に説明してください。install-qaに多くのコンテキストを与えるほど、生成されるテストフローはより的確になります。
+- **成功基準を明確に記述してください。** 単に「ログインが動作する」と言うのではなく、「ユーザーがメールアドレスとパスワードを入力し、Sign Inをクリックし、/dashboardにリダイレクトされ、ウェルカムメッセージが表示される」と言います。具体性により、正しいことを検証するテストフローが生成されます。
+- **既知の癖について言及してください。** ログインフォームが特定のロケールで異なって表示される場合、チェックアウトに15秒かかる場合、開発サーバーが特定の起動コマンドを必要とする場合など、それらを伝えてください。これらは誤った失敗を防ぐ既知の失敗モードとなります。
+- **最初の実行後に反復してください。** レポートを確認し、合格したもの、ブロックされたもの、見逃されたものに基づいてサブスキルフローを改善してください。

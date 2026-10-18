@@ -1,0 +1,443 @@
+---
+id: jp/guides/building/droid-exec-tutorial
+title: "Droid Execによるインタラクティブアプリ構築"
+status: published
+summary: "Droid Execを使って「Xとチャット」機能を構築する方法を学ぶ"
+parent: jp/guides/building/index
+tags: [guides]
+relations: [relates_to=guides/building/droid-exec-tutorial]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Droid Execによるインタラクティブアプリ構築</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Droid Execを使って「Xとチャット」機能を構築する方法を学ぶ</p>
+
+
+<iframe
+  class="w-full aspect-video rounded-xl"
+  src="https://youtube.com/embed/pd8fWTwJylw"
+  title="Droid Execでインタラクティブアプリを構築"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+## この文書の内容 {#what-this-doc-covers}
+
+- Droid Exec をヘッドレスモードで使用して「リポジトリとのチャット」機能を構築する方法
+- リアルタイムエージェントフィードバック用のServer-Sent Eventsによるストリーミングレスポンスの設定
+- Factory の公式サンプルからの実際の実装の理解
+
+
+
+<Aside kind="note">
+Droid Exec機能の完全なリファレンスは、[[jp/cli/droid-exec/overview|Droid Exec概要]]を参照してください
+</Aside>
+
+
+
+---
+
+## 1. 前提条件とインストール {#1-pre-requisites-and-installation}
+
+### 要件 {#requirements}
+- Bun（サンプルではBunを使用していますが、Node.jsでも動作します）
+- Droid CLI をインストール済み（`droid` がPATHに設定されている）
+- チャット対象となるローカルリポジトリ
+
+### インストール {#installation}
+
+```bash
+# Install Bun
+curl -fsSL https://bun.sh/install | bash
+
+# Install the Droid CLI
+curl -fsSL https://app.factory.ai/cli | sh
+
+# Sign in to Factory (one-time browser auth)
+droid
+```
+
+ブラウザでのログイン後、`droid exec` はコード内でAPIキーを必要とせず、アプリから動作します。
+
+### 公式サンプルを試す {#try-the-official-example}
+
+```bash
+git clone https://github.com/Factory-AI/examples.git
+cd examples/droid-chat
+bun i
+bun dev
+```
+
+[http://localhost:4000](http://localhost:4000) を開くと、リポジトリのREADME上にチャットウィンドウが表示されます。
+
+---
+
+## 2. Droid Exec を使用する理由 {#2-why-use-droid-exec}
+
+コードベースを理解するAI機能の構築には、複数の操作の調整が必要です：ファイル検索、コード読み込み、構造解析、回答の合成などです。`droid exec` がなければ、*「MCP サーバーの課金方法は？」*のような質問には、関連するコードの検索、読み込み、理解のために数十回のAPI呼び出しとカスタムロジックが必要になります。
+
+`droid exec` は Droid CLI のヘッドレスモードで、これを単一のコマンドで自動的に処理します。コードベースの検索、ファイル読み込み、コード構造の推論を行い、構造化されたJSON出力を返します—安全性制御と設定可能な自動化レベルが組み込まれています。チャットインターフェース、CI/CD自動化、またはコードベースインテリジェンスが必要なあらゆるアプリケーションの構築に最適です。
+
+---
+
+## 3. 動作原理：基本パターン {#3-how-it-works-the-core-pattern}
+
+Factory のサンプルはシンプルなパターンを使用しています：`droid exec` を `--output-format debug` で起動し、Server-Sent Events（SSE）経由で結果をストリーミングします。
+
+### Droid Exec の実行 {#running-droid-exec}
+
+```typescript
+// Simplified from src/server/chat.ts
+function runDroidExec(prompt: string, repoPath: string) {
+  const args = ["exec", "--output-format", "debug"];
+
+  // Optional: configure model (defaults to glm-4.7)
+  const model = process.env.DROID_MODEL_ID ?? "glm-4.7";
+  args.push("-m", model);
+
+  // Optional: reasoning level (off|low|medium|high)
+  const reasoning = process.env.DROID_REASONING;
+  if (reasoning) {
+    args.push("-r", reasoning);
+  }
+
+  args.push(prompt);
+
+  return Bun.spawn(["droid", ...args], {
+    cwd: repoPath,
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+}
+```
+
+### 主要フラグの説明 {#key-flags-explained}
+
+**`--output-format debug`**：エージェントの作業中に構造化イベントをストリーミング
+- 各ツール呼び出し（ファイル読み込み、検索など）がイベントを出力
+- ユーザーにリアルタイム進捗を表示可能
+- 代替：最終出力のみの `--output-format json`
+
+**`-m`（モデル）**：AIモデルを選択
+- `glm-4.7` - 高速、安価（デフォルト）
+- `gpt-5-codex` - 複雑なコード用で最も強力
+- `claude-sonnet-4-5-20250929` - 速度と性能のベストバランス
+
+**`-r`（推論）**：思考の深度をコントロール
+- `off` - 推論なし、最高速
+- `low` - 軽い推論（デフォルト）
+- `medium|high` - より深い解析、低速
+
+**`--auto` フラグなし？**：読み取り専用がデフォルト（最も安全）
+- ファイルの変更不可、読み取り/検索/解析のみ
+- チャットアプリケーションに最適
+
+
+
+<Aside kind="note">
+すべてのフラグの説明は[[jp/reference/cli-reference|CLIリファレンス]]を参照してください
+</Aside>
+
+
+
+---
+
+## 4. チャット機能の構築：SSEでのストリーミング {#4-building-the-chat-feature-streaming-with-sse}
+
+Factory のサンプルは、Server-Sent Events を使用してエージェントのアクティビティをリアルタイムでストリーミングします。これにより、エージェントが検索、ファイル読み込み、思考を行う際にユーザーに即座にフィードバックを提供します。
+
+### サーバー：SSE ストリーミングエンドポイント {#server-streaming-sse-endpoint}
+
+```typescript
+// Simplified from src/server/chat.ts
+export async function handleChatRequest(req: Request): Promise<Response> {
+  const { message, history } = await req.json();
+
+  // Get repo info (finds ./repos/<folder>)
+  const repoInfo = await getLocalRepoInfo();
+
+  // Build prompt with history
+  const prompt = buildPrompt(message, history);
+
+  // Spawn droid exec
+  const proc = runDroidExec(prompt, repoInfo.workdir);
+
+  // Create SSE stream
+  const stream = new ReadableStream({
+    start(controller) {
+      const encoder = new TextEncoder();
+
+      // Helper to send events
+      const send = (event: string, data: any) => {
+        controller.enqueue(encoder.encode(`event: ${event}\n`));
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+      };
+
+      // Read stdout and parse debug events
+      const reader = proc.stdout.getReader();
+      let buffer = "";
+
+      (async () => {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          buffer += new TextDecoder().decode(value);
+          buffer = parseAndFlush(buffer, (event, data) => {
+            send(event, data);
+          });
+        }
+      })();
+
+      // When process exits, close stream
+      proc.exited.then((code) => {
+        send("exit", { code });
+        controller.close();
+      });
+    }
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive"
+    }
+  });
+}
+```
+
+### 受信するイベントタイプ {#event-types-youll-receive}
+
+`--output-format debug` を使用すると、droid は以下のようなイベントを出力します：
+
+```
+event: tool_call
+data: {"tool":"grep","args":{"pattern":"MCP"}}
+
+event: assistant_chunk
+data: {"text":"I found references to MCP servers in..."}
+
+event: tool_result
+data: {"files_found":["src/billing.ts","config/pricing.yml"]}
+
+event: exit
+data: {"code":0}
+```
+
+### クライアント：SSE 用 React Hook {#client-react-hook-for-sse}
+
+```typescript
+// Simplified from src/hooks/useChat.ts
+export function useChat() {
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const sendMessage = async (text: string, history: Message[]) => {
+    // Add user message
+    setMessages(prev => [...prev, { role: "user", content: text }]);
+
+    // Start SSE connection
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text, history })
+    });
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let assistantMessage = { role: "assistant", content: "" };
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // Parse SSE events
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        if (line.startsWith("event:")) {
+          const event = line.slice(7);
+          const dataLine = lines[++i];
+          const data = JSON.parse(dataLine.slice(6));
+
+          if (event === "assistant_chunk") {
+            // Append to assistant message
+            assistantMessage.content += data.text;
+            setMessages(prev => {
+              const newMessages = [...prev];
+              if (newMessages[newMessages.length - 1]?.role !== "assistant") {
+                newMessages.push({ ...assistantMessage });
+              } else {
+                newMessages[newMessages.length - 1] = { ...assistantMessage };
+              }
+              return newMessages;
+            });
+          }
+
+          if (event === "exit") {
+            // Done
+            break;
+          }
+        }
+      }
+    }
+  };
+
+  return { messages, sendMessage };
+}
+```
+
+### 実例：動画内容 {#real-world-example-the-video}
+
+デモ動画では、ユーザーが次のように質問しました：*「MCP サーバーの課金方法を検索してもらえますか？」*
+
+バックグラウンドで、`droid exec` は自動的に以下を実行しました：
+1. **検索** - ripgrep を使用してコードベース内の「MCP」「課金」「支払い」を検索
+2. **読み込み** - 関連ファイル（課金設定、価格設定ロジック、環境変数）を読み込み
+3. **解析** - コード構造を解析して課金フローを理解
+4. **統合** - ファイルの場所、変数名、実装詳細を含む完全な回答を統合
+
+これらすべてがSSE経由でリアルタイムストリーミングされ、手動でのオーケストレーションは不要です。
+
+### プロジェクト構造（サンプルから） {#project-structure-from-the-example}
+
+```
+examples/droid-chat/
+├── src/
+│   ├── server/
+│   │   ├── index.ts       # Bun HTTP server + static files
+│   │   ├── chat.ts        # SSE endpoint, runs droid exec
+│   │   ├── repo.ts        # Finds local repo in ./repos/
+│   │   ├── prompt.ts      # System prompt + history formatting
+│   │   └── stream.ts      # Parses debug output, strips paths
+│   ├── components/chat/   # React chat UI
+│   └── hooks/useChat.ts   # Client-side SSE parsing
+├── repos/                 # Your repositories to chat with
+│   └── your-repo/
+└── public/                # Static assets
+```
+
+### 設定オプション {#configuration-options}
+
+サンプルは環境変数をサポートしています：
+
+```bash
+# .env
+DROID_MODEL_ID=gpt-5-codex  # Default: glm-4.7
+DROID_REASONING=low         # Default: low (off|low|medium|high)
+PORT=4000                   # Default: 4000
+HOST=localhost              # Default: localhost
+```
+
+### ベストプラクティス {#best-practices}
+
+✅ **推奨：**
+- ユーザー向け機能には読み取り専用モード（`--auto` フラグなし）を使用
+- `droid exec` に渡す前にユーザー入力を検証
+- タイムアウトを設定（サンプルでは240秒）
+- レスポンシブなUI のためにSSE イベントを増分解析
+- クライアントに送信する前に、デバッグ出力からローカルファイルパスを除去
+
+⚠️ **避けるべき：**
+- サンドボックス化せずに本番環境で `--auto medium/high` を使用
+- 無害化されていないユーザー入力を直接 CLI に渡す
+- 結果待機中にメインスレッドをブロック
+
+---
+
+## 5. カスタマイゼーションと拡張 {#5-customization-extensions}
+
+### データソースの変更 {#swap-the-data-source}
+
+サンプルはローカルリポジトリで提供されていますが、簡単に適応できます：
+
+**PDF と文書：**
+```typescript
+// Extract text from PDFs, write to temp dir, point droid at it
+import { pdfToText } from 'pdf-to-text';
+
+const text = await pdfToText('document.pdf');
+fs.writeFileSync('/tmp/docs/content.txt', text);
+runDroidExec("Summarize this document", '/tmp/docs');
+```
+
+**データベース：**
+```typescript
+// Add database context to prompt
+const prompt = `You have access to a PostgreSQL database with these tables:
+${JSON.stringify(schema)}
+
+User question: ${message}`;
+
+runDroidExec(prompt, repoPath); // Can read SQL files in repo
+```
+
+**ウェブサイト：**
+```typescript
+// Crawl site, save markdown, chat with it
+import TurndownService from 'turndown';
+
+const markdown = new TurndownService().turndown(html);
+fs.writeFileSync('./repos/site-content/page.md', markdown);
+```
+
+### モデルの動的変更 {#change-models-on-the-fly}
+
+```typescript
+// Let users pick models
+function runWithModel(prompt: string, model: string) {
+  return Bun.spawn([
+    "droid", "exec",
+    "-m", model,  // glm-4.7, gpt-5-codex, etc.
+    "--output-format", "debug",
+    prompt
+  ], { cwd: repoPath });
+}
+```
+
+### ツール呼び出しの可視化を追加 {#add-tool-call-visibility}
+
+サンプルの `stream.ts` はデバッグイベントを解析します。これらをUIに表示できます：
+
+```typescript
+if (event === "tool_call") {
+  // Show: "🔍 Searching for 'MCP charge'"
+  // Show: "📄 Reading src/billing.ts"
+}
+```
+
+これにより、エージェントが何をしているかユーザーが正確に見える、透明性があり信頼を構築する体験を作成できます。
+
+---
+
+## 追加リソース {#additional-resources}
+
+**公式サンプル：**
+- [GitHub: droid-chat example](https://github.com/Factory-AI/examples/tree/main/droid-chat) - 完全な動作コード
+
+**ドキュメント：**
+- [[jp/cli/droid-exec/overview|Droid Exec概要]] - 完全なCLIリファレンス
+- [[jp/cli/user-guides/auto-run|Autonomy Levels Guide]] - `--auto` フラグの理解
+- [[jp/guides/droid-exec/code-review|CI/CD Cookbook]] - 本番パターン
+- [[jp/reference/cli-reference|Model Configuration]] - 利用可能なモデルと設定
+
+**コミュニティ：**
+- [Factory Discord](https://discord.gg/zuudFXxg69) - チームからのサポートを受ける
+- [GitHub Discussions](https://github.com/factory-ai/factory/discussions) - あなたの作品を共有する
+
+---
+
+## 次のステップ {#next-steps}
+
+1. サンプルをクローン：`git clone https://github.com/Factory-AI/examples.git`
+2. ローカルで実行：`cd examples/droid-chat && bun dev`
+3. `src/server/chat.ts` のコードを調査して SSE ストリーミングの動作を確認
+4. `src/server/prompt.ts` をカスタマイズしてエージェントの動作を変更
+5. `./repos/` コンテンツを交換して独自のリポジトリとチャット
+
+サンプルは意図的に最小限（総計約500行）に作られているため、完全に理解して独自のニーズに適応できます。

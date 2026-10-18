@@ -1,0 +1,305 @@
+---
+id: jp/cli/user-guides/implementing-large-features
+title: "大規模機能の実装"
+status: published
+summary: "仕様計画と反復実装を使って、複雑で複数フェーズの開発プロジェクトに取り組む体系的な方法。"
+parent: jp/cli/user-guides/index
+tags: [cli, large-features, complex-features, big-projects, refactoring, migration, multi-phase, systematic]
+relations: [relates_to=cli/user-guides/implementing-large-features]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">大規模機能の実装</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">仕様計画と反復実装を使って、複雑で複数フェーズの開発プロジェクトに取り組む体系的な方法。</p>
+
+
+大規模な機能の実装には、複雑さを避けるために慎重な計画と体系的な実行が必要です。このガイドでは、巨大なプロジェクトを管理可能なフェーズに分割し、計画にはspecification mode、実装には頻繁な検証を伴う反復的アプローチを使用する実証済みのワークフローを説明します。
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**体系的な計画**
+
+複雑な機能を、明確な境界を持つ管理しやすい個別フェーズに分割します
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**段階的な進捗**
+
+各ステップで検証とテストを行いながら、一度に1フェーズずつ実装します
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**バージョン管理戦略**
+
+gitコミットとPRで進捗を追跡し、安全なロールバックを可能にします
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**継続的な検証**
+
+最後まで待たずに機能を段階的にテストします
+
+</div>
+
+</div>
+
+
+
+## このワークフローを使用するタイミング {#when-to-use-this-workflow}
+
+このアプローチは以下の場合に最適です：
+
+**大規模なリファクタリング** - コードベース全体の100以上のファイルに影響を与える場合
+
+```
+"Migrate from REST API to GraphQL across all frontend components"
+```
+
+**主要コンポーネントの移行** - コアシステムの依存関係を置き換える場合
+
+```
+"Switch from Stripe to a new billing provider across the entire payment system"
+```
+
+**大規模機能の実装** - 30以上のファイルにまたがる新機能の場合
+
+```
+"Add comprehensive user roles and permissions system to the existing application"
+```
+
+## ワークフロー {#the-workflow}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">マスタープランを作成</div>
+
+仕様モードを使用して、プロジェクトを主要フェーズに分割する包括的なドキュメントを作成します
+プロジェクトを主要フェーズに分割します。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">フェーズごとの実装</div>
+
+マスタープラン文書を参照しながら、各フェーズごとに新しいセッションを開始します。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">頻繁なコミットとPR</div>
+
+完了した各フェーズに対応するgitコミットとプルリクエストを作成します。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">段階的な検証</div>
+
+最後ではなく各フェーズ後に機能をテスト・検証します。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">計画を更新</div>
+
+完了したフェーズをマークし、学びに基づいて残りの作業を調整します。
+
+</div>
+
+</div>
+
+
+
+## フェーズ1：Specification Modeによるマスタープラン策定 {#phase-1-master-planning-with-specification-mode}
+
+**Shift+Tab**を使用してSpecification Modeに入り、包括的な分析を作成することから始めます：
+
+**プロンプト例：**
+
+```
+Create a detailed implementation plan for migrating our entire authentication system
+from Firebase Auth to Auth0. This affects user login, registration, session management,
+role-based access control, and integrations across 50+ components.
+
+Break this into major phases that can be implemented independently with clear
+testing and validation points. Each phase should be completable in 1-2 days
+and have minimal dependencies on other phases.
+```
+
+**Specification Modeは以下を生成します：**
+
+- **フェーズの分割** - 4-6の主要な実装フェーズ
+- **依存関係のマッピング** - どのフェーズが他のフェーズの前に完了する必要があるか
+- **テスト戦略** - 各フェーズが正しく動作することを検証する方法
+- **リスク評価** - 潜在的な問題と軽減策
+- **ロールバック計画** - 必要に応じて安全に元に戻す方法
+
+**計画を保存** - 仕様を承認し、プロジェクトルートに`IMPLEMENTATION_PLAN.md`として保存します。
+
+## フェーズ2：反復的実装 {#phase-2-iterative-implementation}
+
+計画の各フェーズについて：
+
+### 新しいセッションを開始 {#start-a-fresh-session}
+
+各フェーズを新しいdroidセッションで開始し、集中力とクリーンなコンテキストを維持します。
+
+### マスタープランを参照 {#reference-the-master-plan}
+
+**フェーズ1のプロンプト例：**
+
+```
+I'm implementing Phase 1 of the authentication migration plan documented in
+IMPLEMENTATION_PLAN.md.
+
+Phase 1 focuses on setting up Auth0 configuration and creating the basic
+authentication service without affecting existing Firebase integration.
+
+Please read the plan document and implement this phase, then update the
+document to mark Phase 1 as complete.
+```
+
+### 複雑なフェーズではSpecification Modeを使用 {#use-specification-mode-for-complex-phases}
+
+重要な変更を伴うフェーズでは、**Shift+Tab**を使用して詳細な計画を立てます：
+
+```
+Following IMPLEMENTATION_PLAN.md, implement Phase 3: Update all login components
+to use the new Auth0 service while maintaining backward compatibility with
+the existing Firebase auth as fallback.
+```
+
+### 頻繁にコミット {#commit-frequently}
+
+各フェーズ完了後、Droidに変更をコミットするよう依頼します：
+
+```
+Commit all changes for Phase 1 of the auth migration with a detailed message.
+```
+
+```
+Create a commit for the Auth0 service setup work with bullet points for each major change.
+```
+
+Droidはすべての変更をステージングし、適切な共同執筆者の帰属を含むコミットを作成します。
+
+### フェーズ固有のPRを作成 {#create-phase-specific-prs}
+
+Droidに完了した各フェーズのプルリクエストを作成するよう依頼します：
+
+```
+Create a PR for the auth migration Phase 1 work on a new branch called auth-migration-phase-1.
+```
+
+```
+Open a pull request with a comprehensive description of what was completed and testing done.
+```
+
+Droidはブランチを作成し、変更をプッシュし、コミットと行われた変更に基づいて詳細なPR説明を生成します。
+
+## フェーズ3：検証とテスト戦略 {#phase-3-validation-and-testing-strategy}
+
+### 各フェーズを独立してテスト {#test-each-phase-independently}
+
+最後まで待つのではなく、各フェーズ後に機能を検証します：
+
+**フェーズ1完了：**
+
+```
+Run the authentication tests and verify the Auth0 service works in isolation.
+Test user registration, login, and logout with the new service.
+```
+
+**フェーズ2完了：**
+
+```
+Test the migration script with a subset of test users. Verify data integrity
+and that users can log in with both old and new systems.
+```
+
+### 段階的ロールアウトにフィーチャーフラグを使用 {#use-feature-flags-for-gradual-rollout}
+
+```
+Add a feature flag for auth0-migration with 10% rollout that can be controlled by environment variable.
+```
+
+```
+Implement progressive rollout logic using feature flags to gradually migrate users from Firebase to Auth0.
+```
+
+### フェーズ境界での自動テスト {#automated-testing-at-phase-boundaries}
+
+```
+Run the full test suite after each phase including unit, integration, and e2e tests.
+```
+
+```
+Set up automated testing that validates auth migration functionality at each phase boundary.
+```
+
+## ベストプラクティス {#best-practices}
+
+**読み取り専用の変更から始める** - 変更を行う前に分析と準備でフェーズを開始します。
+
+**後方互換性を維持する** - 新しいシステムを構築している間、古いシステムが動作し続けるようにします。
+
+**フィーチャートグルを使用する** - 段階的ロールアウトと必要に応じた迅速なロールバックを可能にします。
+
+**学習を文書化する** - 実装中の発見に基づいて計画を更新します。
+
+**境界条件をテストする** - 古いシステムと新しいシステム間のインターフェースにテストを集中します。
+
+**ロールバックを計画する** - 各フェーズは重大な問題が発見された場合に元に戻せるようにします。
+
+**進捗を伝達する** - 定期的な進捗レポートでステークホルダーを最新の状態に保ちます。
+
+## 回復戦略 {#recovery-strategies}
+
+フェーズで重大な問題が発生した場合：
+
+1. **即座のロールバック** - gitを使用して最後の安定状態に戻す
+2. **問題分析** - 何が間違っていて、なぜそうなったかを文書化
+3. **計画調整** - 学習に基づいて残りのフェーズを更新
+4. **ステークホルダーとのコミュニケーション** - タイムラインと期待値を更新
+
+体系的なアプローチにより、プロセス全体を通じてコード品質とシステムの安定性を維持しながら、大規模機能を確実に提供することができます。
+
+次の大規模機能に取り組む準備はできましたか？**Shift+Tab**でマスター実装計画の作成を開始しましょう！

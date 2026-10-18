@@ -1,0 +1,343 @@
+---
+id: cli/configuration/settings
+title: "Settings"
+status: published
+summary: "Configure how droid behaves and integrates with your workflow."
+parent: cli/configuration/index
+tags: [cli, settings, configuration, config, preferences, options, customize, settings-json]
+relations: [relates_to=jp/cli/configuration/settings]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Settings</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Configure how droid behaves and integrates with your workflow.</p>
+
+
+## Accessing settings {#accessing-settings}
+
+To configure droid settings:
+
+1. Run `droid`
+2. Enter `/settings`
+3. Adjust your preferences interactively
+
+Changes take effect immediately and are saved to your settings file.
+
+## Where settings live {#where-settings-live}
+
+| OS            | Location                               |
+| ------------- | -------------------------------------- |
+| macOS / Linux | `~/.factory/settings.json`             |
+| Windows       | `%USERPROFILE%\.factory\settings.json` |
+
+If the file doesn't exist, it's created with defaults the first time you run **droid**.
+
+### Local overrides {#local-overrides}
+
+You can create a `settings.local.json` alongside `settings.json` in any `.factory/` folder:
+
+- `~/.factory/settings.local.json` (user-level)
+- `<project>/.factory/settings.local.json` (project-level)
+
+Local overrides merge on top of the corresponding `settings.json` at the same level and follow the same hierarchy precedence. Add `settings.local.json` to `.gitignore` if you want to keep machine-specific preferences out of version control.
+
+## Legacy Droid YAML configuration {#legacy-droid-yaml-configuration}
+
+`.droid.yaml` was an older project configuration surface. Use the current `.factory/` files instead:
+
+- Use `settings.json` and `settings.local.json` for Droid preferences and local overrides.
+- Use [[cli/configuration/agents-md|AGENTS.md]] for repository instructions, conventions, and validation commands.
+- Use [[cli/configuration/mcp|MCP servers]], [[cli/configuration/hooks-guide|hooks]], and [[cli/configuration/skills|skills]] for integrations, automation, and reusable workflows.
+
+## Available settings {#available-settings}
+
+| Setting                    | Options                                                                                                                                                                                                                                                                  | Default                       | Description                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- | -------------------------------------------------------------------------- |
+| `model`                    | Any [[models|available model ID]]                                                                                                                                                                                                                                        | Product default               | The default AI model used by droid                                         |
+| `reasoningEffort`          | `off`, `none`, `low`, `medium`, `high` (availability depends on the model)                                                                                                                                                                                               | Model-dependent default       | Controls how much structured thinking the model performs.                  |
+| `sessionDefaultSettings.interactionMode` | `auto`, `spec`                                                                                                                                                                                                                                                           | `auto`                        | Sets whether new sessions start in Auto or Spec Mode.                      |
+| `sessionDefaultSettings.autonomyLevel`   | `off`, `low`, `medium`, `high`                                                                                                                                                                                                                                           | `off`                         | Sets the default [[cli/user-guides/auto-run|Autonomy Level]] for new sessions. |
+| `cloudSessionSync`         | `true`, `false`                                                                                                                                                                                                                                                          | `true`                        | Mirror CLI sessions to Factory web.                                        |
+| `diffMode`                 | `github`, `unified`                                                                                                                                                                                                                                                      | `github`                      | Choose between split GitHub-style diffs and a single-column view.          |
+| `completionSound`          | `off`, `bell`, `fx-ok01`, `fx-ack01`, or custom file path                                                                                                                                                                                                                | `fx-ok01`                     | Audio cue when a response finishes.                                        |
+| `awaitingInputSound`       | `off`, `bell`, `fx-ok01`, `fx-ack01`, or custom file path                                                                                                                                                                                                                | `fx-ack01`                    | Audio cue when droid is waiting for user input.                            |
+| `soundFocusMode`           | `always`, `focused`, `unfocused`                                                                                                                                                                                                                                         | `always`                      | When to play sound notifications.                                          |
+| `commandAllowlist`         | Array of commands                                                                                                                                                                                                                                                        | Safe defaults provided        | Commands that run without extra confirmation.                              |
+| `commandDenylist`          | Array of commands                                                                                                                                                                                                                                                        | Restrictive defaults provided | Commands that always require confirmation.                                 |
+| `commandBlocklist`         | Array of commands                                                                                                                                                                                                                                                        | `[]` (none)                   | Commands that can never run, even when approvals are skipped.              |
+| `includeCoAuthoredByDroid` | `true`, `false`                                                                                                                                                                                                                                                          | `true`                        | Automatically append the Droid co-author trailer to commits.               |
+| `enableDroidShield`        | `true`, `false`                                                                                                                                                                                                                                                          | `true`                        | Enable secret scanning and git guardrails.                                 |
+| `hooksDisabled`            | `true`, `false`                                                                                                                                                                                                                                                          | `false`                       | Globally disable all hooks execution.                                      |
+| `ideAutoConnect`           | `true`, `false`                                                                                                                                                                                                                                                          | `false`                       | Auto-connect to IDE from external terminals.                               |
+| `showThinkingInMainView`   | `true`, `false`                                                                                                                                                                                                                                                          | `false`                       | Display AI thinking/reasoning blocks in the main chat view.                |
+| `customModels`             | Array of model configs                                                                                                                                                                                                                                                   | `[]`                          | Custom model configurations for BYOK. See [[cli/byok/overview|BYOK docs]]. |
+| `mcp.callTimeoutMs`        | Integer (milliseconds)                                                                                                                                                                                                                                                   | Built-in default              | Global timeout for MCP tool calls. Overridden per-server by `timeoutMs` in `mcp.json`. See [[cli/configuration/mcp#mcp-call-timeout|MCP call timeout]]. |
+| `blockOnMcpLoad`           | `true`, `false`                                                                                                                                                                                                                                                          | `false`                       | Wait for MCP servers to finish loading before starting an agent turn.       |
+
+### Model {#model}
+
+Set `model` to a [[models|model ID from Available Models]]. For custom models, see [[cli/byok/overview|Bring Your Own Key (BYOK)]].
+
+### Reasoning effort {#reasoning-effort}
+
+`reasoningEffort` adjusts how much structured thinking the model performs before replying. Available values depend on the model, but typically include:
+
+- **`off` / `none`** – disable structured reasoning (fastest).
+- **`low`**, **`medium`**, **`high`** – progressively increase deliberation time for more complex reasoning.
+
+Anthropic models default to `off`, while GPT-5 starts on `medium`.
+
+### Autonomy level {#autonomy-level}
+
+Use `sessionDefaultSettings.interactionMode` to choose whether new sessions start in Auto or Spec Mode, and `sessionDefaultSettings.autonomyLevel` to set the default [[cli/user-guides/auto-run|Autonomy Level]]. `off` keeps manual approvals; `low`, `medium`, and `high` pre-authorize work at or below that risk level.
+
+`sessionDefaultSettings.autonomyMode` is deprecated and retained for older configurations.
+
+### Diff mode {#diff-mode}
+
+Control how droid displays code changes:
+
+- **`github`** – Side-by-side, higher fidelity render (recommended).
+- **`unified`** – Traditional single-column diff format.
+
+### Cloud session sync {#cloud-session-sync}
+
+When this switch is on, every CLI session is mirrored to Factory web so you can revisit conversations in the browser:
+
+- **`true`** – Sync sessions to the web app.
+- **`false`** – Keep sessions local only.
+
+### Sound notifications {#sound-notifications}
+
+Configure audio feedback for droid events:
+
+**Completion sound** (`completionSound`) - plays when a response finishes:
+
+- **`fx-ok01`** – Built-in completion sound (default) - soft success bloop
+- **`fx-ack01`** – Alternative built-in sound effect - tactile ripple feedback
+- **`bell`** – Use the system terminal bell
+- **`off`** – No sound notifications
+- **Custom path** – Provide a file path to your own sound file (e.g., `"/path/to/sound.wav"`)
+
+**Awaiting input sound** (`awaitingInputSound`) - plays when droid is waiting for user input. Same options as completion sound, defaults to `fx-ack01`.
+
+**Sound focus mode** (`soundFocusMode`) - controls when sounds play:
+
+- **`always`** – Play sounds regardless of window focus (default)
+- **`focused`** – Only play sounds when the terminal is focused
+- **`unfocused`** – Only play sounds when the terminal is not focused
+
+
+
+<Aside kind="note">
+Access sound settings via `/settings` or `Shift+Tab` → **Settings** in the TUI.
+</Aside>
+
+
+
+### Hooks {#hooks}
+
+The `hooksDisabled` setting provides a global toggle to disable all hooks execution without removing your hook configurations:
+
+- **`false`** – Hooks are enabled and will execute normally (default)
+- **`true`** – All hooks are disabled globally
+
+You can also toggle this from the `/hooks` menu or `/settings`.
+
+### IDE auto-connect {#ide-auto-connect}
+
+The `ideAutoConnect` setting controls whether droid automatically connects to your IDE when running from external terminals (outside the IDE's built-in terminal):
+
+- **`false`** – Only auto-connect when running inside IDE terminal (default)
+- **`true`** – Auto-connect to IDE from any terminal
+
+
+## Command allowlist, denylist & blocklist {#command-allowlist-denylist-blocklist}
+
+Use these settings to control which commands droid can execute automatically and which it must never run:
+
+- **`commandAllowlist`** – Commands in this array are treated as safe and run without additional confirmation, regardless of autonomy prompts. Include only low-risk utilities you rely on frequently (for example `ls`, `pwd`, `dir`).
+- **`commandDenylist`** – Commands in this array always require confirmation and are typically blocked because they are destructive or unsafe (for example recursive `rm`, `mkfs`, or privileged system operations). A denied command can still be run if you explicitly approve it.
+- **`commandBlocklist`** – Commands in this array can **never** run. Unlike the denylist, there is no prompt and no way to approve them: the block applies even under full autonomy, auto-run, or `--skip-permissions-unsafe`. droid also resolves the actual program being invoked, so a blocked command cannot be slipped through with a wrapper shell, an absolute path, quoting tricks, or command substitution.
+
+Commands that appear in both the allowlist and denylist default to the denylist behavior. The blocklist always takes precedence over both. Any command that is in none of the lists falls back to the autonomy level you selected for the session.
+
+### Example allow/deny/block configuration {#example-allowdenyblock-configuration}
+
+```json
+{
+  "commandAllowlist": ["ls", "pwd", "dir"],
+  "commandDenylist": ["rm -rf /", "mkfs", "shutdown"],
+  "commandBlocklist": ["shutdown", "mkfs", "curl"]
+}
+```
+
+Use `commandBlocklist` for commands that should be hard-stopped regardless of approvals; use `commandDenylist` for commands that are allowed only after explicit confirmation. Review and update these arrays periodically to match your workflow and security posture, especially when sharing configurations across teams.
+
+## Session defaults {#session-defaults}
+
+Defaults applied when a new session starts. See also `sessionDefaultSettings.interactionMode` and `sessionDefaultSettings.autonomyLevel` in the table above.
+
+| Setting                                          | Type   | Options                                  | Default        | Description                                                |
+| ------------------------------------------------ | ------ | ---------------------------------------- | -------------- | ---------------------------------------------------------- |
+| `sessionDefaultSettings.specModeModel`           | string | Any [[models|available model ID]]        | Inherits model | Override the model used when sessions start in Spec Mode.  |
+| `sessionDefaultSettings.specModeReasoningEffort` | string | `off`, `none`, `low`, `medium`, `high`   | Model default  | Reasoning effort applied to the spec model.                |
+
+## Display and UI {#display-and-ui}
+
+Tune how droid renders content in the terminal.
+
+| Setting                    | Type      | Options                                | Default      | Description                                                                                  |
+| -------------------------- | --------- | -------------------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| `toolResultDisplay`        | string    | `expanded`, `compact`                  | `expanded`   | How tool results are rendered in the transcript.                                             |
+| `showTokenUsageIndicator`  | boolean   | `true`, `false`                        | `false`      | Show the live token usage indicator at the bottom of the input.                              |
+| `logoAnimation`            | string    | `once`, `always`, `off`                | `once`       | Animate the droid logo on startup.                                                           |
+| `theme`                    | string    | Theme ID (see `/themes`)               | System theme | Color theme used by the TUI.                                                                 |
+| `overrideTerminalColors`   | boolean   | `true`, `false`                        | `false`      | Force droid's theme to override the terminal's color scheme.                                 |
+| `nerdFont`                 | boolean   | `true`, `false`                        | `false`      | Enable Nerd Font glyphs in the UI (requires a Nerd Font in your terminal).                   |
+
+## Additional sound and notification settings {#additional-sound-and-notification-settings}
+
+Extends the [[cli/configuration/settings#sound-notifications|Sound notifications]] section with toggles for the bell, per-event focus modes, and subagent activity.
+
+| Setting                          | Type    | Options                                | Default   | Description                                                          |
+| -------------------------------- | ------- | -------------------------------------- | --------- | -------------------------------------------------------------------- |
+| `subagentSounds`                 | string  | `on`, `off`                            | `off`     | Play sounds for subagent lifecycle events (start, complete, error).  |
+
+## Mission settings {#mission-settings}
+
+Configure [[features/missions/overview|Missions]] — multi-agent orchestration runs.
+
+| Setting                                              | Type    | Options                                  | Default          | Description                                                                              |
+| ---------------------------------------------------- | ------- | ---------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------- |
+| `missionModelSettings.workerModel`                   | string  | Any [[models|available model ID]]        | Inherits         | Default model used by mission worker subagents.                                          |
+| `missionModelSettings.workerReasoningEffort`         | string  | `off`, `none`, `low`, `medium`, `high`   | Model default    | Reasoning effort for mission workers.                                                    |
+| `missionModelSettings.validationWorkerModel`         | string  | Any [[models|available model ID]]        | Inherits         | Model used by mission validators (scrutiny / user-testing workers).                      |
+| `missionModelSettings.validationWorkerReasoningEffort` | string | `off`, `none`, `low`, `medium`, `high`  | Model default    | Reasoning effort for validation workers.                                                 |
+| `missionModelSettings.skipScrutiny`                  | boolean | `true`, `false`                          | `false`          | Skip scrutiny validation milestones during missions.                                     |
+| `missionModelSettings.skipUserTesting`               | boolean | `true`, `false`                          | `false`          | Skip user-testing validation milestones during missions.                                 |
+| `missionOrchestratorModel`                           | string  | Any [[models|available model ID]]        | Inherits         | Model used by the mission orchestrator.                                                  |
+| `missionOrchestratorReasoningEffort`                 | string  | `off`, `none`, `low`, `medium`, `high`   | Model default    | Reasoning effort for the mission orchestrator.                                           |
+| `keepSystemAwakeDuringMissions`                      | boolean | `true`, `false`                          | `true`           | Prevent the OS from sleeping while a mission is running.                                 |
+
+## Subagent settings {#subagent-settings}
+
+Configure the autonomy and models used by subagents spawned by the Task tool. These appear in the **Subagents** tab of `/settings`.
+
+| Setting                  | Type   | Options                                   | Default   | Description                                                                                                       |
+| ------------------------ | ------ | ----------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------- |
+| `subagentAutonomyLevel`  | string | `inherit`, `off`, `low`, `medium`, `high` | `inherit` | [[cli/user-guides/auto-run|Autonomy Level]] applied to subagents spawned by the Task tool.                       |
+
+### Subagent autonomy level {#subagent-autonomy-level}
+
+`subagentAutonomyLevel` controls how much subagents can do without approval:
+
+- **`inherit`** – Subagents use the parent session's autonomy level (default).
+- **`off`** – Subagents require manual approval for every action.
+- **`low`**, **`medium`**, **`high`** – Pre-authorize subagent work at or below that risk level.
+
+An explicit level is still clamped to the org-managed `maxAutonomyLevel`, so it can never exceed the enterprise cap. Mission workers do not use this setting.
+
+### Subagent model settings {#subagent-model-settings}
+
+Subagents are routed by a complexity tier (`light`, `medium`, `heavy`). Each tier can pin its own model and reasoning effort under `subagentModelSettings`.
+
+| Setting                                    | Type   | Options                                              | Default       | Description                                                                    |
+| ------------------------------------------ | ------ | --------------------------------------------------- | ------------- | ----------------------------------------------------------------------------- |
+| `subagentModelSettings.lightModel`         | string | Any [[models|available model ID]] or `inherit`      | `inherit`     | Model for light-complexity subagents (e.g. the built-in `explorer`).          |
+| `subagentModelSettings.lightReasoningEffort`  | string | `off`, `none`, `low`, `medium`, `high`           | Model default | Reasoning effort for light-complexity subagents.                              |
+| `subagentModelSettings.mediumModel`        | string | Any [[models|available model ID]] or `inherit`      | `inherit`     | Model for medium-complexity subagents (e.g. the built-in `worker`).           |
+| `subagentModelSettings.mediumReasoningEffort` | string | `off`, `none`, `low`, `medium`, `high`           | Model default | Reasoning effort for medium-complexity subagents.                             |
+| `subagentModelSettings.heavyModel`         | string | Any [[models|available model ID]] or `inherit`      | `inherit`     | Model for heavy-complexity subagents.                                         |
+| `subagentModelSettings.heavyReasoningEffort`  | string | `off`, `none`, `low`, `medium`, `high`           | Model default | Reasoning effort for heavy-complexity subagents.                             |
+
+How the tiers are chosen:
+
+- The built-in `worker` subagent runs at `medium` complexity and `explorer` at `light`. Custom droids and the Task tool can request a specific tier.
+- **`inherit`** (the default) means the subagent uses the spawning session's model. Upgrading the parent session's model does not retroactively change a tier pinned to a specific model.
+- A custom droid with an explicit `model` in its configuration uses that model directly and bypasses complexity routing.
+- Reasoning effort defaults to the chosen model's default and is clamped to what that model supports.
+
+## Context and compaction {#context-and-compaction}
+
+Controls when and how droid compacts the conversation to stay within the model's context window.
+
+| Setting                          | Type    | Options                                  | Default         | Description                                                                                |
+| -------------------------------- | ------- | ---------------------------------------- | --------------- | ------------------------------------------------------------------------------------------ |
+| `compactionTokenLimit`           | number  | Token count                              | Model-dependent | Token threshold that triggers automatic compaction of the current session.                 |
+| `compactionTokenLimitPerModel`   | object  | `{ "<modelId>": number }` map            | `{}`            | Per-model overrides for `compactionTokenLimit`.                                            |
+| `compactionModelMode`            | string  | `same`, `<modelId>`                      | `same`          | Which model performs compaction: `same` uses the current session model, or specify a model ID.                 |
+
+## Spec mode settings {#spec-mode-settings}
+
+Controls the persistent spec store created by Spec Mode.
+
+| Setting           | Type    | Options                  | Default                       | Description                                                                |
+| ----------------- | ------- | ------------------------ | ----------------------------- | -------------------------------------------------------------------------- |
+| `specSaveDir`     | string  | Directory path           | `~/.factory/specs`            | Directory where saved specs are written. Supports `~` expansion.           |
+
+## Infrastructure {#infrastructure}
+
+System-level settings for status line, worktrees, and request timeouts.
+
+| Setting                | Type    | Options                                                                                          | Default               | Description                                                                                          |
+| ---------------------- | ------- | ------------------------------------------------------------------------------------------------ | --------------------- | ---------------------------------------------------------------------------------------------------- |
+| `statusLine`           | object  | `{ "command": string, "padding"?: number, "maxRows"?: number }`                                  | unset                 | Custom status line configuration. The `command` is executed and its stdout rendered above the input. Configure interactively with `/statusline`. |
+| `worktreeDirectory`    | string  | Directory path                                                                                   | `~/.factory/worktrees` | Default parent directory for git worktrees created with `--worktree` / `-w`.                         |
+| `llmRequestTimeout`    | number  | Milliseconds                                                                                     | Product default       | Timeout for individual LLM requests before they are aborted.                                         |
+
+## Enterprise and org-level settings {#enterprise-and-org-level-settings}
+
+
+
+<Aside kind="note">
+**Enterprise / Org-level.** The settings below are typically managed by an organization administrator and pushed to members through the Factory App or a managed `settings.json`. Individual users generally do not set these directly.
+</Aside>
+
+
+
+| Setting                              | Type    | Options                                                                                                                | Default      | Description                                                                                                                          |
+| ------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `maxAutonomyLevel`                   | string  | `off`, `low`, `medium`, `high`                                                                                         | `high`       | **Enterprise.** Maximum [[cli/user-guides/auto-run|Autonomy Level]] any session may use. Higher levels selected by users are clamped. |
+| `modelPolicy`                        | object  | `{ "allowedModelIds"?: string[], "blockedModelIds"?: string[], "allowCustomModels"?: boolean, "allowedBaseUrls"?: string[] }` | unset        | **Enterprise.** Restrict which models members can select, control whether custom models are permitted, and allowlist base URLs for custom model providers. |
+| `mcpPolicy`                          | object  | `{ "enabled"?: boolean, "allowlist"?: string[] }`                                                                      | unset        | **Enterprise.** Control whether MCP servers can run and which servers are permitted. See [[cli/configuration/mcp|MCP]].              |
+| `missionPolicy`                      | object  | `{ "restrictedAccess"?: boolean, "allowedUserIds"?: string[] }`                                                        | unset        | **Enterprise.** Restrict who can launch [[features/missions/overview|Missions]].                                                          |
+| `networkPolicy`                      | object  | `{ "allowedIps": string[] }`                                                                                           | unset        | **Enterprise.** Restrict outbound network access from droid sessions to the specified IPs or CIDR ranges in `allowedIps`.            |
+| `sandbox`                            | object  | `{ "enabled"?: boolean, "mode"?: string, "filesystem"?: object, "network"?: object }`                                  | unset        | **Beta.** Sandbox configuration controlling filesystem and network isolation for tool execution. See [[cli/configuration/sandbox|Sandbox]].                               |
+| `restrictMemberVisibility`           | boolean | `true`, `false`                                                                                                        | `false`      | **Org-level.** Hide other org members from non-admin users.                                                                          |
+| `restrictApiKeyCreationToManagers`   | boolean | `true`, `false`                                                                                                        | `false`      | **Org-level.** Only org managers may create API keys.                                                                                |
+| `sessionRetentionDays`               | number  | `14`–`365`                                                                                                             | Org default  | **Org-level.** How long synced session history is retained before deletion.                                                          |
+| `wikiCloudSync`                      | boolean | `true`, `false`                                                                                                        | `true`       | **Org-level.** Sync generated [[cli/features/wiki/overview|Wiki]] content to Factory cloud.                                                                |
+| `managedComputersEnabled`            | boolean | `true`, `false`                                                                                                        | `false`      | **Enterprise.** Enable Factory-managed remote computers for the org.                                                                 |
+| `byomComputersEnabled`               | boolean | `true`, `false`                                                                                                        | `false`      | **Enterprise.** Allow members to register their own machines via `droid computer register` (BYOM).                                   |
+| `disableWeeklyUsageSummary`          | boolean | `true`, `false`                                                                                                        | `false` (summary on) | **Enterprise/org-level.** Opt out of the weekly email to organization Managers and Owners that lists users and active service accounts at or above 80% of their monthly credit cap. Set `true` to stop the summary. |
+
+## Factory App usage alert preferences {#factory-app-usage-alert-preferences}
+
+The following preference is stored in each user's Factory App profile. It cannot be configured in `settings.json`.
+
+| Preference | Type | Options | Default | Description |
+| ---------- | ---- | ------- | ------- | ----------- |
+| `disableUsageLimitAlerts` | boolean | `true`, `false` | `false` (alerts on) | Opt out of emails sent when you reach 80% and 100% of your monthly credit cap. Set `true` to stop these alerts. |
+
+## Example configuration {#example-configuration}
+
+```json
+{
+  "model": "claude-opus-4-7",
+  "reasoningEffort": "low",
+  "diffMode": "github",
+  "cloudSessionSync": true,
+  "completionSound": "fx-ok01",
+  "awaitingInputSound": "fx-ack01",
+  "soundFocusMode": "always"
+}
+```
+
+---
+
+### Need more? {#need-more}
+
+- [[cli/getting-started/overview|CLI Overview]] – see the main TUI workflow
+- [[reference/cli-reference|CLI Reference]] – command flags & options
+- [[integrations/ide-integrations|IDE Integrations]] – editor-specific setup
+- [[cli/byok/overview|Custom models & BYOK]] - add custom models and API keys

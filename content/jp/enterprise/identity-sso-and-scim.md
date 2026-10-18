@@ -1,0 +1,777 @@
+---
+id: jp/enterprise/identity-sso-and-scim
+title: "アイデンティティ、ドメイン、SSO、SCIM"
+status: published
+summary: "ドメイン管理、SSO/SAML認証、Directory Sync/SCIMプロビジョニングによるエンタープライズアイデンティティ管理"
+parent: jp/enterprise/index
+tags: [enterprise]
+relations: [relates_to=enterprise/identity-sso-and-scim]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">アイデンティティ、ドメイン、SSO、SCIM</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">ドメイン管理、SSO/SAML認証、Directory Sync/SCIMプロビジョニングによるエンタープライズアイデンティティ管理</p>
+
+
+Factoryは、SAML/OIDCプロトコルを使用したSingle Sign-On（SSO）と、Directory Sync（SCIM）による自動ユーザープロビジョニングを通じて、包括的なエンタープライズアイデンティティ管理を提供します。このガイドでは、これらのシステムがどのように連携してユーザーアイデンティティ、認証、アクセス制御を管理するかについて説明します。
+
+## 概要 {#overview}
+
+Factoryは**WorkOS**を使用してエンタープライズアイデンティティ管理を処理し、以下をサポートします：
+
+- **ドメイン検証**: アイデンティティガバナンスのためのメールドメインの所有権を確立
+- **SSO/SAML**: Identity Provider（IdP）を通じたユーザー認証
+- **Directory Sync/SCIM**: ディレクトリからのユーザーの自動プロビジョニングと管理
+- **Just-In-Time（JIT）プロビジョニング**: SSO経由の初回ログイン時にユーザーを作成
+- **グループベースアクセス制御**: ディレクトリグループを通じた権限管理
+
+## 仕組み {#how-it-works}
+
+### ドメイン検証（最初に必要） {#domain-verification-required-first}
+
+```mermaid
+graph LR
+    A[Add your<br/>email domains] --> B[DNS validation<br/>via TXT record]
+    B --> C[Domain verified<br/>by WorkOS]
+    C --> D[Configure security<br/>policies]
+
+    style A fill:#fff3e0
+    style C fill:#c8e6c9
+    style D fill:#e1f5fe
+```
+
+SSOやDirectory Syncを有効にする前に：
+
+1. **所有権を検証** - DNS検証を通じてメールドメインの所有権を確認
+2. **既存ユーザーを取得** - あなたのドメインを持つすべてのユーザーが自動的に組織に参加
+3. **ポリシーを設定** - MFA、セッション管理、アクセス制御を構成
+4. **SSO/SCIMを有効化** - エンタープライズアイデンティティ管理の準備完了
+
+### SSOを使った認証 {#authentication-with-sso}
+
+```mermaid
+graph LR
+    A[User clicks<br/>Sign in with SSO] --> B[Redirected to<br/>your IdP]
+    B --> C[Enter corporate<br/>credentials]
+    C --> D[Authenticated<br/>to Factory]
+
+    style A fill:#e1f5fe
+    style D fill:#c8e6c9
+```
+
+SSOが有効な場合：
+
+1. ユーザーはパスワードを入力する代わりに「SSOでサインイン」をクリック
+2. 企業のIdentity Provider（Okta、Azure ADなど）にリダイレクト
+3. 企業の認証情報で認証した後、Factoryにログイン
+4. JITプロビジョニングが有効な場合、初回ユーザーは自動的に作成される
+
+### Directory Syncを使ったユーザープロビジョニング {#user-provisioning-with-directory-sync}
+
+```mermaid
+graph TD
+    A[Add user to<br/>directory group] --> B[User automatically<br/>created in Factory]
+    C[Update user info<br/>in directory] --> D[Profile updated<br/>in Factory]
+    E[Remove user from<br/>directory] --> F[Access revoked<br/>in Factory]
+
+    style A fill:#e8f5e9
+    style C fill:#fff3e0
+    style E fill:#ffebee
+```
+
+Directory Sync（SCIM）が有効な場合：
+
+- ディレクトリへの**ユーザー追加**により、Factoryで自動的にユーザーが作成
+- ユーザー情報の**更新**がFactoryにリアルタイムで同期
+- ディレクトリからの**ユーザー削除**により、FactoryのアクセスがRevoke
+- **グループの変更**により、ユーザー権限が自動的に更新
+
+### データの優先度 {#data-priority}
+
+ユーザーが複数のソース（SSO、Directory Sync、手動招待）から存在する場合、Factoryは以下の優先度に従います：
+
+1. **Directory Syncデータが常に優先** - ディレクトリからの情報が他のソースを上書き
+2. **ユーザーはメールでマッチング** - メールアドレス（大文字小文字を区別しない）で既存ユーザーを検索
+3. **カスタムデータは保持** - ディレクトリに存在しないFactory固有の設定は維持
+4. **論理削除** - 削除されたユーザーは無効化され、削除されず、作業履歴を保持
+
+## 前提条件 {#prerequisites}
+
+Domains、SSO、SCIMを設定する前に：
+
+- **エンタープライズSSO支援**を含むプランを利用している
+- 組織の**メールドメインが検証済み**である（以下のドメイン検証を参照）
+- IdPへの**管理者アクセス**がある（またはITの協力者がいる）
+- Factory側の設定を調整できる**Factory管理者**がいる
+- 設定プロセスを開始するためにFactoryの担当者に連絡
+
+## 設定プロセスの概要 {#setup-process-overview}
+
+### 初期設定フロー {#initial-setup-flow}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">Factoryに問い合わせる</div>
+
+Factoryの担当者またはsupport@factory.ai経由でSSO/SCIM設定を依頼します
+
+</div>
+
+
+
+
+
+<div class="factory-step">
+
+<div class="factory-step-title">セットアップリンクを受け取る</div>
+
+アイデンティティプロバイダーを設定するための安全なセットアップリンク（7日間有効）を受け取ります
+
+</div>
+
+
+
+
+
+<div class="factory-step">
+
+<div class="factory-step-title">プロバイダーを選択</div>
+
+サポート対象リストからアイデンティティプロバイダーを選択するか、"Generic SAML/OIDC"を選択します
+
+</div>
+
+
+
+
+
+<div class="factory-step">
+
+<div class="factory-step-title">ドメインを検証（必須）</div>
+
+DNSによるドメイン検証を完了して所有権を確立します。この手順なしではSSOを有効化できません
+
+</div>
+
+
+
+
+
+<div class="factory-step">
+
+<div class="factory-step-title">SSOを設定</div>
+
+プロバイダー別の手順に従ってSAMLまたはOIDC認証を設定します
+
+</div>
+
+
+
+
+
+<div class="factory-step">
+
+<div class="factory-step-title">Directory Syncを有効化（任意）</div>
+
+自動ユーザー管理のためにSCIMプロビジョニングを設定します
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">テストと確認</div>
+
+組織全体に展開する前にパイロットユーザーでテストします
+
+</div>
+
+</div>
+
+
+
+### 設定オプション {#setup-options}
+
+設定中に以下を構成します：
+
+
+
+
+
+<Details summary="接続タイプ">
+- **SAML 2.0** - エンタープライズIdPに推奨
+  - **OIDC** - モバイルサポートに優れたモダンなプロトコル
+  - **両方** - 一部のプロバイダーは両プロトコルをサポート
+</Details>
+
+
+
+
+
+<Details summary="ユーザープロビジョニング">
+- **Just-In-Time (JIT)** - 初回ログイン時にユーザーを作成
+  - **Directory Sync (SCIM)** - ディレクトリから自動プロビジョニング
+  - **手動** - 管理者がユーザーを個別に招待
+  - **ハイブリッド** - 複数の方式を組み合わせる
+</Details>
+
+
+
+
+
+<Details summary="ロールマッピング">
+- **属性ベース** - SAML/OIDCクレームからロールを取得
+  - **グループベース** - ディレクトリグループからロールを取得
+  - **デフォルトロール** - すべてのユーザーに同じ初期ロールを付与
+  - **カスタムマッピング** - 高度なルールエンジン
+</Details>
+
+
+
+  
+
+<Details summary="MFA要件">
+- **IdP強制** - MFAをIdPで処理
+  - **Factory強制** - 追加のMFAレイヤー
+  - **条件付き** - ユーザーのロールまたは場所に基づく
+  - **任意** - ユーザーが選択
+</Details>
+
+
+
+
+
+## ドメイン検証 {#domain-verification}
+
+### ドメイン検証が重要な理由 {#why-domain-verification-matters}
+
+ドメイン検証は、SSOを有効にし、Factoryで組織のアイデンティティガバナンスを確立するための**必須の前提条件**です。これにより、組織が特定のメールドメインを所有・制御していることが証明され、エンタープライズアイデンティティ管理の安全な基盤が作成されます。
+
+
+
+<Aside kind="warning">
+検証済みドメインなしではSSOを有効化できません。SSOで認証するすべてのユーザーは
+  検証済みドメインのメールアドレスを持っている必要があります。
+</Aside>
+
+
+
+### ドメイン検証で可能になること {#what-domain-verification-enables}
+
+ドメインが検証されると、組織は強力な管理制御を獲得します：
+
+#### アイデンティティガバナンス {#identity-governance}
+
+- **必須SSO実行** - あなたのドメインを持つすべてのユーザーにSSO経由での認証を要求
+- **自動ユーザー取得** - あなたのドメインを持つ既存のFactoryユーザーが自動的に組織に参加
+- **メールドメイン制限** - 未承認のアカウントがあなたのドメインを使用することを防止
+- **ゲストユーザーポリシー** - 外部協力者があなたの組織にアクセスする方法を定義
+
+#### セキュリティポリシー {#security-policies}
+
+- **MFA要件** - すべてのドメインユーザーに多要素認証を強制
+- **パスワードポリシー** - SSO以外の認証方法の複雑さ要件を設定
+- **セッション管理** - セッション期間とアイドルタイムアウト設定を制御
+- **IP制限** - 特定のIP範囲やVPNエンドポイントへのアクセス制限
+
+#### コンプライアンス制御 {#compliance-controls}
+
+- **監査ログ** - ドメインユーザーのすべての認証イベントを追跡
+- **データ居住性** - ユーザーデータを指定された地理的地域内に保持
+- **アクセスレビュー** - ユーザーアクセス権の定期的な認定
+- **プロビジョニング解除ワークフロー** - ユーザーが退職時のアクセス自動削除
+
+### ドメイン検証の構成 {#configuring-domain-verification}
+
+
+
+<Aside kind="info">
+**ドメイン検証はWorkOSを通じて自動的に処理されます。** 2つのオプションがあります:
+
+1. **自動セットアップ** - Factory管理者がプロセス全体を代行します
+2. **セルフサービスセットアップ** - WorkOSダッシュボードを使用して自分でドメインを検証します
+
+どちらのオプションでも同じ検証フローに従います:
+
+- 検証するドメインを追加します（例: `yourcompany.com`）
+- DNS検証用の一意のTXTレコードを受け取ります
+- そのレコードをドメインのDNS設定に追加します
+- WorkOSがレコードを自動検出して検証します
+- 検証後にドメインポリシーを設定します
+
+このプロセスはDNS伝播状況により通常1〜24時間で完了します。WorkOSはリアルタイムのステータス更新を提供し、技術的な複雑さをすべて処理します。
+</Aside>
+
+
+
+#### 検証後に起こること {#what-happens-after-verification}
+
+ドメインが検証されると：
+
+- **即座の効果** - あなたのドメインメールを持つすべての既存ユーザーが組織に関連付け
+- **自動取得** - あなたのドメインを持つ新しいユーザーがデフォルトで組織に参加
+- **ポリシー実行** - 構成されたセキュリティポリシーが即座に適用
+- **SSO準備完了** - 検証されたドメインでSSO設定を進められる
+
+### 複数ドメインサポート {#multiple-domain-support}
+
+組織では多くの場合、複数のドメインの検証が必要です：
+
+- **プライマリドメイン** - メインの企業メールドメイン
+- **子会社ドメイン** - 買収した会社や地域オフィス
+- **レガシードメイン** - まだ使用されている過去のドメイン
+- **エイリアスドメイン** - 代替スペルや短縮版
+
+各ドメインは別々の検証が必要ですが、検証後は同じ組織ポリシーを共有します。
+
+### ドメイン検証のベストプラクティス {#domain-verification-best-practices}
+
+
+
+
+
+<Details summary="計画">
+- 従業員が使用するすべてのメールドメインを棚卸しします
+  - 取得すべきでないドメイン（例: 個人メールドメイン）を特定します
+  - 開始前にDNS管理者と調整します
+  - 子会社や買収シナリオを計画します
+</Details>
+
+
+
+
+
+<Details summary="実装">
+- 最初にプライマリドメインを検証します
+  - 組織全体への展開前に小さなパイロットグループでテストします
+  - 各ドメインのDNSを管理するチームを文書化します
+  - 検証完了後も検証記録を保管します
+</Details>
+
+
+
+  
+
+<Details summary="メンテナンス">
+- 検証済みドメインを四半期ごとに確認します
+  - 使用されていないドメインを削除します
+  - ドメイン移行時に検証を更新します
+  - 不正なドメイン使用の試みを監視します
+</Details>
+
+
+
+
+
+### 一般的な問題と解決策 {#common-issues-and-solutions}
+
+| 問題                                 | 原因                           | 解決策                                           |
+| ------------------------------------- | ------------------------------- | -------------------------------------------------- |
+| 24時間後に検証が失敗                     | DNSレコードが正しく追加されていない   | TXTレコードの正確なフォーマットと配置を確認 |
+| 検証後にユーザーがアクセスできない                 | ドメインポリシーが過度に制限的 | 実行設定を確認し調整             |
+| 子会社ユーザーが含まれていない         | ドメインが検証されていない             | すべての子会社ドメインを追加し検証              |
+| 外部協力者がブロックされる        | 厳格なドメイン実行       | ゲストユーザー例外を設定                    |
+
+
+
+<Aside kind="info">
+ドメイン検証はドメインごとに一度だけのセットアップですが、そのメリットは
+  そのドメインのメールアドレスを持つ現在および将来のすべてのユーザーに適用されます。
+</Aside>
+
+
+
+## シングルサインオン（SSO） {#single-sign-on-sso}
+
+### SSOの仕組み {#how-sso-works}
+
+1. ユーザーがFactoryにログインを試行
+2. Identity Provider（IdP）にリダイレクト
+3. ユーザーが企業認証情報で認証
+4. IdPがFactoryにSAMLアサーションを送信
+5. ユーザーが認証され、必要に応じてプロビジョニング（以下のJITを参照）
+
+### サポートされているSSOプロバイダー {#supported-sso-providers}
+
+FactoryはWorkOSを通じてすべての主要Identity Providerとの統合をサポートします。設定時にプロバイダーを選択してください：
+
+#### 人気のSSOプロバイダー {#popular-sso-providers}
+
+
+
+<div class="factory-tabs">
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">SAMLプロバイダー</div>
+
+- **Okta** - SAML 2.0とSCIMを完全サポート
+  - **Microsoft Azure AD / Entra ID** - SCIM付きSAML/OIDC
+  - **Google Workspace** - Google Groupsマッピング付きSAML 2.0
+  - **OneLogin** - SAML 2.0とSCIMプロビジョニング
+  - **Ping Identity / PingOne** - エンタープライズSAMLフェデレーション
+  - **JumpCloud** - クロスディレクトリ対応SAML
+  - **CyberArk** - 特権アクセス管理付きSAML
+  - **Duo (Cisco)** - MFA連携付きSAML
+
+</div>
+
+
+
+
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">OIDCプロバイダー</div>
+
+- **Auth0** - カスタムルール付きユニバーサルOIDC
+  - **Keycloak** - オープンソースOIDCプロバイダー
+  - **AWS Cognito** - AWS連携付きOIDC
+  - **Firebase Auth** - GoogleのOIDC実装
+  - **FusionAuth** - 開発者向けOIDC
+
+</div>
+
+
+
+
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">エンタープライズプラットフォーム</div>
+
+- **Salesforce Identity** - Salesforce組織向けSAML
+  - **VMware Workspace ONE** - エンタープライズモビリティ + SAML
+  - **IBM Security Verify** - エンタープライズSAML/OIDC
+  - **Oracle Identity Cloud** - Oracleエコシステム連携
+  - **RSA SecurID** - トークンベースMFA付きSAML
+
+</div>
+
+
+
+  
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">汎用オプション</div>
+
+- **Generic SAML 2.0** - 任意のSAML準拠IdP
+  - **Generic OIDC** - 任意のOpenID Connectプロバイダー
+  - **ADFS** - Microsoft Active Directory Federation Services
+  - **Shibboleth** - 学術/研究機関向けSSO
+  - **SimpleSAMLphp** - オープンソースSAML実装
+
+</div>
+
+</div>
+
+
+
+#### マジックリンクの代替案 {#magic-link-alternative}
+
+組織がSSOを使用しない場合、Factoryは以下もサポートします：
+
+- **Magic Link認証** - メールベースのパスワードレスログイン
+- 外部協力者向けにSSOと併用可能
+
+### Just-In-Time（JIT）プロビジョニング {#just-in-time-jit-provisioning}
+
+SSOがJITプロビジョニングで有効な場合：
+
+- 初回ログイン成功時にユーザーが自動作成
+- ユーザープロファイルがSAML属性から入力
+- 組織メンバーシップが自動作成
+- 手動ユーザー招待不要
+
+
+
+<Aside kind="warning">
+JITプロビジョニングはDirectory Syncと競合する場合があります。ベストプラクティスは[[jp/enterprise/identity-sso-and-scim#conflict-resolution|競合 解決]]を参照してください。
+</Aside>
+
+
+
+### SSOの構成 {#configuring-sso}
+
+#### 準備する必要があるもの {#what-you-need-to-prepare}
+
+SSO設定を開始する前に：
+
+1. Identity Providerへの**管理者アクセス**
+2. **テストユーザー** - 組織全体の展開前にテストするパイロットグループ（例：`factory-pilot-users`）を作成
+3. **グループ戦略** - どのIdPグループがFactoryロールにマップするかを決定：
+   - 管理者グループ（例：`factory-admins`）
+   - メンバーグループ（例：`factory-developers`）
+   - 読み取り専用グループ（例：`factory-viewers`）
+
+#### 設定の仕組み {#how-setup-works}
+
+
+
+<Aside kind="info">
+**WorkOSが技術的な設定を自動的に処理します。** Factoryからセットアップリンクを受け取ったら:
+
+1. リンクをクリックしてアイデンティティプロバイダーを選択します
+2. IdP固有のガイド付きセットアップウィザードに従います
+3. WorkOSがすべてのSAML/OIDC設定を自動構成します
+4. パイロットグループで接続をテストします
+5. 組織に展開します
+
+URL、証明書、技術パラメータを手動で設定する必要はありません。WorkOSがプロバイダーに基づいて処理します。
+</Aside>
+
+
+
+#### グループからロールへのマッピング {#group-to-role-mapping}
+
+設定中に、IdPグループがFactoryロールにどのようにマップするかを構成します：
+
+| あなたのIdPグループ        | Factoryロールにマップ | 権限                               |
+| --------------------- | -------------------- | ----------------------------------------- |
+| `factory-admins`      | 管理者                | フルアクセス、ユーザーと設定の管理    |
+| `factory-developers`  | メンバー               | コンテンツの作成・編集、全機能の使用 |
+| `factory-viewers`     | ビューアー               | 読み取り専用アクセス                          |
+| `factory-contractors` | メンバー               | 開発者と同様だが、追跡しやすい   |
+
+
+
+<Aside kind="tip">
+管理しやすくするため、IdPでは説明的なグループ名を使用します。`factory-frontend-team`や`factory-qa-engineers`のような名前は、権限をチーム別に整理するのに役立ちます。
+</Aside>
+
+
+
+#### 統合のテスト {#testing-your-integration}
+
+設定後、パイロットグループでテスト：
+
+1. テストユーザーにFactoryログインページからSSO経由でサインインしてもらう
+2. Factory サインインページから「SSOでサインイン」/あなたのIdPボタンを使用してログインを開始
+3. 以下を確認：
+   - ユーザーがIdPにリダイレクトされ、認証し、Factoryに戻る
+   - ユーザーが期待されるロールで正しい組織/チームに配置される
+
+何かが失敗した場合、IdPのログとFactoryのエラーメッセージを確認してください。ほとんどの問題は、URL、証明書、または属性マッピングの不一致が原因です。
+
+---
+
+## Directory Sync（SCIM）プロビジョニング {#directory-sync-scim-provisioning}
+
+SSOは**ユーザーの認証方法**を制御し、SCIMは**どのユーザーとグループが存在するか**をFactoryで制御します。
+
+SCIMが有効な場合：
+
+- 関連するIdPグループの新入社員が自動的にFactoryにアクセス可能になる
+- これらのグループから削除されたユーザーは自動的にアクセスを失う
+- グループメンバーシップの変更が手動更新なしにFactoryに伝播される
+
+### サポートされているDirectory Syncプロバイダー {#supported-directory-sync-providers}
+
+FactoryはこれらのディレクトリプロバイダーからのSCIM 2.0プロビジョニングをサポートします：
+
+
+
+<div class="factory-tabs">
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">SCIM完全サポート</div>
+
+**完全なSCIM 2.0実装を備えたプロバイダー:**
+
+  - **Okta** - Okta Universal Directoryによるリアルタイムプロビジョニング
+  - **Microsoft Azure AD / Entra ID** - エンタープライズディレクトリ同期
+  - **OneLogin** - ユーザーとグループのプロビジョニング
+  - **JumpCloud** - クロスプラットフォームのディレクトリサービス
+  - **Google Workspace** - Google Groupsと組織部門
+  - **PingOne** - PingDirectory連携
+  - **CyberArk** - 特権アクセスのプロビジョニング
+
+</div>
+
+
+
+
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">部分サポート</div>
+
+**限定的なSCIM機能を持つプロバイダー:**
+
+  - **Rippling** - HR主導のプロビジョニング
+  - **BambooHR** - 従業員ライフサイクル管理
+  - **Workday** - HCMベースのプロビジョニング
+  - **AWS SSO** - AWS Identity Centerプロビジョニング
+
+注: これらのプロバイダーでは追加設定が必要な場合や、グループ管理に制限がある場合があります。
+
+</div>
+
+
+
+  
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">カスタム連携</div>
+
+**独自のSCIM連携を構築:**
+
+  - **Generic SCIM 2.0** - 任意のSCIM準拠ディレクトリ
+  - **カスタムSCIMエンドポイント** - 社内ユーザーディレクトリ
+  - **LDAPブリッジ** - SCIMゲートウェイ経由でレガシーLDAP/ADに接続
+  - **CSVアップロード** - 手動の一括プロビジョニング（リアルタイムではありません）
+
+</div>
+
+</div>
+
+
+
+### プロバイダー別SCIM機能 {#scim-features-by-provider}
+
+| プロバイダー            | ユーザー | グループ  | リアルタイム | ネストグループ | カスタム属性 |
+| ------------------- | ----- | ------- | --------- | ------------- | ----------------- |
+| Okta                | ✅    | ✅      | ✅        | ✅            | ✅                |
+| Azure AD / Entra ID | ✅    | ✅      | ✅        | ✅            | ✅                |
+| Google Workspace    | ✅    | ✅      | ✅        | ❌            | 部分的           |
+| OneLogin            | ✅    | ✅      | ✅        | ❌            | ✅                |
+| JumpCloud           | ✅    | ✅      | ✅        | ✅            | ✅                |
+| Rippling            | ✅    | 部分的 | ✅        | ❌            | 部分的           |
+| 汎用SCIM        | ✅    | ✅      | 可変    | 可変        | 可変            |
+
+### Directory Syncの構成 {#configuring-directory-sync}
+
+#### 準備する必要があるもの {#what-you-need-to-prepare-2}
+
+SCIMを有効にする前に：
+
+1. **同期するグループを決定** - すべてのIdPグループがFactoryアクセスを必要とするわけではない
+2. **グループ構造を計画** - チーム、ロール、アクセスレベルを考慮
+3. **サービスアカウントを特定** - 人間のユーザーとCI/CDアカウントを分離
+4. **既存ユーザーを確認** - SCIMが引き継ぐ際にどう影響されるかを理解
+
+SCIMトークンは秘密として扱い、IdPのアプリケーション設定にのみ保存してください。
+
+#### SCIM設定の仕組み {#how-scim-setup-works}
+
+
+
+<Aside kind="info">
+**WorkOSがSCIM設定を自動的に処理します。** Factoryからセットアップリンクを受け取ったら:
+
+1. WorkOSがSCIMエンドポイントURLとBearerトークンを提供します
+2. それらをIdPのSCIM設定に入力します
+3. 同期するグループを選択します（例: `factory-*`グループのみ）
+4. WorkOSが以下を自動的に処理します:
+   - ユーザー属性マッピング（メール、名前など）
+   - グループ同期
+   - Webhookによるリアルタイム更新
+   - 既存ユーザーとの競合解決
+
+属性マッピングや技術設定を構成する必要はありません。WorkOSがSCIM 2.0標準に基づいて管理します。
+</Aside>
+
+
+
+#### IdPでのSCIM構成 {#configuring-scim-in-your-idp}
+
+FactoryアプリケーションのIdPのSCIM設定で：
+
+1. **自動プロビジョニング**を有効化
+2. Factoryからの**SCIM ベースURL**と**SCIMトークン**を貼り付け
+3. 同期するユーザーとグループを選択（例：`factory-*`グループのみ）
+4. 必要に応じて属性マッピングを設定（例：`userName` → email、`displayName` → name）
+
+有効化すると、IdPはユーザーとグループをFactoryにプッシュし、同期を維持します。
+
+#### SCIMが有効化された時に起こること {#what-happens-when-scim-is-enabled}
+
+SCIMが設定されると、グループ管理は**IdPでのみ**行うべきです。
+
+以下のようなグループ命名とマッピングルールを使用：
+
+- `factory-org-owners` → Factory組織オーナー
+- `factory-org-admins` → Factory組織管理者
+- `factory-users` → Factoryメンバー
+- `factory-ci-bots` → 制限された権限を持つマシン/サービスアカウント
+
+これによりRBAC定義を一箇所（IdP）に保ち、他のエンタープライズアプリと一緒に監査できます。
+
+## データ管理とマージ {#data-management-and-merging}
+
+### ユーザーアイデンティティソース {#user-identity-sources}
+
+Factoryユーザーは複数のソースから生成可能：
+
+- **Directory Sync**: SCIMにより自動プロビジョニング
+- **SSO JIT**: 初回SSOログイン時に作成
+- **手動招待**: 管理者により追加
+- **API**: プログラム的に作成
+
+### マージ戦略 {#merging-strategy}
+
+ユーザーが複数のソースから存在する場合、Factoryは以下のルールに従います：
+
+1. **ディレクトリデータが優先** - SCIM属性が他のすべてのソースを上書き
+2. **メールベースマッチング** - メール（大文字小文字を区別しない）でユーザーをマッチ
+3. **論理削除のみ** - ユーザーは無効化され削除されず、監査証跡を保持
+4. **プロファイル保持** - 更新中に非ディレクトリフィールドを保持
+
+## 競合解決 {#conflict-resolution}
+
+### SSOとDirectory Syncの比較 {#sso-vs-directory-sync}
+
+両方が有効な場合、潜在的な競合は以下を含みます：
+
+**シナリオ**: ディレクトリがプロビジョニングする前にユーザーがSSO経由でログイン
+**解決**: 次回同期時にディレクトリ同期がSSOユーザーとマージ
+
+**ベストプラクティス**: 一つの主要な方法を選択：
+
+- **ディレクトリファースト**: JITを無効化、ディレクトリプロビジョニングを要求
+- **SSOファースト**: 作成にJITを使用、更新にディレクトリを使用
+
+### メール大文字小文字の区別 {#email-case-sensitivity}
+
+すべてのメールマッチングは大文字小文字を区別しません：
+
+- `John.Doe@company.com` = `john.doe@company.com`
+- 大文字小文字のバリエーションによる重複ユーザーを防止
+- 比較のためメールは小文字に正規化
+
+---
+
+## トラブルシューティングとベストプラクティス {#troubleshooting-best-practices}
+
+一般的な問題と推奨事項：
+
+- **ログインループまたは失敗**
+
+  - ACS / リダイレクトURLがFactoryが提供したものと正確に一致することを確認
+  - 証明書や署名キーが期限切れまたはFactoryの更新なしにローテーションされていないことを確認
+
+- **ユーザーが間違った組織やロールに配置**
+
+  - グループメンバーシップとマッピングルールを確認
+  - 意図されたグループがSAMLアサーションまたはIDトークンに含まれていることを確認
+
+- **プロビジョニングが動作しない**
+  - FactoryとIdPの両方でSCIMが有効になっていることを確認
+  - IdPのSCIMログでエラー（無効なトークン、URL、またはスキーマ）を確認
+
+ベストプラクティス：
+
+- 初期展開と将来の変更に**小さなパイロットグループ**を維持
+- **明確で接頭辞ベースのグループ名**（例：`factory-*`）を使用してIdP設定を保守しやすくする
+- 既存のガバナンスプロセスを活用するために、すべてのロール変更とアクセスレビューをIdPで管理
+
+SSOとSCIMが設定されると、**Identity & Access Management**の概要で、これらのアイデンティティがDroidの実行時にどのように実行されるかを説明します。

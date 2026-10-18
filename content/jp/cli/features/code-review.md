@@ -1,0 +1,313 @@
+---
+id: jp/cli/features/code-review
+title: "ローカルコードレビュー"
+status: published
+summary: "/reviewコマンドを使用してAI駆動レビューでローカルのコード変更を解析する"
+parent: jp/cli/features/index
+tags: [cli, local-code-review, code-review, review, slash-command, pr-review, pull-request, commit-review]
+relations: [relates_to=cli/features/code-review]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">ローカルコードレビュー</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">/reviewコマンドを使用してAI駆動レビューでローカルのコード変更を解析する</p>
+
+
+## 概要 {#overview}
+
+`/review`コマンドは、AIによる洞察を活用してローカルのコード変更を分析するためのワークフローを提供します。コミット前の変更のレビューから、ブランチ全体や特定のコミットの分析まで、さまざまな開発シナリオに適合する複数のレビューモードを提供します。
+
+`/review`を実行すると、droidがレビュータイプの選択、パラメータの設定をガイドし、業界標準のレビューガイドラインに基づいてコードの変更を包括的に分析します。
+
+## クイックスタート {#quick-start}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">レビューフローを開始する</div>
+
+ローカルのdroidセッションで、以下を入力してください：
+```bash
+/review
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">レビューの種類を選択</div>
+
+4つのレビュープリセットから選択してください：
+  - **ベースブランチと比較したレビュー** - ブランチをベースブランチと比較するPRスタイルのレビュー
+  - **コミットされていない変更のレビュー** - 作業ディレクトリの変更（ステージング済み、未ステージング、未追跡）を分析
+  - **コミットのレビュー** - 履歴から特定のコミットを調査
+  - **カスタムレビュー指示** - 独自のレビュー基準を定義
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">パラメータを設定</div>
+
+選択内容に応じて：
+  - **ベースブランチレビュー**の場合：ターゲットブランチを選択（例：`main`、`develop`）
+  - **コミットレビュー**の場合：インタラクティブリストからコミットを選択
+  - **カスタムレビュー**の場合：レビュー指示を入力
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">調査結果を確認</div>
+
+Droidはコードの変更を分析し、以下を提供します：
+  - 重要度レベル[P0-P3]で優先順位付けされた調査結果
+  - 特定のファイル位置と行番号
+  - コードの提案を含む修正案
+  - 変更の全体的な評価
+
+</div>
+
+</div>
+
+
+
+## レビューの種類 {#review-types}
+
+### ベースブランチと比較したレビュー {#review-against-a-base-branch}
+
+現在のブランチをベースブランチと比較します（プルリクエストのレビューのように）。PRレビュー前やマージされる変更の確認に最適です。
+
+**動作方法：**
+1. 「ベースブランチと比較したレビュー」を選択
+2. リストからターゲットのベースブランチを選択（ローカルとリモートブランチが表示されます）
+3. Droidがマージベースを見つけて差分をレビューします
+
+**使用例：**
+- コミット前のPRレビュー
+- プルリクエスト作成前のブランチ変更確認
+- main/developに対するフィーチャーブランチの検証
+
+**ワークフローの例：**
+```bash
+> /review
+# Select: Review against a base branch
+# Choose: origin/main
+# Droid reviews all changes that would be merged
+```
+### コミット前の変更をレビューする {#review-uncommitted-changes}
+
+現在の作業ディレクトリの変更をすべて分析します—ステージされたファイル、ステージされていない変更、追跡されていないファイル。
+
+**使用例:**
+- コミット前の簡単なサニティチェック
+- 進行中の作業のレビュー
+- 開発の早い段階での問題の発見
+
+**ワークフローの例:**
+```bash
+> /review
+# Select: Review uncommitted changes
+# Droid immediately reviews all working directory changes
+```
+### コミットをレビューする {#review-a-commit}
+
+リポジトリ履歴の特定のコミットによって導入された変更を調査します。
+
+**動作方法:**
+1. 「コミットをレビューする」を選択
+2. ハッシュ、メッセージ、作成者、日付でコミットを閲覧
+3. レビューするコミットを選択
+
+**使用例:**
+- 最近のコミットの問題をレビュー
+- 特定のコミットでの変更を理解
+- チームメイトの作業のマージ後レビュー
+
+**ワークフローの例:**
+```bash
+> /review
+# Select: Review a commit
+# Browse and select: abc1234 - "Add user authentication"
+# Droid reviews that specific commit's changes
+```
+### カスタムレビュー指示 {#custom-review-instructions}
+
+専門的な分析のための独自のレビュー基準を定義します。
+
+**ユースケース:**
+- パフォーマンス分析
+- 特定のコーディング標準の確認
+- ドメイン固有の検証
+
+**ワークフローの例:**
+```bash
+> /review
+# Select: Custom review instructions
+# Enter: "Focus on performance regressions and unnecessary re-renders"
+# Droid performs a targeted review
+```
+## レビューガイドライン {#review-guidelines}
+
+すべてのコードレビューは、実行可能で高品質なフィードバックを提供するために設計された構造化された評価基準に従います：
+
+### 重要度レベル {#severity-levels}
+
+レビューでは優先度レベルを使用して発見事項を分類します：
+
+- **[P0]** - リリースまたは運用を妨げる重大な問題
+- **[P1]** - 次のサイクルで対処すべき緊急の問題
+- **[P2]** - いずれ修正すべき通常の優先度の問題
+- **[P3]** - 低優先度のあったら良い改善
+
+### バグ検出基準 {#bug-detection-criteria}
+
+AIは以下の基準をすべて満たす場合のみ、問題をバグとしてフラグを立てます：
+
+1. **意味のある影響** - 正確性、パフォーマンス、セキュリティ、または保守性に影響する
+2. **具体的で実行可能** - 明確で具体的な問題と明確な修正方法
+3. **適切な厳密さ** - 修正がコードベースの他の部分より厳密さを要求しない
+4. **変更で導入された** - レビュー対象の変更で追加されたバグ（既存のものではない）
+5. **修正する価値がある** - 作成者が認識すれば修正する可能性が高い
+6. **根拠のない仮定なし** - 推測ではなく検証可能な事実に基づく
+7. **証明可能な影響** - 理論的ではなく、影響を受ける具体的なコードを特定できる
+8. **意図的ではない** - 明らかに意図的な設計選択ではない
+
+### コメントスタイル {#comment-style}
+
+レビューコメントは以下の原則に従います：
+
+- **明確な理由** - なぜそれが問題なのかを説明する
+- **適切な重要度** - 影響を正確に伝える
+- **簡潔** - 発見事項ごとに最大1段落
+- **最小限のコード** - マークダウンでのコードチャンクは3行に制限
+- **シナリオ固有** - 影響を受ける環境/条件を説明
+- **事実的なトーン** - 非難する言葉を避ける
+- **すぐに理解可能** - 作成者が理解しやすい
+- **過度の賛辞なし** - 実行可能なフィードバックに集中
+
+### 出力形式 {#output-format}
+
+各発見事項には以下が含まれます：
+
+- **明確なタイトル** （≤80文字、命令法）
+- **説明** なぜこれが問題なのか
+- **ファイルパスと行番号** 該当する場合
+- **優先度レベル** [P0-P3]
+- **修正案** （具体的な代替コードが利用可能な場合）
+
+加えて**全体評価**：
+- 変更が正しいか正しくないか
+- 1-3文の要約
+
+## ヒントとベストプラクティス {#tips-and-best-practices}
+
+
+
+
+
+<Details summary="各レビュータイプの使用タイミング">
+- **未コミット変更**: アクティブな開発中、コミットをステージングする前
+  - **ベースブランチレビュー**: PRを作成する前、早期に問題をキャッチするため
+  - **コミットレビュー**: マージ後、過去の変更を理解したりチームメイトのコミットをレビューするため
+  - **カスタム指示**: 集中的な分析が必要な場合（セキュリティ、パフォーマンス、特定のパターン）
+</Details>
+
+
+
+  
+
+<Details summary="レビューを最大限活用する">
+- コミット前だけでなく、開発中に頻繁にレビューを実行する
+  - チームが重視するドメイン固有の懸念事項にはカスタム指示を使用する
+  - P0/P1の発見事項を真剣に扱う—それらは対処する価値のある実際の問題を表している
+  - 変更が健全かどうかの文脈について全体評価をレビューする
+</Details>
+
+
+
+  
+
+<Details summary="レビューUIのナビゲーション">
+- **Esc**を押すとレビューフローのどのステップでも戻ることができます
+  - プリセット選択から、**Esc**はレビューオーバーレイを閉じます
+  - 矢印キーを使用してブランチ/コミットリストをナビゲートします
+  - タイピングでブランチ名をリアルタイムでフィルターできます
+</Details>
+
+
+
+  
+
+<Details summary="ワークフローとの統合">
+`/review`コマンドはローカルのCLIセッション用です。CI/CDでの自動レビューには以下を使用してください：
+
+```bash
+    droid exec "Review the changes in this PR for correctness and performance regressions"
+```
+自動レビューの設定については[[jp/guides/droid-exec/code-review|自動コードレビューガイド]]を参照してください。
+</Details>
+
+
+
+
+
+## 例 {#examples}
+
+### PR前レビュー {#pre-pr-review}
+```bash
+# Before creating a pull request
+> /review
+# Select: Review against a base branch
+# Choose: origin/main
+# Review findings, fix issues, then create PR
+```
+### クイック WIP チェック {#quick-wip-check}
+```bash
+# Check work in progress
+> /review
+# Select: Review uncommitted changes
+# Get immediate feedback on current changes
+```
+### マージ後レビュー {#post-merge-review}
+```bash
+# Review a teammate's recent commit
+> /review
+# Select: Review a commit
+# Choose the recent commit to understand changes
+```
+## CI での自動レビュー {#automated-reviews-in-ci}
+
+自動 PR レビューには、[[jp/guides/droid-exec/code-review|自動コードレビュー]]ワークフローを使用してください。以下をサポートしています：
+
+- **自動 PR レビュー**：pull request イベントまたはコメントでトリガー
+- **レビューの深度**（`deep`または`shallow`）で徹底性とコストを制御
+- **カスタムレビューガイドライン**：リポジトリ固有のチェックを追加
+
+以下で設定します：
+```bash
+droid
+> /install-code-review
+```
+完全な設定オプションについては[[jp/guides/droid-exec/code-review|自動コードレビューガイド]]をご覧ください。
+
+## 関連項目 {#see-also}
+
+- [[jp/reference/cli-reference|CLIリファレンス]] - `/review`を含む完全なコマンドリファレンス
+- [[jp/guides/droid-exec/code-review|自動コードレビューガイド]] - deep/shallowモードによる自動PRレビューの設定
+- [[jp/cli/getting-started/common-use-cases|一般的な使用例]] - その他のワークフローとパターン
+- [[jp/cli/getting-started/how-to-talk-to-a-droid|Droidとの対話方法]] - AIレビューからより良い結果を得る方法

@@ -1,0 +1,157 @@
+---
+id: jp/integrations/ide-integrations
+title: "IDE連携"
+status: published
+summary: "エディター内でdroidを直接実行し、より豊富なコンテキストとスムーズなワークフローを利用する。"
+parent: jp/integrations/index
+tags: [integrations]
+relations: [relates_to=integrations/ide-integrations]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">IDE連携</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">エディター内でdroidを直接実行し、より豊富なコンテキストとスムーズなワークフローを利用する。</p>
+
+
+Droidは、ターミナルを備えた統合開発環境（IDE）と優れた連携を提供します。単に`droid`を実行するだけで、すぐに使い始めることができます。
+
+Droidは、Visual Studio Code（CursorやWindsurfを含む）およびJetBrains IDEに専用プラグインも提供しています。IntelliJ IDEA、PyCharm、Android Studio、WebStorm、PhpStorm、GoLandなどのJetBrains IDEでは、統合機能を強化するための公式Factory Droidプラグインをインストールするか、統合ターミナルで`droid`を実行することができます。
+
+## 機能 {#features}
+
+- **クイック起動**: キーボードショートカットを使用してエディターから直接Droidを開いたり、UIのDroidボタンをクリックしたりできます
+- **差分表示**: コードの変更をターミナルではなくIDE差分ビューアーに直接表示できます
+- **選択コンテキスト**: IDEでの現在の選択/タブが自動的にDroidと共有されます
+- **ファイル参照ショートカット**: キーボードショートカットを使用してファイル参照を挿入できます
+- **診断情報共有**: IDEからの診断エラー（lint、構文など）が作業中に自動的にDroidと共有されます
+
+## インストール {#installation}
+
+### VS Code {#vs-code}
+
+VS Codeおよびサポートされているフォーク（Cursor、Windsurf）にDroidをインストールするには：
+
+1. VS Codeを開く
+2. 統合ターミナルを開く
+3. `droid`を実行 - 拡張機能が自動的にインストールされます
+
+
+
+<Aside kind="note">
+You can install the [VS Code Extension
+  here](https://marketplace.visualstudio.com/items?itemName=Factory.factory-vscode-extension).
+</Aside>
+
+
+
+### その他のIDE {#other-ides}
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**[[jp/integrations/jetbrains|JetBrains IDE]]**
+
+IntelliJ IDEA、PyCharm、WebStorm、その他のJetBrains IDE向けの設定と使用方法を手順ごとに説明します。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**[[jp/integrations/zed|Zed]]**
+
+MCPサーバーとAgent Panelワークフローを使って、Factory DroidをZedのカスタムエージェントとして設定します。
+
+</div>
+
+</div>
+
+
+
+## 使用方法 {#usage}
+
+### IDEから {#from-your-ide}
+
+IDEの統合ターミナルから`droid`を実行すると、すべての機能が有効になります。
+
+### `/ide`コマンド {#the-ide-command}
+
+droid内で`/ide`コマンドを使用してIDE統合を管理できます：
+
+```
+/ide
+```
+
+このコマンドは以下を実行します：
+
+- インストール済みの場合、現在の拡張機能バージョンを表示
+- 未インストールの場合、拡張機能のインストールを促す
+- VS Code、Cursor、Windsurfで動作
+
+## トラブルシューティング {#troubleshooting}
+
+### VS Code拡張機能がインストールされない場合 {#vs-code-extension-not-installing}
+
+- VS Codeの統合ターミナルからDroidを実行していることを確認
+- IDEに対応するCLIがインストールされていることを確認：
+  - VS Code用：`code`コマンドが利用可能である必要があります
+  - Cursor用：`cursor`コマンドが利用可能である必要があります
+  - Windsurf用：`windsurf`コマンドが利用可能である必要があります
+  - インストールされていない場合は、`Cmd+Shift+P`（Mac）または`Ctrl+Shift+P`（Windows/Linux）を使用し、「Shell Command: Install 'code' command in PATH」（または該当するIDEの同等のもの）を検索してください
+- VS Codeに拡張機能をインストールする権限があるかを確認
+
+### ESCキーの設定 {#esc-key-configuration}
+
+JetBrainsターミナルでESCキーがDroid操作を中断しない場合：
+
+1. Settings → Tools → Terminalに移動
+2. 以下のいずれかを実行：
+   - 「Move focus to the editor with Escape」のチェックを外す、または
+   - 「Configure terminal keybindings」をクリックして「Switch focus to Editor」ショートカットを削除
+3. 変更を適用
+
+これにより、ESCキーがDroid操作を適切に中断できるようになります。
+
+### よくある問題 {#common-issues}
+
+| 症状                                    | 対処法                                                                                       |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **「Editor integration disabled」メッセージ** | VS Code拡張機能がインストールされていることを確認するか、`editorIntegration`をエディターに合わせて更新 |
+| CLIがNode/Bunを見つけられない                  | VS Code/JetBrainsが使用するPATHに`droid`バイナリがあることを確認（インストール後は再起動）      |
+| ファイルコンテキストが不足                      | ファイルを保存してください。500KBを超える未保存バッファはパフォーマンス上の理由でスキップされます                    |
+| 診断情報が古い                         | **↻ Refresh Diagnostics**コマンド（VS Codeコマンドパレット）を実行                              |
+| VS Codeターミナルがすぐに閉じる       | シェルの起動スクリプトを確認してください。自動終了してはいけません                                  |
+| 企業プロキシでネットワークがブロックされる        | 設定でプロキシ変数を設定するか、`HTTP_PROXY`/`HTTPS_PROXY`環境変数を設定             |
+
+追加のヘルプについては、`~/.factory/logs/`からのログとともにsupport@factory.aiまでメールでお問い合わせください
+
+## 次のステップ {#next-steps}
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**[[jp/cli/configuration/settings|設定]]**
+
+思考予算、ツール権限などを細かく調整します。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**[[jp/cli/user-guides/specification-mode|Specification Mode]]**
+
+エディターコンテキストが機能開発をどう改善するかを見る。
+
+</div>
+
+</div>

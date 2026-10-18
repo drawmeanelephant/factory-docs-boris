@@ -1,0 +1,92 @@
+---
+id: jp/cli/user-guides/auto-run
+title: "自律レベル"
+status: published
+summary: "Off、Low、Medium、Highを選んで、繰り返し確認なしでDroidが実行できる内容を制御します。"
+parent: jp/cli/user-guides/index
+tags: [cli, autonomy-level, auto-run, autorun, autonomy, automatic, auto-mode, permissions]
+relations: [relates_to=cli/user-guides/auto-run]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">自律レベル</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Off、Low、Medium、Highを選んで、繰り返し確認なしでDroidが実行できる内容を制御します。</p>
+
+
+自律レベルは、承認のために一時停止せずにDroidが実行できる最も高いリスクの作業を設定します。これはインタラクションモードとは別です。Autoは作業を実行し、Spec Modeは実装前に計画します。
+
+## レベルを選ぶ {#choose-a-level}
+
+ExecuteコマンドとMCPツールにはリスクレベル（`low`、`medium`、`high`）があります。denylistやサンドボックスチェックで承認が必要な場合、またはコマンドがblocklistに一致する場合を除き、Droidはリスクが自律レベル以下なら自動実行します。blocklistに一致するコマンドはどのレベルでも実行されず、承認プロンプトも表示されません。
+
+| 自律レベル | 承認なしで実行できる内容 | 例 |
+| --- | --- | --- |
+| **Off** | 組み込みの読み取りツールとallowlistに登録されたコマンドのみ | `Read`, `LS`, `ls`, `pwd`, `git status` |
+| **Low** | ファイル編集に加え、低リスクのコマンドとMCPツール | `Edit`, `Create`, `rg`, ログの表示 |
+| **Medium** | Lowのすべてに加え、元に戻せるワークスペース変更 | `npm install`, `pip install`, `git commit`, `mv`, `cp`, ビルドツール |
+| **High** | 安全チェックで承認が必要な場合を除く高リスク操作 | `docker compose up`, `git push`（許可されている場合）, マイグレーション, カスタムスクリプト |
+
+どのレベルでも、Droidは出力をストリーミングし、ファイル変更をハイライト表示します。
+
+## 承認の仕組み {#how-approvals-work}
+
+自律レベルが制御するのは自動承認であり、利用可能なツール自体ではありません。ツールポリシー、MCP設定、モデル対応、組織の制御によって、ツールがさらに制限される場合があります。
+
+- **Auto と Spec Mode** – Autoでは自律レベルが承認を制御します。Spec Modeは読み取り専用の計画フェーズで、承認後にDroidはSpec Modeを終了し、選択された自律レベルで実装を行います。
+- **ファイル変更** – Low以上では、Droidは事前確認なしでファイルの作成・編集・パッチ適用を行えます。
+- **コマンドとMCPツール** – Droidはツールのリスクレベルを現在の自律レベルと比較します。リスクのほうが高ければ、続行前に確認を求めます。
+- **allowlist登録コマンド** – allowlist内のコマンドは、denylistやblocklistにも一致しない限り、承認なしで実行できます。
+- **安全チェック** – denylistにある危険なコマンドはHighでも確認を求めます。`$(...)`やバッククォート内にネストされた危険なコマンドも含まれます。blocklistに一致するコマンドはどのレベルでも即座に拒否され、承認プロンプトは表示されません。[[jp/cli/configuration/sandbox|サンドボックス]]の読み取り・書き込み・ネットワークチェックでも別途プロンプトが表示される場合があります。
+- **常に許可** – 「常に許可」を選ぶと、そのプロンプトに必要なレベルまで現在の自律レベルが引き上げられます。サンドボックスの「常に許可」オプションは、代わりに許可されたパスやドメインを永続化します。
+- **仕様承認** – Spec Modeのプランを承認するときは、現在の自律レベルを維持する**実装を進める**を選ぶか、実装用に利用可能なLow、Medium、Highを選択します。組織の最大自律レベルによっては、より高い選択肢が表示されない場合があります。
+
+## コマンドallowlist、denylist、blocklist {#command-allowlists-denylists-and-blocklists}
+
+ユーザープロファイル、プロジェクト、ローカルのプロジェクト上書き、またはネストされたフォルダごとのコマンドポリシーを定義するには、[[jp/cli/configuration/settings|設定]]の`commandAllowlist`、`commandDenylist`、`commandBlocklist`を使用します。
+
+- allowlistのエントリは、そのスコープでは低リスクとして扱われます。
+- denylistのエントリは、常にallowlistより優先されます。拒否されたコマンドでも、明示的に承認すれば実行できます。
+- blocklistのエントリは絶対に実行されません。承認のプロンプトはなく、完全自律、自動実行、`--skip-permissions-unsafe`のいずれの場合でもブロックが適用されます。承認に関係なくハードストップすべきコマンドに使用してください。
+- いずれのリストにも含まれないコマンドは、現在の自律レベルとコマンド制限に従います。
+- 組織管理の設定が最優先されます。ローカル設定やプロジェクト設定でリポジトリやマシン向けのデフォルトを追加できますが、組織のコマンドポリシーを弱めたり、組織の最大値を超えて自律レベルを上げたりすることはできません。詳細は[[jp/enterprise/hierarchical-settings-and-org-control|階層設定と組織管理]]を参照してください。
+
+組み込みのdenylistには、ファイルシステムの消去、ディスク初期化、シャットダウンコマンド、fork bomb、広範な権限・所有者変更など、一般的な破壊的パターンが含まれます。リポジトリに追加の危険なスクリプトやデプロイ経路がある場合は、プロジェクト固有のコマンドを追加してください。
+
+
+
+<Aside kind="warning">
+blocklistは承認では回避できないため、利用可能な最も強力な制御です。droidは照合前に実際に呼び出されるプログラムを解決するため、ラッパーシェル（例：`bash -c "…"`）、絶対パス、クォートのトリック、コマンド置換でブロックされたコマンドを回避することはできません。
+</Aside>
+
+
+
+## レベルを変更する {#change-the-level}
+
+- `Ctrl+L`で`Off → Low → Medium → High → Off`の順に切り替えます。組織ポリシーで利用可能な最高レベルが制限される場合があります。
+- `Shift+Tab`でAutoとSpec Modeを切り替えます。
+- 今後のセッション向けに`/settings`でデフォルトを設定します。
+- 自律レベルは、実装前、[[jp/cli/user-guides/specification-mode|仕様モード]]の承認ダイアログ、またはSpec Modeを終了した後いつでも変更できます。
+
+## 自律レベルが適用される場所 {#where-autonomy-level-applies}
+
+- **対話型CLI** – `droid`はセッションの現在の自律レベルを使用します。`droid "<prompt>"`も同じ対話型CLIを初期プロンプト付きで開始するため、最初のタスクには設定済みのデフォルトが使われます。詳細は[[jp/reference/cli-reference|CLIリファレンス]]を参照してください。
+- **Factory App** – Factory Appのセッションでも、CLIセッションと同じAuto / Spec Modeと自律レベルの制御を使用します。
+- **Droid Exec** – `droid exec`はデフォルトで読み取り専用です。編集、ローカル開発コマンド、より広い自動化が必要な非対話実行では、`--auto low`、`--auto medium`、`--auto high`を使用します。詳細は[[jp/cli/droid-exec/overview|Droid Exec（ヘッドレス）]]を参照してください。
+- **カスタムDroid（サブエージェント）** – AutoではTaskで起動されたサブエージェントが`--auto high`を要求し、Spec Modeでは読み取り専用です。組織とDroidのツールポリシーでさらに制限される場合があります。詳細は[[jp/cli/configuration/custom-droids|カスタムDroid（サブエージェント）]]を参照してください。
+- **Factory Missions** – Factory MissionsのオーケストレーションにはHigh自律レベルまたは`--skip-permissions-unsafe`（危険: すべての権限チェックをスキップするため、隔離されたサンドボックスでのみ使用）が必要で、管理者はFactory Missionsを開始できるユーザーを制限できます。詳細は[[jp/features/missions/overview|Factory Missions]]を参照してください。
+
+## Enterpriseの制御 {#enterprise-controls}
+
+Enterprise管理者は、組織管理の設定で組織全体の自律性の境界を設定できます。詳細は[[jp/enterprise/hierarchical-settings-and-org-control|階層設定と組織管理]]を参照してください。
+
+- **デフォルト自律レベル** は、新しいセッションの開始レベルを設定します。
+- **最大自律レベル** は、メンバーがどこまで自律性を上げられるかを制限します。最大がMediumなら、CLIではHighを選択できません。
+
+これらの制御は、コマンドallowlist、コマンドdenylist、MCP制限、サンドボックス設定、Factory Missionsのアクセス制御と組み合わせて適用されます。
+
+## 安全に使う {#use-it-safely}
+
+- 新しい作業や重要な作業は、プランを信頼できるようになるまでOffまたはLowで始めます。
+- 作業に必要な最小レベルを選びます。ファイル編集や生成レポートにはLow、依存関係のインストール、ビルド、テスト、ローカルコミットが必要な実行にはMedium、push、デプロイ、Taskで起動されたサブエージェント、Factory Missions、その他のオーケストレーションにはHighを使います。
+- [[jp/cli/configuration/hooks-guide|ブロッキングフック]]、コマンドdenylist、MCP制限、最小権限の認証情報、隔離されたランナーで多層防御を追加します。
+- CIワークフローでは、完走に必要な最小の`droid exec --auto`レベルを選びます。詳細は[[jp/guides/droid-exec/code-review|自動コードレビュー]]と[[jp/guides/droid-exec/github-actions|GitHubアクション]]を参照してください。
+- 疑わしいコマンドを見つけたら中断し、ガイダンスを追加したうえで、残りのリスクに合う自律レベルで再開してください。

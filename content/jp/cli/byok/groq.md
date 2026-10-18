@@ -1,0 +1,48 @@
+---
+id: jp/cli/byok/groq
+title: "Groq"
+status: published
+summary: "GroqのLPU™ Inference Engineによる超高速推論"
+parent: jp/cli/byok/index
+tags: [cli, groq, api-key, byok, fast-inference, lpu, custom-model]
+relations: [relates_to=cli/byok/groq]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Groq</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">GroqのLPU™ Inference Engineによる超高速推論</p>
+
+
+Groq の LPU™（Language Processing Unit）推論エンジンによって駆動される超高速推論により、様々なオープンソースモデルにアクセスできます。
+
+## 設定 {#configuration}
+
+`~/.factory/settings.json` に追加してください：
+
+```json
+{
+  "customModels": [
+    {
+      "model": "moonshotai/kimi-k2-instruct-0905",
+      "displayName": "Kimi K2 [Groq]",
+      "baseUrl": "https://api.groq.com/openai/v1",
+      "apiKey": "YOUR_GROQ_KEY",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 16384
+    }
+  ]
+}
+```
+
+## はじめに {#getting-started}
+
+1. [groq.com](https://groq.com) でサインアップしてください
+2. [console.groq.com](https://console.groq.com) から API キーを取得してください
+3. [Groq documentation](https://console.groq.com/docs/overview.md) で利用可能なモデルを確認してください
+4. 必要なモデルを設定に追加してください
+
+## 注意事項 {#notes}
+
+- ベース URL 形式：`https://api.groq.com/openai/v1`
+- Groq は `generic-chat-completion-api` プロバイダータイプを使用します
+- LPU アーキテクチャにより極めて高速な推論速度で知られています
+- 対応モデルでストリーミングレスポンスをサポートしています

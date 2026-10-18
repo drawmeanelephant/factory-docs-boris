@@ -1,0 +1,137 @@
+---
+id: enterprise/compliance-audit-and-monitoring
+title: "Compliance, Audit & Monitoring"
+status: published
+summary: "How Droids support SOC2, ISO 27001/42001, regulatory reviews, and continuous monitoring using OpenTelemetry and audit logs."
+parent: enterprise/index
+tags: [enterprise]
+relations: [relates_to=jp/enterprise/compliance-audit-and-monitoring]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Compliance, Audit &amp; Monitoring</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">How Droids support SOC2, ISO 27001/42001, regulatory reviews, and continuous monitoring using OpenTelemetry and audit logs.</p>
+
+
+Security and compliance teams need clear answers to **who did what, when, where, and with which data**. This page explains how Droids fit into your compliance posture and how to integrate them with your existing monitoring and audit infrastructure.
+
+---
+
+## Certifications and Trust Center {#certifications-and-trust-center}
+
+Factory maintains an enterprise‑grade security and compliance program, including:
+
+- **SOC 2**
+- **ISO 27001**
+- **ISO 42001**
+
+Our **[Trust Center](https://trust.factory.ai)** provides up‑to‑date reports, security architecture documentation, and sub‑processor lists. Use it as the primary reference for security and compliance reviews.
+
+---
+
+## Audit trails and events {#audit-trails-and-events}
+
+There are two complementary sources of audit information:
+
+1. **Factory‑side audit logs** (for cloud‑managed features).
+2. **Customer‑side OTEL telemetry** emitted by Droid.
+
+### Factory‑side audit logs (cloud‑managed) {#factoryside-audit-logs-cloudmanaged}
+
+When you use Factory’s hosted services, the control plane records key events such as:
+
+- Authentication events and SSO/SCIM changes.
+- Org and project configuration updates.
+- Policy changes (model allow/deny lists, autonomy limits, Droid Shield settings, hooks configuration).
+- Administrative actions in the web UI.
+
+These logs can be exported via the [Trust Center](https://trust.factory.ai) or integrations agreed upon in your enterprise engagement.
+
+### Customer‑side OTEL telemetry {#customerside-otel-telemetry}
+
+Droid emits OTEL metrics, traces, and logs that can serve as **fine‑grained audit data** inside your own systems, including:
+
+- Session start and end events, tagged with user, team, environment, and project information.
+- Tool usage events (which tools were invoked, how long they ran, and whether they succeeded).
+- Command execution metadata, including risk classification and outcome.
+- Code modification events (which files and repositories were changed).
+
+You control how long these signals are retained and how they are correlated with other systems such as CI/CD pipelines, SIEMs, and case management tools.
+
+---
+
+## OpenTelemetry schema and collectors {#opentelemetry-schema-and-collectors}
+
+Factory’s OTEL support is designed to integrate with existing observability tooling.
+
+At a high level, telemetry includes:
+
+- **Resource attributes** – describing the environment, service, org, team, and user.
+- **Metrics** – counters and histograms for sessions, LLM usage, tools, and errors.
+- **Traces and spans** – describing the lifecycle of sessions and automated runs.
+- **Logs** – structured events for key actions and errors.
+
+You can deploy OTEL collectors that:
+
+- Receive OTLP data from Droid.
+- Enrich or redact attributes based on your own policies.
+- Forward telemetry to multiple destinations (for example, Prometheus + Loki, Datadog, Splunk, or S3).
+
+This architecture keeps **ownership of telemetry firmly in your hands**, even when using Factory’s cloud‑managed features.
+
+For step-by-step configuration of dual-export to your own OTLP collector, see [[enterprise/telemetry-export|Telemetry Export (OTEL)]].
+
+For more details on the metrics and traces useful for cost and productivity analysis, see [[enterprise/usage-cost-and-analytics|Usage, Cost & Productivity Analytics]].
+
+---
+
+## Regulatory and industry use cases {#regulatory-and-industry-use-cases}
+
+Factory is designed to support organizations operating under strict regulatory regimes. While implementation details differ, common patterns include:
+
+
+
+
+
+<Details summary="Financial services">
+- Use hybrid or airgapped deployments for systems subject to strict data residency and record‑keeping requirements.
+  - Route all LLM traffic through gateways that implement your bank’s data policies.
+  - Use OTEL telemetry and hooks to ensure Droid activity is visible in your SIEM and aligned with your control framework.
+</Details>
+
+
+
+  
+
+<Details summary="Healthcare and PHI">
+- Deploy Droid in environments that never expose protected health information to external LLMs.
+  - Use model allowlists that include only providers and gateways that meet your PHI handling requirements.
+  - Use Droid Shield and DLP hooks to prevent PHI from being included in prompts or logs.
+</Details>
+
+
+
+  
+
+<Details summary="National security and defense">
+- Rely on fully airgapped deployments with on‑prem models and collectors.
+  - Treat Droid as an internal tool whose artifacts and logs never leave your network.
+  - Use OTEL and hooks to integrate with mission‑specific monitoring and incident response tooling.
+</Details>
+
+
+
+
+
+---
+
+## Deployment and configuration for compliance teams {#deployment-and-configuration-for-compliance-teams}
+
+To integrate Droid into your compliance and monitoring stack:
+
+1. **Decide on deployment pattern** – cloud‑managed, hybrid, or fully airgapped.
+2. **Define model and gateway policies** – which providers and gateways are allowed, and where.
+3. **Configure OTEL collectors and destinations** – ensure all Droid telemetry flows into your SIEM and observability tools.
+4. **Set up hooks and Droid Shield** – enforce DLP, approval workflows, and environment‑specific controls.
+5. **Document policies and mappings** – connect Droid controls to your internal control framework and regulatory obligations.
+
+Most of this configuration is expressed via the hierarchical settings system described in [[enterprise/hierarchical-settings-and-org-control|Hierarchical Settings & Org Control]].

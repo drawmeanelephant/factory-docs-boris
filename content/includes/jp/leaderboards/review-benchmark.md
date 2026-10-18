@@ -1,0 +1,50 @@
+オープンソースの [droid-code-review-evals](https://github.com/droid-code-review-evals/review-droid-benchmark) によるベンチマークで、コードレビューにおいて AI モデルが実際のバグをどれだけ見つけられるかを測定します。Sentry、Grafana、Keycloak、Discourse、Cal.com という 5 つの大規模オープンソースコードベースの 50 件の PR を対象に、最前線モデルおよびオープンソースモデル 13 種を評価し、人手でキュレーションされた 167 件の検証済みバグからなるゴールデンセットを基準にスコアリングしています。
+
+### コストと品質 {#review-benchmark-sec-1-4fa4bbbc}
+| モデル | 平均 F1 | コスト / PR |
+|--------|---------|-------------|
+| **GPT-5.2** | 60.5% | $1.25 |
+| **Claude Opus 4.6** | 59.8% | $3.11 |
+| Claude Sonnet 4.6 | 57.9% | $1.15 |
+| Claude Opus 4.7 | 56.4% | $4.18 |
+| GLM-5.1 | 56.3% | $1.06 |
+| GPT-5.3 Codex | 56.2% | $1.69 |
+| Gemini 3.1 Pro | 52.6% | $2.04 |
+| GPT-5.4 Mini | 52.0% | $0.68 |
+| Kimi K2.5 | 51.9% | $0.41 |
+| Gemini 3 Flash | 50.0% | $0.34 |
+| GPT-5.5 | 47.9% | $5.63 |
+| GPT-5.4 | 47.5% | $2.01 |
+| MiniMax M2.7 | 45.6% | $0.15 |
+
+*最終更新: 2026年4月*
+
+品質面では GPT-5.2 が首位で、Claude Opus 4.6 の約 40% のコストで同等以上の性能を示しています。Kimi K2.5 や MiniMax M2.7 のようなオープンソースモデルは、GPT-5.2 の品質の約 75〜86% を、PR あたり約 3〜8 倍低いコストで実現しており、複数パスやアンサンブルによるレビュー戦略を現実的にします。
+
+### 方法論 {#review-benchmark-sec-2-8892b68e}
+| 項目 | 説明 |
+|------|------|
+| **テストセット** | Python、Go、Java、Ruby、TypeScript を含む 5 リポジトリ（Sentry、Grafana、Keycloak、Discourse、Cal.com）の 50 件の PR |
+| **ゴールデンセット** | 正確なファイル/行位置とバグ種別分類を含む、人手で検証済みの 167 件のバグ（v3） |
+| **モデル評価** | 各モデルが標準化されたプロンプトを使い、[Droid Action](https://github.com/Factory-AI/droid-action) 経由ですべての PR をレビュー |
+| **LLM judge** | 独立した LLM が、意味的同等性に基づいてモデルコメントとゴールデンコメントを照合 |
+| **クロスジャッジ検証** | 採点バイアスを抑えるため、照合結果の一部を第 2 の judge で確認 |
+| **F1 計算** | F1 は適合率（コメントのうち実際のバグである割合）と再現率（ゴールデンバグのうち検出できた割合）を組み合わせた指標 |
+| **複数回実行** | 一貫性を測定するため、各モデルを複数回実行して評価 |
+| **外れ値の除外** | エラーになった実行やトークン上限に達した実行は除外 |
+
+<div class="factory-card">
+
+**[Review Droid Benchmark](https://github.com/droid-code-review-evals/review-droid-benchmark)**
+
+GitHub で完全な方法論、ローデータ、スコアリングスクリプトを見る
+
+</div>
+
+<div class="factory-card">
+
+**[解説を読む](https://www.factory.ai/news/code-review-benchmark)**
+
+どのモデルがコードレビューに最も優れているか？
+
+</div>

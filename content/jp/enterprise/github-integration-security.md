@@ -1,0 +1,275 @@
+---
+id: jp/enterprise/github-integration-security
+title: "GitHubインテグレーションセキュリティ"
+status: published
+summary: "Factory Droid GitHub Action連携のセキュリティアーキテクチャ、データフロー、制御。"
+parent: jp/enterprise/index
+tags: [enterprise]
+relations: [relates_to=enterprise/github-integration-security]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">GitHubインテグレーションセキュリティ</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Factory Droid GitHub Action連携のセキュリティアーキテクチャ、データフロー、制御。</p>
+
+
+Factory Droid GitHub Actionは、GitHubワークフロー内で自動化されたコードレビューとPRアシスタンス機能を直接提供します。このページでは、統合がどのように動作するかを管理するセキュリティアーキテクチャ、データフロー、および制御について説明します。
+
+---
+
+## 概要 {#overview}
+
+Droid GitHub Action（`Factory-AI/droid-action`）は、独自のランナーを使用して**完全にGitHub Actions内で**実行されます。標準的なAPI認証以外に、別途ホストされたサービスやFactoryインフラストラクチャへの永続的な接続は必要ありません。
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**自社環境で実行**
+
+このアクションは、管理下のGitHubホストまたはセルフホストランナーで実行されます。外部のコンピュートリソースはプロビジョニングされません。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**永続的なコード保存なし**
+
+コードはワークフロー実行中に一時的にチェックアウトされ、実行後に破棄されます。
+Factoryはソースコードを保存しません。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**スコープされた権限**
+
+このアクションは必要なGitHub権限のみを要求し、トークンは
+各実行後に自動的に失効します。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**標準のFactory認証**
+
+Factory APIキーを使用し、組織の既存のモデル許可リスト、レート制限、ポリシーに従います。
+
+</div>
+
+</div>
+
+
+
+---
+
+## アーキテクチャとデータフロー {#architecture-and-data-flows}
+
+ワークフローが実行されると、以下の順序で処理が行われます：
+
+1. **トリガー検出** – アクションはPRコメント、説明、またはレビューコメント内の`@droid`メンションを検出します。
+2. **権限確認** – 実行前に、アクションはトリガーしたユーザーがリポジトリへの書き込みアクセス権を持っているかを確認します。
+3. **コンテキスト収集** – Droidは、チェックアウトされたリポジトリからPRメタデータ、変更されたファイル、および既存のコメントを収集します。
+4. **Droid Exec** – CLIはGitHub MCPツールがあらかじめ登録された状態で実行され、GitHub API経由でPRとやり取りできるようになります。
+5. **LLMリクエスト** – プロンプトはFactoryの標準ルーティングを通じて、設定されたモデルプロバイダーに送信されます。
+6. **結果** – DroidはGitHub API経由で直接インラインコメントを投稿するか、PR説明を更新します。
+7. **トークン取り消し** – GitHub Appトークンはワークフロー終了時に自動的に取り消されます。
+
+### データ境界 {#data-boundaries}
+
+| データ種別           | フロー先                     | 保持期間                                |
+| ------------------- | ---------------------------------- | ---------------------------------------- |
+| ソースコード         | GitHubランナー（一時的チェックアウト） | ワークフロー後に破棄                 |
+| PRメタデータ         | GitHub API                        | GitHubの保持ポリシーに従う              |
+| プロンプトとコンテキスト | 設定されたLLMプロバイダー           | モデルプロバイダーとの契約に従う       |
+| ワークフローログ       | GitHub Actions                     | リポジトリのログ保持設定に従う |
+| デバッグアーティファクト     | GitHub Actionsアーティファクト           | 7日間（設定可能）                    |
+
+---
+
+## 認証と認可 {#authentication-and-authorization}
+
+### Factory APIキー {#factory-api-key}
+
+アクションは、GitHubシークレットとして保存されたFactory APIキー（`FACTORY_API_KEY`）を必要とします。このキーは：
+
+- Factory APIでのDroid Execセッションを認証します。
+- 組織のモデル許可リスト、レート制限、およびポリシーの対象となります。
+- 組織のキー管理慣行に従って定期的にローテーションする必要があります。
+
+
+
+<Aside kind="warning">
+APIキーをリポジトリに直接コミットしないでください。必ずGitHub Actionsのシークレットを使用してください。
+</Aside>
+
+
+
+### GitHub Appトークン {#github-app-tokens}
+
+Factory Droid GitHub Appを使用する場合：
+
+- アプリは特定のリポジトリにスコープされたインストールトークンを要求します。
+- トークンは短期間有効で、ワークフロー完了後に自動的に取り消されます。
+- アプリは動作に必要な権限のみを要求します（contents、pull requests、issues）。
+
+GitHub Appを使用したくない場合は、適切な権限を持つカスタム`github_token`入力を提供できます。
+
+### ユーザー権限確認 {#user-permission-verification}
+
+任意の`@droid`コマンドを実行する前に、アクションは以下を確認します：
+
+1. トリガーユーザーがリポジトリへの**書き込みアクセス権**を持っている。
+2. ユーザーがボットではない（`allowed_bots`入力で明示的に許可されている場合を除く）。
+3. コメントまたはトリガーが期待される形式と一致している。
+
+これにより、未承認ユーザーによるDroidの呼び出しを防ぎます。
+
+---
+
+## セキュリティ制御 {#security-controls}
+
+### 権限スコープ {#permission-scoping}
+
+アクションは必要なGitHub権限のみを要求します：
+
+```yaml
+permissions:
+  contents: write # Read code, write for fixes
+  pull-requests: write # Comment on and update PRs
+  issues: write # Comment on issues
+  id-token: write # OIDC token for secure auth
+  actions: read # Read workflow run metadata
+```
+
+セキュリティ要件に基づいて、ワークフローファイルでさらに権限を制限できます。
+
+### ボットとユーザーのフィルタリング {#bot-and-user-filtering}
+
+アクションをトリガーできるユーザーを制御します：
+
+| 入力                     | 目的                                                                                  |
+| ------------------------- | ---------------------------------------------------------------------------------------- |
+| `allowed_bots`            | トリガーを許可するボットユーザー名のカンマ区切りリスト、または全て許可する場合は`*`。デフォルト：なし。 |
+| `allowed_non_write_users` | 書き込み権限なしで許可するユーザー名。細心の注意を払って使用してください。                  |
+
+### ネットワーク制限（実験的） {#network-restrictions-experimental}
+
+セキュリティ強化のため、Droid実行中のネットワークアクセスを制限できます：
+
+```yaml
+- uses: Factory-AI/droid-action@main
+  with:
+    factory_api_key: ${{ secrets.FACTORY_API_KEY }}
+    experimental_allowed_domains: |
+      api.factory.ai
+      api.anthropic.com
+      api.openai.com
+```
+
+これにより、アウトバウンド接続を指定されたドメインのみに制限します。
+
+### シークレット保護 {#secrets-protection}
+
+アクションはシークレット処理のセキュリティベストプラクティスに従います：
+
+- APIキーはGitHubシークレットからの環境変数を通じて渡されます。
+- `show_full_output`オプションは、ログでの機密データの偶発的な漏洩を防ぐため、デフォルトで無効になっています。
+- デバッグアーティファクトはデフォルトで7日間のみ保持されます。
+
+
+
+<Aside kind="warning">
+`show_full_output`を有効にすると、公開ワークフローログに機密情報が表示される可能性があります。機密性の低い環境でのデバッグ時のみ有効にしてください。
+</Aside>
+
+
+
+---
+
+## 監査とモニタリング {#audit-and-monitoring}
+
+### ワークフローログ {#workflow-logs}
+
+すべてのDroidアクティビティはGitHub Actionsワークフロー実行でログに記録され、以下を提供します：
+
+- すべての操作のタイムスタンプ。
+- コマンド入力と出力（機密データを含まない場合）。
+- 各ステップの成功/失敗ステータス。
+- 作成されたコメントや変更へのリンク。
+
+### デバッグアーティファクト {#debug-artifacts}
+
+アクションは以下を含むデバッグアーティファクトをアップロードします：
+
+- Droidセッションログ。
+- コンソール出力。
+- セッションメタデータ。
+
+これらのアーティファクトはデフォルトで7日間保持され、トラブルシューティングや監査目的で使用できます。
+
+### Factory telemetryとの統合 {#integration-with-factory-telemetry}
+
+組織でFactoryのOTEL telemetryを使用している場合、GitHub ActionsからのDroid Execセッションはtelemetryデータに含まれ、以下を提供します：
+
+- リポジトリとワークフローコンテキストでタグ付けされたセッションメトリクス。
+- LLM使用量とコスト配分。
+- ツール呼び出し追跡。
+
+Factoryのテレメトリ機能の詳細については[[jp/enterprise/compliance-audit-and-monitoring|コンプライアンス、監査、モニタリング]]を参照してください。
+
+---
+
+## デプロイメント推奨事項 {#deployment-recommendations}
+
+
+
+
+
+<Details summary="セキュリティ重視の組織向け">
+1. **リポジトリシークレットを使用** – `FACTORY_API_KEY`をリポジトリまたは組織シークレットとして保存します。
+  2. **ワークフロー権限を確認** – ワークフローファイルが必要な権限のみを要求していることを確認します。
+  3. **botアクセスを制限** – 明確な必要がない限り`allowed_bots`は空にします。
+  4. **ブランチ保護を有効化** – Droidが支援した変更のマージ前にPRレビューを必須にします。
+  5. **ワークフロー実行を監視** – GitHub ActionsログでDroidアクティビティを定期的に確認します。
+  6. **ネットワーク制限を検討** – `experimental_allowed_domains`を使用してネットワークアクセスを制限します。
+</Details>
+
+
+
+  
+
+<Details summary="規制対象環境向け">
+- **セルフホストランナー** – 管理下の環境にあるセルフホストランナーでアクションを実行します。
+  - **モデル許可リスト** – Droidが使用できるモデルを制限するFactory組織ポリシーを設定します。
+  - **監査保持** – コンプライアンス要件に合わせてアーティファクト保持期間を調整します。
+  - **SIEMと連携** – GitHub ActionsログとFactoryテレメトリをセキュリティ監視ツールへエクスポートします。
+</Details>
+
+
+
+
+
+---
+
+## 他のデプロイメントパターンとの比較 {#comparison-with-other-deployment-patterns}
+
+| 側面                | GitHub Action       | 開発者マシン上のCLI  | CI内のDroid Exec            |
+| --------------------- | ------------------- | ------------------------- | --------------------------- |
+| 実行環境 | GitHubランナー      | ローカルワークステーション         | CIランナー             |
+| コードアクセス           | 一時的チェックアウト  | フルローカルアクセス         | 一時的チェックアウト          |
+| 認証        | Factory APIキー     | Factory APIキー           | Factory APIキー             |
+| トリガー               | PRイベント、コメント | 手動呼び出し         | CIパイプラインイベント          |
+| 監査証跡           | GitHub Actionsログ | ローカル + Factory telemetry | CIログ + Factory telemetry |
+
+すべてのデプロイメントパターンは同じ基盤となるDroid Execランタイムを使用し、同じFactory組織ポリシーの対象となります。

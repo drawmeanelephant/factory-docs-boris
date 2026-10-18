@@ -1,0 +1,472 @@
+---
+id: jp/enterprise/enterprise-plugin-registry
+title: "エンタープライズプラグインレジストリ"
+status: published
+summary: "プライベートプラグインマーケットプレイスで、承認済みプラグインを組織全体に一元化して配布する。"
+parent: jp/enterprise/index
+tags: [enterprise]
+relations: [relates_to=enterprise/enterprise-plugin-registry]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">エンタープライズプラグインレジストリ</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">プライベートプラグインマーケットプレイスで、承認済みプラグインを組織全体に一元化して配布する。</p>
+
+
+**エンタープライズプラグインレジストリ**は、組織が社内全体での配布用に承認されたプラグインを管理する、中央集約型のプライベートリポジトリです。各チームが個別にプラグインを発見し検証する代わりに、レジストリは事前承認済み、保守され、すぐに使用可能な機能のキュレートされたカタログを提供します。
+
+## エンタープライズプラグインレジストリを使用する理由 {#why-use-an-enterprise-plugin-registry}
+
+| 課題 | 解決策 |
+|-----------|----------|
+| チーム間での**ツールの一貫性の欠如** | 承認されたプラグインの単一ソースにより、全員が同じ機能を使用することを保証 |
+| 各プラグインの**セキュリティとコンプライアンス審査** | 組織レベルでプラグインを一度審査し、どこでも配布 |
+| **新しい開発者のオンボーディング** | 新しいチームメンバーが承認されたすべての機能に即座にアクセス |
+| **役割固有のツール** | チーム機能別（セキュリティ、フロントエンド、データなど）にプラグインをパッケージ化 |
+| **バージョン管理** | プラグインバージョンを中央管理し、組織全体でアップデートを展開 |
+
+## レジストリの設定 {#setting-up-a-registry}
+
+エンタープライズプラグインレジストリは、組織の承認されたプラグインとマーケットプレイスマニフェストを含むGitリポジトリです。
+
+### リポジトリ構造 {#repository-structure}
+
+```
+your-org/droid-plugins/
+├── .factory-plugin/
+│   └── marketplace.json      # レジストリマニフェスト
+├── plugins/
+│   ├── security-toolkit/     # セキュリティチームのプラグイン
+│   │   ├── .factory-plugin/
+│   │   │   └── plugin.json
+│   │   └── skills/
+│   ├── frontend-standards/   # フロントエンドチームのプラグイン
+│   │   ├── .factory-plugin/
+│   │   │   └── plugin.json
+│   │   └── skills/
+│   ├── data-engineering/     # データチームのプラグイン
+│   │   └── ...
+│   └── platform-tools/       # Platform/DevOpsプラグイン
+│       └── ...
+└── README.md
+```
+
+### マーケットプレイスマニフェスト {#marketplace-manifest}
+
+プラグインを登録するために`.factory-plugin/marketplace.json`を作成します：
+
+```json
+{
+  "name": "acme-corp-plugins",
+  "description": "ACME Corp承認済みDroidプラグイン",
+  "owner": {
+    "name": "ACME Platform Team",
+    "email": "platform@acme.com"
+  },
+  "plugins": [
+    {
+      "name": "security-toolkit",
+      "description": "セキュリティレビュー、脅威モデリング、脆弱性スキャン",
+      "source": "./plugins/security-toolkit",
+      "category": "security"
+    },
+    {
+      "name": "frontend-standards",
+      "description": "Reactコンポーネントパターン、アクセシビリティチェック、デザインシステム連携",
+      "source": "./plugins/frontend-standards",
+      "category": "frontend"
+    },
+    {
+      "name": "data-engineering",
+      "description": "SQLレビュー、パイプライン検証、データ品質チェック",
+      "source": "./plugins/data-engineering",
+      "category": "data"
+    },
+    {
+      "name": "platform-tools",
+      "description": "CI/CDヘルパー、インフラレビュー、デプロイ自動化",
+      "source": "./plugins/platform-tools",
+      "category": "platform"
+    }
+  ]
+}
+```
+
+## 組織レベルの設定 {#org-level-configuration}
+
+レジストリを組織レベルで設定することで、すべてのユーザーが自動的に利用できるようになります。組織管理設定に追加します：
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "acme-corp-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "your-org/droid-plugins"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "security-toolkit@acme-corp-plugins": true,
+    "platform-tools@acme-corp-plugins": true
+  }
+}
+```
+
+| フィールド | 目的 |
+|-------|---------|
+| `extraKnownMarketplaces` | ユーザーがプラグインを閲覧・インストールできるようにマーケットプレイスを登録 |
+| `enabledPlugins` | すべてのユーザーに特定のプラグインを事前インストール（オプション） |
+
+### マーケットプレイスの制限 {#restricting-marketplaces}
+
+ユーザーが未承認のマーケットプレイスを追加することを防ぐには、`strictKnownMarketplaces`を使用します：
+
+```json
+{
+  "strictKnownMarketplaces": [
+    { "source": "github", "repo": "your-org/droid-plugins" },
+    { "source": "github", "repo": "Factory-AI/factory-plugins" }
+  ]
+}
+```
+
+`strictKnownMarketplaces`が設定されている場合：
+- ユーザーは承認リストからのマーケットプレイスのみ追加可能
+- 未承認のマーケットプレイスからのプラグインインストールはブロック
+- 既存の未承認マーケットプレイスは動作し続けるが更新不可
+
+この設定により：
+- ユーザーが`/plugins`を実行すると、レジストリが自動的に表示される
+- 事前有効化されたプラグインは手動インストールなしですぐに利用可能
+- ユーザーは必要に応じてレジストリから追加のプラグインをインストール可能
+
+## ユーザーエクスペリエンス {#user-experience}
+
+ユーザーは`/plugins` UIを通じてプラグインを管理します：
+
+1. `/plugins`を実行してプラグインマネージャーを開く
+2. ブラウズタブで組織レジストリを含む登録されたすべてのマーケットプレイスからプラグインを閲覧
+3. 組織が有効にしたプラグインは起動時に自動的に事前インストール
+
+CLI アクセスの場合：
+
+```bash
+droid plugin install frontend-standards@acme-corp-plugins
+droid plugin update security-toolkit@acme-corp-plugins
+```
+
+ユーザーは公開マーケットプレイスと並んでレジストリを確認でき、組織のプラグインは明確にラベル付けされています。
+
+## 役割別のプラグイン整理 {#organizing-plugins-by-role}
+
+組織のチームとワークフローに合わせてレジストリを構造化します：
+
+### チーム機能別 {#by-team-function}
+
+```
+plugins/
+├── security/           # AppSecチーム
+├── frontend/           # Web/モバイルチーム
+├── backend/            # API/サービスチーム
+├── data/               # データエンジニアリング/サイエンス
+├── platform/           # DevOps/SRE
+└── compliance/         # 法務/コンプライアンス
+```
+
+### 機能別 {#by-capability}
+
+```
+plugins/
+├── code-review/        # レビューと品質
+├── testing/            # テスト生成と検証
+├── documentation/      # ドキュメント生成とメンテナンス
+├── migrations/         # コードとデータのマイグレーション
+└── security/           # セキュリティスキャンとレビュー
+```
+
+### プロジェクトタイプ別 {#by-project-type}
+
+```
+plugins/
+├── microservices/      # サービス開発パターン
+├── monolith/           # レガシーシステムツール
+├── data-pipelines/     # ETLとバッチ処理
+└── ml-projects/        # ML/AI開発
+```
+
+## プラグインの事前インストール {#pre-installing-plugins}
+
+全員が必要とする重要な機能については、組織管理設定で`enabledPlugins`を使用します：
+
+```json
+{
+  "enabledPlugins": {
+    "security-toolkit@acme-corp-plugins": true,
+    "code-standards@acme-corp-plugins": true
+  }
+}
+```
+
+事前インストールされたプラグイン：
+- 初回のDroidセッションですぐに利用可能
+- `org`スコープで自動的にインストール
+- `/plugins` UIまたは`droid plugin update`で更新可能
+
+## バージョン管理 {#version-management}
+
+プラグインはGitコミットハッシュでバージョン管理されます。プラグインが更新されると、Droidはマーケットプレイスから最新のコミットを取得します。
+
+バージョンを制御するには、マーケットプレイスソース自体に `ref`（ブランチまたはタグ）または `sha`（フルコミットSHA）を設定して固定します：
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "acme-corp-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "your-org/droid-plugins",
+        "ref": "v2.4.0"
+      }
+    },
+    "acme-corp-plugins-frozen": {
+      "source": {
+        "source": "github",
+        "repo": "your-org/droid-plugins",
+        "sha": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b"
+      }
+    }
+  }
+}
+```
+
+一般的なパターン：
+- `ref: "main"` — すべてのユーザー向けのプロダクション準備完了（デフォルトの動作）
+- `ref: "staging"` — 早期採用者チャンネル
+- `ref: "v1.2.0"` — リリースタグに固定
+- `sha: "<40文字のSHA>"` — 特定のコミットへのハードピン；`droid plugin marketplace update` は何も行いません
+
+完全なソーススキーマについては、[[jp/cli/configuration/plugins#pinning-a-marketplace-to-a-ref-or-commit|プラグイン · マーケットプレイスをrefまたはコミットに固定する]]を参照してください。
+
+
+
+<Aside kind="note">
+プラグインごとの `version` フィールドによるバージョン固定は現在サポートされていません。プラグインのバージョンを固定するには、`ref` または `sha` を使用してプラグインが含まれるマーケットプレイスを固定してください。
+</Aside>
+
+
+
+## プライベート npm レジストリ認証 {#private-npm-registry-authentication}
+
+トークンベース認証が必要なプライベートレジストリ（JFrog Artifactory、AWS CodeArtifact、GitHub Packages など）から npm パッケージとして配布するプラグインでは、プラグインソースの `authTokenEnvVar` フィールドを使って、認証トークンを保持する環境変数を指定します：
+
+```json
+{
+  "plugins": [
+    {
+      "name": "internal-tools",
+      "description": "社内ツール用プラグイン",
+      "source": {
+        "source": "npm",
+        "package": "@acme/droid-internal-tools",
+        "registry": "https://acme.jfrog.io/artifactory/api/npm/npm-virtual/",
+        "authTokenEnvVar": "JFROG_NPM_TOKEN"
+      }
+    }
+  ]
+}
+```
+
+インストール時に、Droid は指定された環境変数からトークンを読み取り、一時的な `.npmrc` にレジストリパス単位の `_authToken` エントリを書き込みます。トークンがインストール後にディスクへ永続化されることはありません。環境変数が設定されていない場合、インストールは早い段階で失敗し、どの変数を `export` すべきかを示す具体的なエラーが表示されます。
+
+オンボーディング用ドキュメントでは、必要なトークンを開発者が `export` するよう案内してください：
+
+```bash
+export JFROG_NPM_TOKEN="$(jfrog rt access-token-create --groups readers | jq -r .access_token)"
+```
+
+## プライベートリポジトリアクセス {#private-repository-access}
+
+プライベートGitリポジトリの場合、Droidが認証できることを確認します：
+
+### GitHub Enterprise {#github-enterprise}
+
+```bash
+# Users authenticate via gh CLI
+gh auth login --hostname github.your-company.com
+```
+
+### GitLab セルフホスト {#gitlab-self-hosted}
+
+```bash
+# Configure git credentials
+git config --global credential.helper store
+```
+
+### SSHベースのアクセス {#ssh-based-access}
+
+リポジトリホスト用のSSHキーが設定されていることを確認してください。
+
+## ローカルマーケットプレイス {#local-marketplaces}
+
+エアギャップ環境やGitアクセスが制限されている場合、ローカルディレクトリマーケットプレイスを使用できます。これは以下の場合に便利です：
+- インターネットアクセスがない環境
+- 公開前のプラグインテスト
+- 共有ネットワークドライブ経由での内部配布
+
+### ローカルマーケットプレイスの設定 {#setting-up-a-local-marketplace}
+
+標準的なマーケットプレイス構造でディレクトリを作成します：
+
+```
+/shared/company-plugins/
+├── .factory-plugin/
+│   └── marketplace.json
+└── plugins/
+    ├── security-toolkit/
+    │   └── .factory-plugin/
+    │       └── plugin.json
+    └── code-standards/
+        └── .factory-plugin/
+            └── plugin.json
+```
+
+### ローカルマーケットプレイスの追加 {#adding-a-local-marketplace}
+
+UI経由：`/plugins` → マーケットプレイスタブ → 「新しいマーケットプレイスを追加」→ 絶対パスを入力
+
+CLI経由：
+
+```bash
+droid plugin marketplace add /shared/company-plugins
+```
+
+### 自動登録の設定 {#configuration-for-auto-registration}
+
+設定で`local`ソースタイプを使用します：
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "company-local-plugins": {
+      "source": {
+        "source": "local",
+        "path": "/shared/company-plugins"
+      }
+    }
+  }
+}
+```
+
+
+
+<Aside kind="note">
+ローカルマーケットプレイスをレジストリから削除しても、Droidはソースディレクトリを**削除しません**。削除時にディレクトリが削除されるのは、Gitでクローンされたマーケットプレイスのみです。
+</Aside>
+
+
+
+## ベストプラクティス {#best-practices}
+
+
+
+
+
+<Details summary="レビュープロセスを確立">
+プラグインをレジストリに追加する前に:
+  - 外部依存関係のセキュリティレビュー
+  - プラットフォームチームによるコードレビュー
+  - 分離環境でのテスト
+  - ドキュメント要件
+</Details>
+
+
+
+  
+
+<Details summary="各プラグインを文書化">
+すべてのプラグインには以下を含むREADMEが必要です:
+  - 提供する機能
+  - 使用すべきタイミング（および使用すべきでないタイミング）
+  - 前提条件や依存関係
+  - 使用例
+</Details>
+
+
+
+  
+
+<Details summary="セマンティックにバージョン管理">
+チームが変更内容を予測できるようにセマンティックバージョニングを使用します:
+  - **Major**: コマンドまたは動作の破壊的変更
+  - **Minor**: 後方互換性のある新機能
+  - **Patch**: バグ修正のみ
+</Details>
+
+
+
+  
+
+<Details summary="導入状況を監視">
+使用されているプラグインを追跡します:
+  - インストール数
+  - アクティブ利用メトリクス
+  - チームからのフィードバック
+  - 課題と機能リクエスト
+</Details>
+
+
+
+  
+
+<Details summary="非推奨化を計画">
+プラグインを廃止するとき:
+  - 非推奨化のタイムラインを告知する
+  - 代替手段への移行パスを提供する
+  - 移行中は非推奨プラグインを読み取り専用で利用可能にします
+</Details>
+
+
+
+
+
+## 例：金融サービス組織 {#example-financial-services-org}
+
+金融サービス会社がレジストリを設定する場合：
+
+**必須プラグイン**（全員に事前インストール）：
+- `compliance-checks` - PCI-DSSおよびSOXコンプライアンス検証
+- `security-scanner` - OWASP脆弱性検出
+- `audit-logging` - すべてのDroidアクションの強化された監査証跡
+
+**チーム固有プラグイン**（インストール可能）：
+- `trading-systems` - 定量分析および取引チーム向け
+- `risk-models` - リスク管理チーム向け
+- `regulatory-reporting` - コンプライアンスチーム向け
+
+**設定 (org-managed-settings.json):**
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "acme-financial-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "acme-financial/droid-plugins"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "compliance-checks@acme-financial-plugins": true,
+    "security-scanner@acme-financial-plugins": true,
+    "audit-logging@acme-financial-plugins": true
+  }
+}
+```
+
+これにより、すべての開発者が初日からコンプライアンスとセキュリティツールを持ちながら、専門チームはドメイン固有の機能を追加できます。
+
+## 関連 {#related}
+
+- [[jp/enterprise/hierarchical-settings-and-org-control|階層設定と組織管理]] - 組織レベル設定の仕組み
+- [[jp/cli/configuration/plugins|プラグイン]] - プラグインの基本とインストール
+- [[jp/guides/building/building-plugins|プラグインの構築]] - 独自プラグインの作成

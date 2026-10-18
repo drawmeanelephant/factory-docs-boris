@@ -1,0 +1,815 @@
+---
+id: jp/guides/hooks/documentation-sync
+title: "ドキュメント同期"
+status: published
+summary: "コード変更に合わせてドキュメントを自動同期する"
+parent: jp/guides/hooks/index
+tags: [guides, documentation, docs, api-docs, sync, changelog, hook]
+relations: [relates_to=guides/hooks/documentation-sync]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">ドキュメント同期</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">コード変更に合わせてドキュメントを自動同期する</p>
+
+
+このクックブックでは、コードが変更された時にドキュメントを自動更新し、ドキュメントを最新の状態に保ち、コードからAPIドキュメントを生成する方法を説明します。
+
+## 動作原理 {#how-it-works}
+
+ドキュメント同期フックでできること：
+
+1. **API ドキュメントの更新**: コードアノテーションからドキュメントを生成
+2. **コード例の同期**: ドキュメント内の例を実際のコードと一致させる
+3. **ドキュメント参照の検証**: ドキュメントが正しいコードパスを参照していることを確認
+4. **変更ログの更新**: 変更ログエントリを自動生成
+5. **ドキュメント完全性チェック**: 新機能にドキュメントを必須にする
+
+## 前提条件 {#prerequisites}
+
+ドキュメントツールをインストールしてください：
+
+
+
+<div class="factory-codegroup">
+<div class="factory-codegroup-bar"><button type="button" class="factory-codegroup-tab is-active" data-tab-idx="0">TypeScript/JavaScript</button><button type="button" class="factory-codegroup-tab" data-tab-idx="1">Python</button><button type="button" class="factory-codegroup-tab" data-tab-idx="2">Go</button></div>
+
+<div class="factory-codegroup-panel is-active" data-panel-idx="0">
+
+```bash
+npm install -D typedoc jsdoc documentation
+npm install -D @readme/openapi-parser  # For OpenAPI
+```
+
+</div>
+
+<div class="factory-codegroup-panel" data-panel-idx="1">
+
+```bash
+pip install sphinx pdoc3 mkdocs
+pip install pydoc-markdown  # Markdown docs from docstrings
+```
+
+</div>
+
+<div class="factory-codegroup-panel" data-panel-idx="2">
+
+```bash
+go install golang.org/x/tools/cmd/godoc@latest
+go install github.com/swaggo/swag/cmd/swag@latest  # For Swagger
+```
+
+</div>
+
+</div>
+
+
+
+## 基本的なドキュメント自動化 {#basic-documentation-automation}
+
+### API ドキュメントの自動生成 {#auto-generate-api-docs}
+
+コードが変更された時にAPIドキュメントを生成します。
+
+`.factory/hooks/generate-api-docs.sh` を作成してください：
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+tool_name=$(echo "$input" | jq -r '.tool_name')
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
+
+# Only process code files
+if ! echo "$file_path" | grep -qE '\.(ts|tsx|js|jsx|py|go)$'; then
+  exit 0
+fi
+
+# Skip test files
+if echo "$file_path" | grep -qE '\.(test|spec)\.(ts|tsx|js|jsx)$'; then
+  exit 0
+fi
+
+cwd=$(echo "$input" | jq -r '.cwd')
+cd "$cwd"
+
+echo "📚 Updating API documentation..."
+
+case "$file_path" in
+  *.ts|*.tsx)
+    # TypeScript - use typedoc
+    if command -v typedoc &> /dev/null && [ -f "typedoc.json" ]; then
+      echo "Generating TypeScript docs..."
+      typedoc --out docs/api src/ 2>&1 || {
+        echo "⚠️ Failed to generate docs" >&2
+      }
+      echo "✓ API docs updated at docs/api"
+    fi
+    ;;
+
+  *.py)
+    # Python - use pdoc
+    if command -v pdoc &> /dev/null; then
+      module_name=$(echo "$file_path" | sed 's|^src/||; s|/|.|g; s|\.py$||')
+      echo "Generating Python docs for $module_name..."
+
+      pdoc --html --output-dir docs/api "$module_name" --force 2>&1 || {
+        echo "⚠️ Failed to generate docs" >&2
+      }
+      echo "✓ API docs updated"
+    fi
+    ;;
+
+  *.go)
+    # Go - use godoc
+    if command -v godoc &> /dev/null; then
+      echo "Generating Go docs..."
+      # Go docs are typically served, not generated
+      # But we can create markdown from godoc
+      echo "✓ Go docs available via 'godoc -http=:6060'"
+    fi
+    ;;
+esac
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/generate-api-docs.sh
+```
+
+`.factory/hooks.json` に追加してください：
+
+```json
+{
+  "PostToolUse": [
+    {
+      "matcher": "Create|Edit|ApplyPatch",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DROID_PROJECT_DIR\"/.factory/hooks/generate-api-docs.sh",
+          "timeout": 30
+        }
+      ]
+    }
+  ]
+}
+```
+
+### プロジェクト変更時にREADMEを更新 {#update-readme-on-project-changes}
+
+README をプロジェクト構造と同期させます。
+
+`.factory/hooks/update-readme.sh` を作成してください：
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+tool_name=$(echo "$input" | jq -r '.tool_name')
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
+
+# Only update on package.json or structure changes
+if ! echo "$file_path" | grep -qE '(package\.json|README\.md)$'; then
+  exit 0
+fi
+
+cwd=$(echo "$input" | jq -r '.cwd')
+cd "$cwd"
+
+# Don't run if README is the file being edited
+if [ "$file_path" = "README.md" ]; then
+  exit 0
+fi
+
+echo "📝 Checking README..."
+
+# Update package info in README
+if [ -f "package.json" ] && [ -f "README.md" ]; then
+  name=$(jq -r '.name' package.json)
+  version=$(jq -r '.version' package.json)
+  description=$(jq -r '.description' package.json)
+
+  # Check if version in README matches package.json
+  if ! grep -q "Version: $version" README.md; then
+    echo "⚠️ README version out of sync with package.json"
+    echo "Package version: $version"
+    echo "Consider updating README.md or ask me to do it"
+  fi
+fi
+
+# Check for missing documentation sections
+required_sections=("Installation" "Usage" "API" "Contributing")
+missing_sections=()
+
+for section in "${required_sections[@]}"; do
+  if ! grep -qi "## $section" README.md; then
+    missing_sections+=("$section")
+  fi
+done
+
+if [ ${#missing_sections[@]} -gt 0 ]; then
+  echo "⚠️ README missing sections:"
+  printf '  - %s\n' "${missing_sections[@]}"
+fi
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/update-readme.sh
+```
+
+
+### ドキュメント内のコード例を同期 {#sync-code-examples-in-documentation}
+
+ドキュメントのコード例が実際のコードと一致することを確認します：
+
+
+
+`.factory/hooks/sync-doc-examples.py` を作成してください：
+
+```python
+#!/usr/bin/env python3
+"""
+Sync code examples in markdown docs with actual source code.
+"""
+import json
+import sys
+import re
+import os
+
+def extract_code_snippets(doc_file):
+    """Extract code snippets from markdown file."""
+    with open(doc_file, 'r') as f:
+        content = f.read()
+
+    # Find code blocks with source file annotations
+    # Format: ```typescript
+    # // From: src/components/Button.tsx
+    pattern = r'```(\w+)\n// From: (.*?)\n(.*?)\n```'
+    snippets = re.findall(pattern, content, re.DOTALL)
+
+    return snippets
+
+def verify_snippet_matches_source(language, source_file, snippet):
+    """Check if snippet exists in source file."""
+    if not os.path.exists(source_file):
+        return False, f"Source file not found: {source_file}"
+
+    with open(source_file, 'r') as f:
+        source_content = f.read()
+
+    # Normalize whitespace for comparison
+    normalized_snippet = ' '.join(snippet.split())
+    normalized_source = ' '.join(source_content.split())
+
+    if normalized_snippet in normalized_source:
+        return True, "Snippet matches source"
+    else:
+        return False, "Snippet does not match source code"
+
+def main():
+    input_data = json.load(sys.stdin)
+    file_path = input_data.get('tool_input', {}).get('file_path', '')
+
+    # Check both code files and doc files
+    if file_path.endswith(('.md', '.mdx')):
+        # Doc file changed - verify all examples
+        print(f"📖 Verifying code examples in {file_path}...")
+
+        snippets = extract_code_snippets(file_path)
+        issues = []
+
+        for lang, source, snippet in snippets:
+            matches, message = verify_snippet_matches_source(lang, source, snippet)
+            if not matches:
+                issues.append(f"{source}: {message}")
+
+        if issues:
+            print("⚠️ Some code examples may be outdated:", file=sys.stderr)
+            for issue in issues:
+                print(f"  - {issue}", file=sys.stderr)
+            print("\nConsider updating the examples in the documentation.", file=sys.stderr)
+        else:
+            print("✓ All code examples are in sync")
+
+    elif file_path.endswith(('.ts', '.tsx', '.js', '.jsx', '.py')):
+        # Code file changed - check if it's referenced in docs
+        print(f"Checking if {file_path} is referenced in documentation...")
+
+        # Find docs that reference this file
+        doc_files = []
+        for root, dirs, files in os.walk('docs'):
+            for file in files:
+                if file.endswith(('.md', '.mdx')):
+                    doc_path = os.path.join(root, file)
+                    with open(doc_path, 'r') as f:
+                        if file_path in f.read():
+                            doc_files.append(doc_path)
+
+        if doc_files:
+            print(f"ℹ️ File is referenced in {len(doc_files)} documentation file(s):")
+            for doc in doc_files:
+                print(f"  - {doc}")
+            print("\nConsider updating these docs if the API changed.")
+
+    sys.exit(0)
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(0)
+```
+
+```bash
+chmod +x .factory/hooks/sync-doc-examples.py
+```
+
+
+## 高度なドキュメント自動化 {#advanced-documentation-automation}
+
+### OpenAPI/Swagger仕様検証 {#openapiswagger-spec-validation}
+
+APIドキュメントが実装と一致していることを確認します:
+
+
+
+`.factory/hooks/validate-openapi.sh`を作成します:
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+tool_name=$(echo "$input" | jq -r '.tool_name')
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
+
+# Check if this is an API route file
+if ! echo "$file_path" | grep -qE 'routes/.*\.(ts|js)$'; then
+  exit 0
+fi
+
+cwd=$(echo "$input" | jq -r '.cwd')
+cd "$cwd"
+
+# Check if OpenAPI spec exists
+if [ ! -f "openapi.yaml" ] && [ ! -f "swagger.yaml" ]; then
+  exit 0
+fi
+
+spec_file="openapi.yaml"
+[ -f "swagger.yaml" ] && spec_file="swagger.yaml"
+
+echo "🔍 Validating OpenAPI spec..."
+
+# Extract route definitions from code
+# This is simplified - you'd need a more sophisticated parser
+routes=$(grep -E "router\.(get|post|put|delete|patch)" "$file_path" | \
+  sed -E "s/.*router\.([a-z]+)\(['\"](.*?)['\"].*/\1 \2/" || true)
+
+if [ -n "$routes" ]; then
+  echo "Routes in $file_path:"
+  echo "$routes" | sed 's/^/  /'
+
+  # Check if routes are documented in OpenAPI spec
+  while IFS= read -r route; do
+    method=$(echo "$route" | awk '{print $1}')
+    path=$(echo "$route" | awk '{print $2}')
+
+    if ! grep -q "$path" "$spec_file"; then
+      echo "⚠️ Route not documented in $spec_file: $method $path"
+      echo "Consider adding this endpoint to the API documentation."
+    fi
+  done <<< "$routes"
+fi
+
+# Validate spec syntax
+if command -v swagger-cli &> /dev/null; then
+  if swagger-cli validate "$spec_file" 2>&1; then
+    echo "✓ OpenAPI spec is valid"
+  else
+    echo "❌ OpenAPI spec has errors" >&2
+  fi
+fi
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/validate-openapi.sh
+```
+
+
+### JSDoc/TSDocの強制 {#jsdoctsdoc-enforcement}
+
+公開APIにドキュメントコメントを必須にします:
+
+
+
+`.factory/hooks/enforce-jsdoc.sh`を作成します:
+
+```bash
+#!/bin/bash
+
+input=$(cat)
+tool_name=$(echo "$input" | jq -r '.tool_name')
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
+content=$(echo "$input" | jq -r '.tool_input.content // ""')
+
+# Only check TypeScript/JavaScript files
+if ! echo "$file_path" | grep -qE '\.(ts|tsx|js|jsx)$'; then
+  exit 0
+fi
+
+# Skip test files
+if echo "$file_path" | grep -qE '\.(test|spec)\.(ts|tsx|js|jsx)$'; then
+  exit 0
+fi
+
+# Check for exported functions/classes without JSDoc
+missing_docs=()
+
+# Find exported functions without JSDoc
+while IFS= read -r line; do
+  # Check if line is an export
+  if echo "$line" | grep -qE '^export (function|class|const|interface|type)'; then
+    # Get the name
+    name=$(echo "$line" | sed -E 's/^export (function|class|const|interface|type) ([a-zA-Z0-9_]+).*/\2/')
+
+    # Check if there's a JSDoc comment before it
+    # This is simplified - you'd want a proper parser
+    if ! echo "$content" | grep -B1 "^export.*$name" | grep -qE '^\s*\*'; then
+      missing_docs+=("$name")
+    fi
+  fi
+done <<< "$content"
+
+if [ ${#missing_docs[@]} -gt 0 ]; then
+  echo "⚠️ Exported items missing documentation:" >&2
+  printf '  - %s\n' "${missing_docs[@]}" >&2
+  echo "" >&2
+  echo "Please add JSDoc comments for public APIs:" >&2
+  echo "/**" >&2
+  echo " * Description of what this does" >&2
+  echo " * @param paramName - Parameter description" >&2
+  echo " * @returns Return value description" >&2
+  echo " */" >&2
+
+  # Warning only, don't block
+  # Change to exit 2 to enforce documentation
+fi
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/enforce-jsdoc.sh
+```
+
+
+### コミットからchangelogを生成 {#generate-changelog-from-commits}
+
+git履歴からchangelogを自動生成します:
+
+
+
+`.factory/hooks/generate-changelog.sh`を作成します:
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+hook_event=$(echo "$input" | jq -r '.hook_event_name')
+
+# Only run on Stop (after work is complete)
+if [ "$hook_event" != "Stop" ]; then
+  exit 0
+fi
+
+cwd=$(echo "$input" | jq -r '.cwd')
+cd "$cwd"
+
+# Check if there are new commits since last changelog update
+if [ ! -f "CHANGELOG.md" ]; then
+  exit 0
+fi
+
+# Get last version in changelog
+last_version=$(grep -m1 "## \[" CHANGELOG.md | sed -E 's/.*\[([0-9.]+)\].*/\1/')
+
+if [ -z "$last_version" ]; then
+  exit 0
+fi
+
+# Get commits since last version tag
+if git rev-parse "v$last_version" &>/dev/null; then
+  new_commits=$(git log "v$last_version..HEAD" --oneline)
+
+  if [ -n "$new_commits" ]; then
+    echo "📝 New commits since v$last_version"
+    echo ""
+    echo "Consider updating CHANGELOG.md with:"
+    echo ""
+
+    # Group commits by type
+    echo "### Features"
+    git log "v$last_version..HEAD" --oneline | grep "^[a-f0-9]* feat" | sed 's/^[a-f0-9]* feat[:(]/- /' || true
+    echo ""
+
+    echo "### Bug Fixes"
+    git log "v$last_version..HEAD" --oneline | grep "^[a-f0-9]* fix" | sed 's/^[a-f0-9]* fix[:(]/- /' || true
+    echo ""
+  fi
+fi
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/generate-changelog.sh
+```
+
+
+### ドキュメントカバレッジレポート {#docs-coverage-report}
+
+どのコードにドキュメントがあるかを追跡します:
+
+
+
+`.factory/hooks/docs-coverage.py`を作成します:
+
+```python
+#!/usr/bin/env python3
+"""
+Calculate documentation coverage for the codebase.
+"""
+import os
+import re
+import sys
+import json
+
+def count_functions(file_path):
+    """Count functions in a file."""
+    with open(file_path, 'r') as f:
+        content = f.read()
+
+    # Count function definitions (simplified)
+    if file_path.endswith('.py'):
+        functions = re.findall(r'^def \w+\(', content, re.MULTILINE)
+    elif file_path.endswith(('.ts', '.tsx', '.js', '.jsx')):
+        functions = re.findall(r'(^export function \w+|^function \w+|const \w+ = \(.*\) =>)',
+                              content, re.MULTILINE)
+    else:
+        return 0
+
+    return len(functions)
+
+def count_documented_functions(file_path):
+    """Count functions with documentation."""
+    with open(file_path, 'r') as f:
+        content = f.read()
+
+    if file_path.endswith('.py'):
+        # Look for docstrings
+        pattern = r'def \w+\(.*?\):\s*"""'
+    elif file_path.endswith(('.ts', '.tsx', '.js', '.jsx')):
+        # Look for JSDoc comments
+        pattern = r'/\*\*.*?\*/\s*(export )?function \w+'
+    else:
+        return 0
+
+    documented = re.findall(pattern, content, re.DOTALL)
+    return len(documented)
+
+def main():
+    # Calculate documentation coverage for src/
+    src_dir = 'src'
+
+    if not os.path.exists(src_dir):
+        sys.exit(0)
+
+    total_functions = 0
+    documented_functions = 0
+
+    for root, dirs, files in os.walk(src_dir):
+        # Skip test files
+        dirs[:] = [d for d in dirs if d not in ['__tests__', 'test', 'tests']]
+
+        for file in files:
+            if file.endswith(('.py', '.ts', '.tsx', '.js', '.jsx')):
+                file_path = os.path.join(root, file)
+                total_functions += count_functions(file_path)
+                documented_functions += count_documented_functions(file_path)
+
+    if total_functions > 0:
+        coverage = (documented_functions / total_functions) * 100
+
+        print(f"\n📊 Documentation Coverage Report")
+        print(f"Documented functions: {documented_functions}/{total_functions}")
+        print(f"Coverage: {coverage:.1f}%")
+
+        if coverage < 60:
+            print("\n⚠️ Documentation coverage is low")
+            print("Consider adding documentation to public APIs")
+        elif coverage < 80:
+            print("\n✓ Documentation coverage is good, but could be better")
+        else:
+            print("\n✓ Excellent documentation coverage!")
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+
+    sys.exit(0)
+```
+
+```bash
+chmod +x .factory/hooks/docs-coverage.py
+```
+
+セッション終了時に実行します:
+
+```json
+{
+  "SessionEnd": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DROID_PROJECT_DIR\"/.factory/hooks/docs-coverage.py",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
+}
+```
+
+
+## ベストプラクティス {#best-practices}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">自動化しても自動コミットしない</div>
+
+ドキュメントを生成しても、コミット前にユーザーがレビューできるようにします:
+```bash
+# Generate docs
+typedoc --out docs/api src/
+
+# Alert but don't commit
+echo "✓ API docs regenerated at docs/api"
+echo "Review changes: git diff docs/"
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">ドキュメント例をテスト可能に保つ</div>
+
+実際のテストから例を抽出します:
+```bash
+# テストファイルから例を抽出
+sed -n '/Example:/,/End example/p' Button.test.tsx > docs/examples/button.md
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">ドキュメントをバージョン管理する</div>
+
+ドキュメントにバージョン情報をタグ付けします:
+```markdown
+# APIリファレンス
+
+> バージョン: 2.1.0
+> 最終更新: 2024-01-15
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">ドキュメントをコードにリンクする</div>
+
+ソースファイル参照を含めます:
+```markdown
+## Buttonコンポーネント
+
+ソース: [`src/components/Button.tsx`](../src/components/Button.tsx)
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">ドキュメント生成ツールを使用</div>
+
+APIドキュメントを手動管理しないでください:
+```bash
+# TypeScript
+typedoc --out docs/api src/
+
+# Python
+pdoc --html --output-dir docs/api src/
+
+# Go
+godoc -http=:6060
+```
+
+</div>
+
+</div>
+
+
+
+## トラブルシューティング {#troubleshooting}
+
+
+
+    **問題**: ドキュメントを生成できない
+
+    **解決策**: ツール設定を確認します:
+    ```bash
+    # Verify tool installation
+    which typedoc
+
+    # Check config file
+    cat typedoc.json
+
+    # Test manually
+    typedoc --version
+    typedoc --help
+    ```
+
+
+
+    **問題**: ドキュメント例がコードと一致しない
+
+    **解決策**: テストから例を抽出します:
+    ```typescript
+    // In test file
+    /* DOC_EXAMPLE_START: basic-usage */
+    const result = myFunction(input);
+    expect(result).toBe(expected);
+    /* DOC_EXAMPLE_END */
+    ```
+
+    その後、プログラムで抽出します:
+    ```bash
+    sed -n '/DOC_EXAMPLE_START/,/DOC_EXAMPLE_END/p' test.ts
+    ```
+
+
+
+    **問題**: ドキュメント生成に時間がかかりすぎる
+
+    **解決策**: 段階的に構築します:
+    ```bash
+    # Only rebuild changed files
+    typedoc --incremental src/
+
+    # Or skip in hooks, run manually
+    if [ "$SKIP_DOC_BUILD" = "true" ]; then
+      exit 0
+    fi
+    ```
+
+
+
+## 関連項目 {#see-also}
+
+- [[jp/reference/hooks-reference|フックリファレンス]] - 完全なフックAPIドキュメント
+- [[jp/cli/configuration/hooks-guide|フックの始め方]] - 基本的なフックの紹介
+- [[jp/guides/hooks/code-validation|コード検証]] - コード標準の強制
+- [[jp/guides/hooks/git-workflows|Gitワークフロー]] - Git統合

@@ -1,0 +1,756 @@
+---
+id: guides/building/building-plugins
+title: "Building Plugins"
+status: published
+summary: "Create shareable plugins with skills, commands, and tools for Droid."
+parent: guides/building/index
+tags: [guides, plugins, building, development, skills, commands, marketplace, distribution]
+relations: [relates_to=jp/guides/building/building-plugins]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Building Plugins</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Create shareable plugins with skills, commands, and tools for Droid.</p>
+
+
+Create Droid plugins to package skills, commands, hooks, and MCP configuration into shareable bundles for teams and projects.
+
+## Quick start {#quick-start}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">Create the plugin directory</div>
+
+```bash
+mkdir -p my-plugin/.factory-plugin
+```
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Create the manifest</div>
+
+Create `my-plugin/.factory-plugin/plugin.json`:
+```json
+{
+  "name": "my-plugin",
+  "description": "A helpful plugin description",
+  "version": "1.0.0"
+}
+```
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Add a command</div>
+
+Create `my-plugin/commands/hello.md`:
+```markdown
+---
+description: Greet the user with a friendly message
+---
+
+Greet the user warmly and ask how you can help them today.
+```
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Test your plugin</div>
+
+Install from local directory to test:
+```bash
+droid plugin marketplace add ./my-plugin
+droid plugin install my-plugin@my-plugin
+```
+Then run `/hello` to test.
+
+</div>
+
+</div>
+
+
+
+## Plugin manifest {#plugin-manifest}
+
+The manifest file at `.factory-plugin/plugin.json` defines your plugin's metadata:
+
+```json
+{
+  "name": "my-plugin",
+  "description": "What this plugin does",
+  "version": "1.0.0",
+  "author": {
+    "name": "Your Name",
+    "email": "you@example.com"
+  },
+  "homepage": "https://github.com/you/my-plugin",
+  "repository": "https://github.com/you/my-plugin",
+  "license": "MIT"
+}
+```
+
+### Required fields {#required-fields}
+
+| Field | Description |
+|-------|-------------|
+| `name` | Unique identifier. Lowercase letters, digits, hyphens. |
+| `description` | Short description shown in plugin manager. |
+| `version` | Semantic version (e.g., `1.0.0`). |
+
+### Optional fields {#optional-fields}
+
+| Field | Description |
+|-------|-------------|
+| `author` | Object with `name` and optional `email`. |
+| `homepage` | URL for plugin documentation. |
+| `repository` | Git repository URL. |
+| `license` | License identifier (e.g., `MIT`, `Apache-2.0`). |
+
+## Adding skills {#adding-skills}
+
+Skills are model-invoked capabilities. Create them in the `skills/` directory:
+
+```
+my-plugin/
+└── skills/
+    └── code-review/
+        └── SKILL.md
+```
+
+### Skill format {#skill-format}
+
+```markdown
+---
+name: code-review
+description: Reviews code for best practices and potential issues. Use when reviewing code, checking PRs, or analyzing code quality.
+---
+
+When reviewing code, check for:
+1. Code organization and structure
+2. Error handling
+3. Security concerns
+4. Test coverage
+
+Provide specific, actionable feedback with line references.
+```
+
+### Skill frontmatter {#skill-frontmatter}
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Unique identifier for the skill |
+| `description` | Yes | When to use this skill (helps model decide when to invoke) |
+| `disable-model-invocation` | No | Set `true` to make it user-only |
+| `allowed-tools` | No | Restrict which tools the skill can use |
+
+## Adding commands {#adding-commands}
+
+Commands are user-invoked via slash syntax. Create them in the `commands/` directory:
+
+```
+my-plugin/
+└── commands/
+    └── review-pr.md
+```
+
+### Command format {#command-format}
+
+```markdown
+---
+description: Review the current PR for issues
+disable-model-invocation: true
+---
+
+# Review PR Command
+
+Review the current pull request. Check for:
+1. Code correctness and logic errors
+2. Test coverage
+3. Documentation updates
+4. Breaking changes
+
+If the user provides arguments: $ARGUMENTS
+
+Use them to focus on specific areas of the review.
+```
+
+A command at `commands/review-pr.md` becomes `/review-pr`.
+
+### Command arguments {#command-arguments}
+
+Use `$ARGUMENTS` to capture user input:
+
+```markdown
+---
+description: Greet a user by name
+---
+
+Greet the user named "$ARGUMENTS" warmly.
+```
+
+Usage: `/greet Alice`
+
+## Adding agents {#adding-agents}
+
+Define specialized subagents in the `droids/` directory:
+
+```
+my-plugin/
+└── droids/
+    └── security-reviewer.md
+```
+
+### Agent format {#agent-format}
+
+```markdown
+---
+name: security-reviewer
+description: Reviews code for security vulnerabilities
+model: inherit
+tools: ["Read", "Grep", "Glob"]
+---
+
+You are a security expert. Review the code for:
+
+1. Injection vulnerabilities (SQL, command, XSS)
+2. Authentication/authorization issues
+3. Sensitive data exposure
+4. Insecure cryptography
+5. Security misconfigurations
+
+Report findings with severity levels and remediation steps.
+```
+
+See [[cli/configuration/custom-droids|Custom Droids]] for full agent configuration options.
+
+## Adding hooks {#adding-hooks}
+
+Define lifecycle hooks in `hooks/hooks.json`:
+
+```
+my-plugin/
+└── hooks/
+    ├── hooks.json
+    └── format-check.sh
+```
+
+### Hook configuration {#hook-configuration}
+
+```json
+{
+  "PostToolUse": [
+    {
+      "matcher": "Create|Edit|ApplyPatch",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "${DROID_PLUGIN_ROOT}/hooks/format-check.sh",
+          "timeout": 30
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Environment variables {#environment-variables}
+
+| Variable | Description |
+|----------|-------------|
+| `${DROID_PLUGIN_ROOT}` | Absolute path to your plugin directory |
+| `${CLAUDE_PLUGIN_ROOT}` | Alias for `${DROID_PLUGIN_ROOT}` (Claude Code compatibility) |
+
+
+
+<Aside kind="note">
+Plugin hooks cannot be imported via `/hooks import`. They only function within installed plugins where the plugin root path can be resolved.
+</Aside>
+
+
+
+## Adding MCP servers {#adding-mcp-servers}
+
+Configure MCP servers in `mcp.json` at the plugin root:
+
+```json
+{
+  "mcpServers": {
+    "my-api": {
+      "command": "npx",
+      "args": ["-y", "@example/mcp-server"],
+      "env": {
+        "API_KEY": "${MY_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+## Testing plugins {#testing-plugins}
+
+### Local testing {#local-testing}
+
+Install from a local directory to test during development:
+
+```bash
+droid plugin marketplace add ./my-plugin
+droid plugin install my-plugin@my-plugin
+```
+
+### Validation checklist {#validation-checklist}
+
+Before sharing your plugin:
+
+- [ ] Manifest has required fields (`name`, `description`, `version`)
+- [ ] All skills have `name` and `description` in frontmatter
+- [ ] Commands work with and without arguments
+- [ ] No hardcoded paths or machine-specific config
+- [ ] README documents all commands and features
+
+## Distributing plugins {#distributing-plugins}
+
+### Creating a marketplace {#creating-a-marketplace}
+
+A marketplace is a Git repository with a manifest listing available plugins:
+
+```
+my-marketplace/
+├── .factory-plugin/
+│   └── marketplace.json
+├── plugin-one/
+│   └── .factory-plugin/
+│       └── plugin.json
+└── plugin-two/
+    └── .factory-plugin/
+        └── plugin.json
+```
+
+### Marketplace manifest {#marketplace-manifest}
+
+Create `.factory-plugin/marketplace.json`:
+
+```json
+{
+  "name": "my-marketplace",
+  "description": "A collection of useful plugins",
+  "owner": {
+    "name": "Your Name"
+  },
+  "plugins": [
+    {
+      "name": "plugin-one",
+      "description": "Description of plugin one",
+      "source": "./plugin-one"
+    },
+    {
+      "name": "plugin-two",
+      "description": "Description of plugin two",
+      "source": "./plugin-two"
+    }
+  ]
+}
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Marketplace identifier |
+| `description` | No | Shown when browsing marketplaces |
+| `owner` | No | Contact information |
+| `plugins[].name` | Yes | Plugin identifier |
+| `plugins[].source` | Yes | Where to fetch the plugin from. A relative path string or a source object. See [[guides/building/building-plugins#plugin-sources|Plugin sources]]. |
+| `plugins[].description` | No | Shown in plugin browser |
+| `plugins[].category` | No | For organizing plugins |
+
+### Plugin sources {#plugin-sources}
+
+Each plugin entry's `source` field tells Droid where to fetch the plugin from. The default form, a relative path string like `"./plugin-one"`, points at a directory inside the marketplace repository. For plugins that live elsewhere, use a source object.
+
+Pinning behavior depends on the source type. Git-based sources (`github`, `url`, `git-subdir`) are pinned per-plugin via `ref` (branch or tag) or `sha`. Relative-path plugins are pinned by pinning the marketplace source they live in. `npm` plugins are pinned via the `version` field, which follows npm version resolution.
+
+| Source type | Fields | Use when |
+| :---------- | :----- | :------- |
+| Relative path | `"./path/to/plugin"` | Plugin lives inside the marketplace repository. |
+| `github` | `repo`, `ref?`, `sha?` | Plugin is hosted in its own GitHub repository. |
+| `url` | `url`, `ref?`, `sha?` | Plugin is hosted on a non-GitHub git host (GitLab, Bitbucket, self-hosted). |
+| `git-subdir` | `url`, `path`, `ref?`, `sha?` | Plugin lives inside a subdirectory of a larger git repository, such as a monorepo. |
+| `npm` | `package`, `version?`, `registry?`, `authTokenEnvVar?` | Plugin is published as an npm package. |
+
+#### npm packages {#npm-packages}
+
+Distribute plugins as npm packages when you already ship to a private registry (Artifactory, CodeArtifact, GitHub Packages, Verdaccio, and so on) and want to reuse that channel for your Droid plugins. Public packages on the npm registry work the same way. For npm sources, pinning and updates follow npm version resolution via the `version` field; the git commit-hash guidance in [[guides/building/building-plugins#version-management|Version management]] applies to git-based sources only.
+
+Requires `npm` to be installed and available on `PATH`. The CLI surfaces a clear error if it is not.
+
+```json
+{
+  "name": "pr-triage",
+  "source": {
+    "source": "npm",
+    "package": "@your-org/droid-pr-triage"
+  }
+}
+```
+
+Pin to a specific version or range:
+
+```json
+{
+  "name": "pr-triage",
+  "source": {
+    "source": "npm",
+    "package": "@your-org/droid-pr-triage",
+    "version": "2.4.0"
+  }
+}
+```
+
+Install from a private registry:
+
+```json
+{
+  "name": "pr-triage",
+  "source": {
+    "source": "npm",
+    "package": "@your-org/droid-pr-triage",
+    "version": "^2.0.0",
+    "registry": "https://npm.your-org.example"
+  }
+}
+```
+
+Authenticate with a private registry that requires a token (for example JFrog Artifactory, AWS CodeArtifact, or GitHub Packages):
+
+```json
+{
+  "name": "pr-triage",
+  "source": {
+    "source": "npm",
+    "package": "@your-org/droid-pr-triage",
+    "registry": "https://acme.jfrog.io/artifactory/api/npm/npm-virtual/",
+    "authTokenEnvVar": "JFROG_NPM_TOKEN"
+  }
+}
+```
+
+Users must set the named environment variable before launching Droid:
+
+```bash
+# bash/zsh
+export JFROG_NPM_TOKEN="your-token-here"
+```
+
+```powershell
+# PowerShell
+$env:JFROG_NPM_TOKEN="your-token-here"
+```
+
+
+
+<Aside kind="warning">
+Never commit tokens to source control or paste them into marketplace JSON. The `authTokenEnvVar` field stores only the variable name, not the secret itself.
+</Aside>
+
+
+
+| Field | Required | Description |
+| :---- | :------- | :---------- |
+| `package` | Yes | npm package name. Scoped packages (`@scope/name`) are supported. |
+| `version` | No | npm version, range, or dist-tag (for example `2.4.0`, `^2.0.0`, `latest`). Defaults to `latest`. Tarball URLs, `file:` paths, `git+...` specs, and `npm:` aliases are rejected; the source must resolve through the configured registry. |
+| `registry` | No | Custom registry URL. Defaults to the system npm registry. Must be `https://` with no embedded credentials, query string, or fragment, so that secrets stay in your registry client config rather than the marketplace JSON. The setting is scoped to the install run and never written to your global `~/.npmrc`. |
+| `authTokenEnvVar` | No | Name of an environment variable that holds an authentication token for the private registry (for example `JFROG_NPM_TOKEN`). Must be a valid shell variable name (`[A-Za-z_][A-Za-z0-9_]*`). Only takes effect when `registry` is also set. At install time, Droid reads the token from this variable and writes a path-scoped `_authToken` entry into a temporary `.npmrc` that is cleaned up after install. If the variable is not set, the install fails early with a clear error. |
+
+**Layout requirements.** The published package root must contain a plugin manifest. Both the native Droid layout (`.factory-plugin/plugin.json`, `droids/`, `mcp.json`) and the Claude Code layout (`.claude-plugin/plugin.json`, `agents/`, `.mcp.json`) are accepted. Claude Code layouts are translated into Droid form when the package is copied into the plugin cache.
+
+A typical published package looks like this:
+
+```
+@your-org/droid-pr-triage/
+├── .factory-plugin/
+│   └── plugin.json
+├── package.json
+├── skills/
+│   └── classify/
+│       └── SKILL.md
+├── droids/
+│   └── triage-reviewer.md
+└── README.md
+```
+
+Set the `files` field in `package.json` so only the plugin payload ships:
+
+```json
+{
+  "name": "@your-org/droid-pr-triage",
+  "version": "2.4.0",
+  "files": [
+    ".factory-plugin",
+    "skills",
+    "droids",
+    "mcp.json",
+    "hooks",
+    "README.md"
+  ]
+}
+```
+
+**Hardening.** Droid runs `npm install` in a per-plugin scratch directory with `--ignore-scripts`, `--no-save`, `--no-audit`, and `--no-fund`. Lifecycle scripts (`postinstall`, `preinstall`, and so on) are not executed, and your global npm configuration is not consulted or mutated. Because lifecycle scripts are skipped, packages that rely on a `postinstall` build step won't ship usable contents. Publish prebuilt artifacts (run your build before `npm publish`) so the package contents under the `files` allowlist are ready to use as-is.
+
+
+
+<Aside kind="note">
+`npm:` is not a valid marketplace source. Droid only accepts `npm` as a per-plugin source inside a marketplace's `marketplace.json`. To ship a single npm-published plugin to your team without standing up a full marketplace repo, publish a thin wrapper marketplace (see below).
+</Aside>
+
+
+
+##### Wrapper marketplace for a single npm plugin {#wrapper-marketplace-for-a-single-npm-plugin}
+
+To distribute one npm-published plugin without a dedicated marketplace repo, commit a small `marketplace.json` to any folder. The folder name becomes the marketplace name.
+
+```
+your-org-plugins/
+└── .factory-plugin/
+    └── marketplace.json
+```
+
+```json
+{
+  "name": "your-org-plugins",
+  "owner": { "name": "Your Org Platform Team" },
+  "plugins": [
+    {
+      "name": "pr-triage",
+      "description": "Triage and label new pull requests for the on-call rotation",
+      "source": {
+        "source": "npm",
+        "package": "@your-org/droid-pr-triage",
+        "version": "^2.0.0"
+      }
+    }
+  ]
+}
+```
+
+Teammates add it like any other local marketplace:
+
+```bash
+droid plugin marketplace add ./your-org-plugins
+droid plugin install pr-triage@your-org-plugins
+```
+
+### Version management {#version-management}
+
+Use semantic versioning in your plugin manifest for documentation purposes:
+
+- **Major** (1.0.0 → 2.0.0): Breaking changes
+- **Minor** (1.0.0 → 1.1.0): New features, backward compatible
+- **Patch** (1.0.0 → 1.0.1): Bug fixes
+
+
+
+<Aside kind="note">
+For git-based plugin sources (relative path, `github`, `url`, `git-subdir`), Droid tracks plugin versions by Git commit hash, not semantic version. By default, updating a plugin fetches the latest commit from the marketplace. To pin a plugin to a specific version, pin the marketplace it lives in by setting `ref` (branch or tag) or `sha` (full commit SHA) on the marketplace source — see [[cli/configuration/plugins#pinning-a-marketplace-to-a-ref-or-commit|Pinning a marketplace to a ref or commit]]. For `npm` plugin sources, pinning follows npm version resolution via the per-plugin `version` field instead.
+</Aside>
+
+
+
+## Claude Code compatibility {#claude-code-compatibility}
+
+Droid is fully compatible with Claude Code plugins. If you find a Claude Code plugin, you can install it directly and Droid will automatically translate the format.
+
+## Best practices {#best-practices}
+
+
+
+
+
+<Details summary="Keep plugins focused">
+Design plugins around a single purpose or workflow. Prefer several small plugins over one monolithic plugin that does everything.
+</Details>
+
+
+  
+  
+
+<Details summary="Document thoroughly">
+Include a README with:
+  - What the plugin does
+  - Installation instructions
+  - All available commands and their usage
+  - Configuration options
+  - Examples
+</Details>
+
+
+  
+  
+
+<Details summary="Use semantic versioning">
+Follow semver conventions so users know when updates might break their workflows.
+</Details>
+
+
+  
+  
+
+<Details summary="Test across environments">
+Ensure your plugin works on macOS, Linux, and Windows if applicable. Use portable shell commands and avoid platform-specific paths.
+</Details>
+
+
+  
+  
+
+<Details summary="Handle errors gracefully">
+Scripts should fail gracefully without blocking the user. Log errors but don't crash sessions.
+</Details>
+
+
+  
+  
+
+<Details summary="Respect user privacy">
+Don't collect telemetry or send data without explicit consent. Document any network requests your plugin makes.
+</Details>
+
+
+
+
+
+## Example: Complete plugin {#example-complete-plugin}
+
+Here's a complete example of a code review plugin:
+
+```
+code-review-plugin/
+├── .factory-plugin/
+│   └── plugin.json
+├── commands/
+│   └── review.md
+├── skills/
+│   └── review-patterns/
+│       └── SKILL.md
+├── droids/
+│   └── reviewer.md
+└── README.md
+```
+
+**`.factory-plugin/plugin.json`:**
+```json
+{
+  "name": "code-review",
+  "description": "Automated code review with multiple specialized reviewers",
+  "version": "1.0.0",
+  "author": { "name": "Your Team" }
+}
+```
+
+**`commands/review.md`:**
+```markdown
+---
+description: Run comprehensive code review on staged changes
+---
+
+Review the staged git changes using the review-patterns skill.
+Focus on: $ARGUMENTS
+
+If no focus area specified, perform a general review.
+```
+
+**`skills/review-patterns/SKILL.md`:**
+```markdown
+---
+name: review-patterns
+description: Use when reviewing code to check for common issues and best practices.
+---
+
+Check code for:
+- Logic errors and edge cases
+- Error handling completeness
+- Security vulnerabilities
+- Performance concerns
+- Test coverage gaps
+```
+
+**`droids/reviewer.md`:**
+```markdown
+---
+name: reviewer
+description: Specialized code reviewer subagent
+model: inherit
+tools: read-only
+---
+
+You are a senior code reviewer. Analyze the provided code and report:
+
+Summary: <one-line assessment>
+Issues:
+- <severity> <description>
+Suggestions:
+- <improvement>
+```
+
+## Next steps {#next-steps}
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**[[cli/configuration/plugins|Plugins overview]]**
+
+Learn about installing and managing plugins.
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**[[cli/configuration/skills|Skills]]**
+
+Deep dive into creating powerful skills.
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**[[cli/configuration/custom-slash-commands|Custom commands]]**
+
+Create user-invoked slash commands.
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**[[cli/configuration/custom-droids|Custom Droids]]**
+
+Create specialized subagents for your plugins.
+
+</div>
+
+</div>

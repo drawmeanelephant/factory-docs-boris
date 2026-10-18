@@ -1,0 +1,151 @@
+---
+id: enterprise/models-llm-gateways-and-integrations
+title: "Models, LLM Gateways & Integrations"
+status: published
+summary: "How Droids connect to your models, LLM gateways, MCP servers, droids, commands, and existing engineering tools."
+parent: enterprise/index
+tags: [enterprise]
+relations: [relates_to=jp/enterprise/models-llm-gateways-and-integrations]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Models, LLM Gateways &amp; Integrations</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">How Droids connect to your models, LLM gateways, MCP servers, droids, commands, and existing engineering tools.</p>
+
+
+Factory is designed to plug into the **AI and developer tooling you already use**. This page explains how to control which models Droid can use, how to route traffic through LLM gateways, and how to manage MCP servers, droids, commands, and platform integrations.
+
+---
+
+## Model management and hierarchy {#model-management-and-hierarchy}
+
+Model access is governed by the same hierarchical settings system used throughout Factory:
+
+- **Org level**
+  - Defines the **authoritative list of allowed models** and categories.
+  - Can explicitly ban models (for example, non‑enterprise APIs) so they cannot be re‑enabled by projects or users.
+  - Decides whether user‑supplied BYOK keys are allowed at all.
+
+- **Project level**
+  - Can **add additional models** on top of the org‑approved set (for example, project‑specific fine‑tunes) but cannot re‑enable banned ones.
+  - Can set project defaults—for example, “use a small model for tests, a large model for refactors.”
+
+- **User level**
+  - Can choose personal defaults **within the allowed set**.
+  - Cannot see or select models that higher levels have disallowed.
+
+Because the hierarchy is extension‑only, upgrades and policy changes at the org level flow consistently across all environments.
+
+---
+
+## LLM gateways {#llm-gateways}
+
+Many enterprises centralize model access behind an **LLM gateway** that handles authentication, routing, and policy enforcement.
+
+Factory works with gateways in two ways:
+
+1. **Directly configured gateway endpoints**
+   - `.factory/settings.json` can specify gateway base URLs for specific providers.
+   - Environment variables can route calls (for example, `ANTHROPIC_BASE_URL`, `OPENAI_BASE_URL`).
+   - Custom models configured via [[cli/byok/overview|BYOK]] can point to gateway endpoints using `base_url` and provider‑specific settings, so the same gateway policy applies whether models are built‑in or custom.
+
+2. **Org‑level gateway policy**
+   - Org admins can require that all model traffic go through specific gateways.
+   - BYOK can be restricted so that only centrally managed keys and identities are used.
+
+When you use a gateway, **data handling and retention policies are those of the gateway and underlying providers**; Droid simply uses the endpoints and credentials you configure.
+
+For concrete examples of configuring custom models (including gateway‑backed models), see [[cli/byok/overview|Custom models & BYOK]], which covers the `customModels` array in `~/.factory/settings.json` and how those models appear in the `/model` selector.
+
+---
+
+## Cloud providers and BYOK {#cloud-providers-and-byok}
+
+Factory supports multiple model deployment patterns:
+
+- **Direct cloud providers** – calling OpenAI, Anthropic, Google, and others using your enterprise credentials.
+- **Cloud AI platforms** – AWS Bedrock, GCP Vertex, Azure OpenAI, using IAM‑backed authentication.
+- **On‑prem / self‑hosted models** – models running inside your network, exposed via approved gateways.
+
+Bring‑your‑own‑key (BYOK) is controlled by policy:
+
+- Org admins can allow or block **user‑supplied API keys**.
+- Even when BYOK is allowed, orgs can restrict which providers and endpoints keys may target.
+- Project configs can define shared keys or credentials for team‑wide models in secure stores.
+
+In high‑security environments, orgs often:
+
+- Disable user BYOK entirely.
+- Route all traffic through gateways that enforce data residency and audit logging.
+
+---
+
+## MCP servers {#mcp-servers}
+
+The **Model Context Protocol (MCP)** lets Droid access external systems—ticket queues, documentation, databases, and more—through well‑defined tools.
+
+MCP servers can be very powerful; they may read from internal systems or perform side‑effecting actions. Factory gives you several levers to control them:
+
+- **Org allowlist/blocklist**
+  - Org admins define which MCP servers are allowed at all.
+  - Servers not on the allowlist are ignored, even if a project tries to configure them.
+
+- **Project‑level configuration**
+  - Projects can enable subsets of the allowed servers and configure environment variables and connection details.
+
+- **User‑level opt‑in**
+  - Users can enable or disable MCP servers from the allowed set for their own sessions.
+
+These controls let you safely expose internal systems to Droid while ensuring each server has passed security and compliance review.
+
+---
+
+## Droids, commands, and tools {#droids-commands-and-tools}
+
+Factory’s ecosystem of **droids, commands, and hooks** is also governed hierarchically.
+
+### Org‑level droids and commands {#orglevel-droids-and-commands}
+
+- Org admins can publish **blessed droids** and **shared commands** into an org‑level `.factory` bundle.
+- These often encode security‑reviewed workflows such as:
+  - `/security-review`
+  - `/migrate-service`
+  - `/refactor-module`
+- Projects and users can use these resources but cannot modify them.
+
+### Project‑level extensions {#projectlevel-extensions}
+
+- Projects add **specialized droids and commands** in their own `.factory/droids/` and `.factory/commands/` directories.
+- These extend org resources with project‑specific logic—such as knowledge of particular services, schemas, or runbooks.
+
+### User‑level customization {#userlevel-customization}
+
+- Users can add personal droids and commands in `~/.factory/droids/` and `~/.factory/commands/`.
+- These are useful for individual workflows but must still respect org and project policies (for example, cannot call disallowed tools or models).
+
+Hooks tie everything together by providing enforcement and logging at the edges of these tools. See [[enterprise/llm-safety-and-agent-controls|LLM Safety & Agent Controls]] for more.
+
+---
+
+## Integration environments {#integration-environments}
+
+Because Droid is CLI‑first, it integrates with many environments without forcing developers into a particular IDE.
+
+Common patterns include:
+
+- **Terminals and shells**
+  - Direct use of Droid in `bash`, `zsh`, `fish`, or Windows shells.
+  - Shell aliases and scripts to standardize workflows across teams.
+
+- **IDE and editor integrations**
+  - Integrations with IDEs such as VS Code, JetBrains tools, and others that treat Droid as a backend agent.
+  - Policies and telemetry still flow through the same hierarchical settings and OTEL pipelines.
+
+- **CI/CD pipelines**
+  - Running Droid in GitHub Actions, GitLab CI, or internal pipelines for tasks like code review, refactoring, and migration.
+  - Use separate identities and credentials for CI compared to developers.
+
+- **Remote and locked-down environments**
+  - Running Droid in air-gapped or restricted environments.
+  - Supporting Factory App and browser-based interfaces for secure enterprise deployments.
+
+Across all of these, the same enterprise controls apply: **models, tools, MCP servers, and telemetry are constrained by org and project policy, not by the IDE or environment**.

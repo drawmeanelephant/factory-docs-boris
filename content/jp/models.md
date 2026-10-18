@@ -1,0 +1,66 @@
+---
+id: jp/models
+title: "利用可能なモデル"
+status: published
+summary: "Factoryプラットフォームでネイティブに提供されるモデル。"
+parent: jp/index
+tags: [jp, models, model-id, available-models, model-families, model-multipliers]
+relations: [relates_to=models]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">利用可能なモデル</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Factoryプラットフォームでネイティブに提供されるモデル。</p>
+
+
+## <span class="provider-heading"><img src="../images/model-icons/anthropic.png" alt="" class="provider-icon anthropic-icon" />Anthropic</span> {#anthropic}
+
+| モデル | 倍率 | 最適用途 |
+| ----- | ---- | -------- |
+| Claude Opus 4.8 | 2× | 新しいOpusフラッグシップ |
+| Claude Opus 4.8 Fast | 4× | より高速なレスポンス用にチューニングされたOpus 4.8 |
+| Claude Opus 4.7 | 1×（4/30後は2×） | 前フラッグシップ、ローンチ期間中は割引 |
+| Claude Opus 4.7 Fast | 12× | より高速なレスポンス用にチューニングされたOpus 4.7 |
+| Claude Opus 4.6 | 2× | 旧フラッグシップ、Max推論 |
+| Claude Opus 4.6 Fast | 12× | より高速なレスポンス用にチューニングされたOpus 4.6 |
+| Claude Sonnet 4.6 | 1.2× | Sonnetの価格帯でMax推論 |
+| Claude Opus 4.5 | 2× | 複雑な推論、アーキテクチャ |
+| Claude Sonnet 4.5 | 1.2× | 品質/コストのバランス |
+| Claude Haiku 4.5 | 0.4× | クイック編集、日常的な作業 |
+
+## <span class="provider-heading"><img src="../images/model-icons/openai.svg" alt="" class="provider-icon openai-icon" />OpenAI</span> {#openai}
+
+| モデル | 倍率 | 最適用途 |
+| ----- | ---- | -------- |
+| GPT-5.5 | 2× | Extra High推論を備えた最新GPTフラッグシップ |
+| GPT-5.5 Fast | 5× | 優先サービスティア上のGPT-5.5 |
+| GPT-5.5 Pro | 12× | リサーチ重視のタスク向けの高性能GPT-5.5バリアント |
+| GPT-5.4 | 1× | Extra High推論を備えた大規模コンテキストGPTモデル |
+| GPT-5.4 Fast | 2× | より高速なGPT-5.4レスポンス |
+| GPT-5.4 Mini | 0.3× | コスト重視のGPT作業 |
+| GPT-5.3-Codex | 0.7× | Extra High推論による高度なコーディング |
+| GPT-5.3-Codex Fast | 1.4× | より高速なGPT-5.3-Codexレスポンス |
+| GPT-5.2 | 0.7× | Extra High推論を使う一般的なGPT作業 |
+
+## <span class="provider-heading"><img src="../images/model-icons/google.ico" alt="" class="provider-icon" />Google</span> {#google}
+
+| モデル | 倍率 | 最適用途 |
+| ----- | ---- | -------- |
+| Gemini 3.1 Pro | 0.8× | 新世代Geminiによる研究、分析 |
+| Gemini 3.5 Flash | 0.6× | 高速なGemini Flashモデル |
+| Gemini 3 Flash | 0.2× | 高頻度タスク向けの高速・安価 |
+
+## <span class="provider-heading"><img src="../favicon.svg" alt="" class="provider-icon factory-icon" />Droid Core（オープンモデル）</span> {#xai}
+
+| モデル | 倍率 | 最適用途 |
+| ----- | ---- | -------- |
+| GLM-5.2 | 0.55× | 最新のオープンソースGLMモデル、バルク自動化とエアギャップ環境向け |
+| GLM-5.1 | 0.55× | Droid Coreでより強力な品質を求める場合の新しいオープンソースGLMモデル |
+| Kimi K2.6 | 0.4× | コスト重視の作業、画像サポート、High推論オプション |
+| Kimi K2.5 | 0.25× | コスト重視の作業、画像サポート |
+| DeepSeek V4 Pro | 0.7× | 長文コンテキストとMax推論が必要な作業 |
+| MiniMax M2.7 | 0.12× | 推論サポート付きの最安価オプション |
+| MiniMax M2.5 | 0.12× | 低コストの推論対応オプション |
+
+## カスタムモデル {#droid-core-open-models}
+
+[[jp/cli/byok/overview|Bring Your Own Key（BYOK）]]でカスタムモデルを設定できます。カスタムモデルは`custom:<alias>`形式のモデルIDを使用します。コンテキストウィンドウ、推論サポート、乗数は、設定したプロバイダーとモデルによって異なります。

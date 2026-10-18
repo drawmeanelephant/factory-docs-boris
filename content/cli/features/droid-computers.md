@@ -1,0 +1,188 @@
+---
+id: cli/features/droid-computers
+title: "Overview"
+status: published
+summary: "Persistent, long-lived compute environments for Droid"
+parent: cli/features/index
+tags: [cli]
+relations: [relates_to=jp/cli/features/droid-computers]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Overview</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Persistent, long-lived compute environments for Droid</p>
+
+
+Droid Computers are persistent compute environments that Droid can connect to and work on across sessions. Unlike ephemeral cloud templates that are destroyed after each session, Droid Computers **retain state** — installed packages, files, running services, and configuration all persist between sessions.
+
+## Droid Computer types {#droid-computer-types}
+
+Factory supports two ways to use Droid Computers:
+
+- **Bring Your Own Machine (BYOM)** — You register a machine you already manage, such as a VPS, workstation, or on-prem server
+- **Managed Droid Computers** — Factory provisions and manages the underlying cloud compute environment for you
+
+Both types appear in **Settings → Droid Computers** and can be used as long-lived targets for Droid sessions.
+
+## Using Droid Computers in sessions {#using-droid-computers-in-sessions}
+
+### Factory App {#factory-app}
+
+In the new session modal, select the **Computer** tab, pick an active Droid Computer, set a working directory (for example, `/home/factory-user/projects/my-app`), and start your session.
+
+Connection status (connecting / connected / error) is shown in real time.
+
+### Slack {#slack}
+
+Droid Computers can also be selected when creating sessions via the Slack integration.
+
+## Managing Droid Computers {#managing-droid-computers}
+
+From **Settings → Droid Computers**, you can:
+
+- Configure your own local Droid Computer
+- Browse available Droid Computers
+- Rename a Droid Computer
+- Delete a Droid Computer
+- Open the detail page for status and connection information (Managed Droid Computers only)
+
+## Bring Your Own Machine (BYOM) {#bring-your-own-machine-byom}
+
+You can register any machine you own — VPS, cloud VM, on-prem server, etc. — as a Droid Computer. For the full BYOM setup flow, Remote Access guidance, and management notes, see [[cli/features/droid-computers-byom|Bring Your Own Machine (BYOM)]].
+
+## Managed Droid Computers {#managed-droid-computers}
+
+The fastest way to get started is to create a Droid Computer directly from the Factory App.
+
+1. Navigate to **Settings → Droid Computers**.
+2. Click **Create**.
+3. Give your Droid Computer a name.
+
+Factory provisions a cloud Droid Computer (4 CPU, 8GB RAM, 6GB swap) automatically. Provisioning progress is tracked live in the UI through the following steps:
+
+1. **Creating Droid Computer** — allocating the cloud Droid Computer
+2. **Setting up user** — creating the `factory-user` account with sudo access
+3. **Configuring environment** — writing environment config, SSH keys, and service files
+4. **Installing Droid** — downloading and installing the Droid binary
+5. **Starting services** — launching the SSH and Droid daemon services
+
+Once provisioning completes, the Droid Computer status changes to **Active** and it becomes available for use in sessions. Platform-managed Droid Computers auto-pause when idle and auto-resume when a new session targets them. They also expose provisioning details, resource metrics, and remote update flows.
+
+## CLI commands {#cli-commands}
+
+### General {#general}
+
+| Command | Description |
+|---------|-------------|
+| `droid computer list` | List all Droid Computers (shows name, ID, status; marks current machine) |
+| `droid computer ssh <name>` | Open an interactive SSH session to any Droid Computer |
+| `droid computer port-forward <name> <mappings...>` | Forward local ports to a Droid Computer over the relay |
+
+### BYOM setup {#byom-setup}
+
+| Command | Description |
+|---------|-------------|
+| `droid computer register [name]` | Register the current machine as a BYOM Droid Computer |
+| `droid computer remove` | Unregister the current machine and clean up local config |
+
+### SSH options {#ssh-options}
+
+The `ssh` subcommand supports the following flags:
+
+- `--proxy` — Run as a stdio proxy (for use as a `ProxyCommand`)
+- `--port <port>` — Target port on the remote machine (default: 22)
+- `--debug` — Enable verbose connection logging
+
+## Port forwarding {#port-forwarding}
+
+`droid computer port-forward <name> <mappings...>` forwards local TCP ports to a Droid Computer over the same relay tunnel used by `droid computer ssh` — no direct port exposure is required. Managed Droid Computers are woken automatically before the connection is established.
+
+Mappings can be passed multiple at a time in one command:
+
+- `LOCAL:REMOTE` — bind `LOCAL` locally and forward to `REMOTE` (e.g. `8080:80`)
+- `REMOTE` — use the same port on both sides (e.g. `5432`)
+- `:REMOTE` — pick a random free local port (e.g. `:9000`)
+
+```
+# Forward local 8080 to remote 80, and local 5432 to remote 5432
+droid computer port-forward mycomputer 8080:80 5432
+```
+
+The `port-forward` subcommand supports the following flags:
+
+- `--address <addr>` — Local address to bind (default: `127.0.0.1`)
+- `--debug` — Enable debug output
+
+Only TCP is supported.
+
+## Monitoring {#monitoring}
+
+Click on any Droid Computer in **Settings → Droid Computers** to open its detail page. For platform-managed Droid Computers, the detail page shows live resource metrics:
+
+- **CPU usage** — percentage utilization over time
+- **Memory usage** — used vs. total memory
+- **Disk usage** — used vs. total disk space
+
+The detail page also shows the current **daemon version** and connection status. Possible Droid Computer statuses are:
+
+- **Provisioning** — initial setup in progress
+- **Active** — ready for sessions
+- **Error** — provisioning or runtime failure
+
+## Updating the daemon {#updating-the-daemon}
+
+The Droid Computer detail page displays the running daemon version alongside the latest available version. When an update is available, an **Update** button appears. Clicking it triggers a remote update — the daemon downloads the new binary, restarts, and reconnects automatically.
+
+## Force Reboot {#force-reboot}
+
+Use **Force Reboot** when a managed Droid Computer becomes unresponsive or a session is stuck connecting. This reboots the computer, not just the current session.
+
+
+
+<Aside kind="warning">
+Force Reboot stops all running processes and disconnects all active sessions on that computer. In-memory work and unflushed writes can be lost. Persisted files are kept.
+</Aside>
+
+
+
+1. Open the affected session in the Factory web or desktop app.
+2. Open the **…** menu beside the session title and select **Force Reboot**.
+3. In the **Force reboot computer** dialog, check the computer name and review the warning. Click **Force reboot** to confirm, or **Cancel** to leave the computer running.
+4. Wait while the dialog shows **Preparing recovery...** and **Rebooting...**. When recovery succeeds, the dialog closes and Factory shows **Computer recovered and daemon reconnected**.
+
+You can also start the same flow from a computer's actions menu in **Settings → Droid Computers**.
+
+Force Reboot is available for active, E2B-hosted managed Droid Computers, including template-backed computers accessed through a session. The session menu remains available when the computer is disconnected, but does not offer Force Reboot for read-only sessions. BYOM and other unsupported computer types do not offer this action.
+
+## Git credentials {#git-credentials}
+
+- **BYOM** — Droid uses whatever git credentials are already configured on the machine.
+- **Managed Droid Computers** — If you have a personal GitHub integration with Factory, credentials are added automatically for authenticated repository access. When you add new GitHub App installations or change repository access, credentials are refreshed automatically on the next session connection.
+
+## SSH & IDE integration {#ssh-ide-integration}
+
+`droid computer ssh <name>` establishes a secure WebSocket tunnel through the daemon — no direct SSH port exposure is required. Factory generates and manages a dedicated Ed25519 SSH key pair (stored in `~/.factory/.ssh/`), separate from your personal SSH keys. The public key is injected on each connection for passwordless authentication.
+
+### VS Code Remote-SSH {#vs-code-remote-ssh}
+
+You can use `droid computer ssh` as a `ProxyCommand` for VS Code Remote-SSH. Add the following to your `~/.ssh/config`:
+
+```
+Host factory-*
+  ProxyCommand droid computer ssh %h --proxy
+  User factory-user
+  StrictHostKeyChecking accept-new
+  UserKnownHostsFile ~/.factory/.ssh/known_hosts
+  IdentityFile ~/.factory/.ssh/id_ed25519
+  IdentitiesOnly yes
+```
+
+The wildcard `factory-*` host applies to every Droid Computer, and `%h` passes the host name through to the CLI, so you connect to `factory-<computer-name>` (for example, `factory-mycomputer`) without adding a stanza per computer. Host keys are recorded on first connect (`StrictHostKeyChecking accept-new`) in a dedicated `~/.factory/.ssh/known_hosts` file, so a changed key surfaces an SSH warning instead of being accepted silently.
+
+This lets you open a full VS Code remote session on your Droid Computer.
+
+## Security {#security}
+
+- **Firewall** — Platform-managed Droid Computers use iptables rules to restrict inbound traffic to the daemon port only; all other ports are blocked by default. Note that `factory-user` has passwordless sudo access and could modify these rules. For a hard network-level boundary, use relay mode, which blocks all public traffic at the infrastructure level.
+- **SSH hardening** — Root login and password authentication are disabled.
+- **Relay mode** — BYOM Droid Computers route all traffic through Factory's relay service, so no public ports are exposed. Platform-managed Droid Computers can also be configured to use relay mode at the organization level for stricter network isolation.
+- **Git credentials** — Configured automatically per-user for authenticated repository access on platform-managed Droid Computers.

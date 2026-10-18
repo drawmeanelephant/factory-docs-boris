@@ -1,0 +1,193 @@
+---
+id: jp/guides/skills/browser
+title: "ブラウザ自動化"
+status: published
+summary: "完全なMCPサーバーを構築せずに、DroidがChromeの起動、タブ移動、JavaScript評価、スクリーンショット取得、DOMメタデータ取得を行える最小限のChrome DevTools Protocolヘルパー。"
+parent: jp/guides/skills/index
+tags: [guides, browser, automation, chrome, cdp, devtools, screenshot, scraping]
+relations: [relates_to=guides/skills/browser]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">ブラウザ自動化</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">完全なMCPサーバーを構築せずに、DroidがChromeの起動、タブ移動、JavaScript評価、スクリーンショット取得、DOMメタデータ取得を行える最小限のChrome DevTools Protocolヘルパー。</p>
+
+
+
+
+<Aside kind="note">
+このクックブックは[Mario Zechnerの“What if you don't need
+  MCP?”](https://mariozechner.at/posts/2025-11-02-what-if-you-dont-need-mcp/),
+  軽量なブラウザヘルパーをチームで共有できるよう、再利用可能なFactoryスキルとして調整されています
+  新しいサービスを立ち上げずに共有できます。
+</Aside>
+
+
+
+browser skillは、いくつかの実行可能スクリプト（`start.js`、`nav.js`、`eval.js`、`screenshot.js`、`pick.js`）と簡潔な`SKILL.md`をバンドルしています。これらにより、Factory Droidsはポート`9222`でChromeを確実に起動し、既存のタブを操作し、構造化データをスクレイピングし、開発者マシン上で完全に動作しながら視覚的証拠を取得する信頼性の高い方法を提供します。
+
+## このスキルを使用する場合 {#when-to-use-this-skill}
+
+- タスクを完了するために**実際のブラウザコンテキスト**（認証済みセッション、本番環境でのみ発生する動作、視覚的リグレッション）が必要な場合。
+- 専用のMCPサーバーを構築することなく**DOM状態を検査または抽出**したい場合。
+- QAノート、バグトリアージ、またはドキュメント作成の一環として**スクリーンショットまたはDOM要素メタデータの取得**が必要な場合。
+- チームメンバーが追加インフラストラクチャなしでローカルで実行できる**ポータブルでgit管理されたバンドル**を好む場合。
+
+## スクリプトが提供する機能 {#what-the-scripts-provide}
+
+| スクリプト          | 目的                                                                                       | 典型的な使用方法                                                 |
+| --------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `start.js`      | `:9222`でリモートデバッグ機能を有効にしてChromeを起動し、`--profile`によるオプションのプロファイル同期を行います。 | `~/.factory/skills/browser/start.js --profile`                |
+| `nav.js`        | アクティブなタブをナビゲートするか、`--new`が渡された際に新しいタブを開きます。                           | `~/.factory/skills/browser/nav.js https://example.com --new`  |
+| `eval.js`       | フォーカスされたタブで任意のJavaScript（async対応）を実行し、構造化された結果を出力します。 | `~/.factory/skills/browser/eval.js "document.title"`          |
+| `screenshot.js` | 現在のビューポートを`$TMPDIR`に保存されるタイムスタンプ付きPNGとしてキャプチャします。                    | `~/.factory/skills/browser/screenshot.js`                     |
+| `pick.js`       | ビジュアルピッカーを注入して、DOM ノードをクリックしてタグ/ID/クラス/テキストメタデータを返すことができます。     | `~/.factory/skills/browser/pick.js "送信ボタンをクリック"` |
+
+すべてのスクリプトは`puppeteer-core`に依存し、あなたが制御するChromeインスタンスに接続します。すべてがローカルで実行されるため、既存のクッキーや認証トークンがマシンから外に出ることはありません。
+
+## セットアップ {#setup}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">スキルフォルダを作成</div>
+
+`mkdir -p .factory/skills/browser`を実行します。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">スクリプトとパッケージメタデータをコピー</div>
+
+`start.js`、`nav.js`、`eval.js`、`screenshot.js`、`pick.js`、および
+`package.json`を`.factory/skills/browser/`に配置します（または共有dotfilesリポジトリへシンボリックリンクします）。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">依存関係をインストール</div>
+
+`npm install --prefix .factory/skills/browser puppeteer-core`を実行し、その後`chmod +x .factory/skills/browser/*.js`を実行します。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Droidを再起動</div>
+
+`droid`（またはIDE連携）を再起動して、ワークスペーススキルを再スキャンし、
+`browser`を検出できるようにします。
+
+</div>
+
+</div>
+
+
+
+## スキル定義 {#skill-definition}
+
+以下を`.factory/skills/browser/SKILL.md`にコピーしてください：
+
+````md
+---
+name: browser
+description: ブラウザ自動化とスクレイピングのための最小限のChrome DevTools Protocolツール。Chromeの起動、ページ遷移、JavaScript実行、スクリーンショット取得、DOM要素の対話的選択が必要な場合に使用します。
+---
+
+# ブラウザツール
+
+共同でのサイト探索とスクレイピングのための最小限のCDPツールです。
+
+**重要**: すべてのスクリプトは`~/.factory/skills/browser/`にあり、完全パスで呼び出す必要があります。
+
+## Chromeを起動
+
+```bash
+~/.factory/skills/browser/start.js              # 新しいプロファイル
+~/.factory/skills/browser/start.js --profile    # あなたのプロファイルをコピー（クッキー、ログイン）
+```
+
+リモートデバッグ付きで`:9222`上にChromeを起動します。
+
+## ナビゲート
+
+```bash
+~/.factory/skills/browser/nav.js https://example.com
+~/.factory/skills/browser/nav.js https://example.com --new
+```
+
+現在のタブをナビゲートするか、新しいタブを開きます。
+
+## JavaScriptを評価
+
+```bash
+~/.factory/skills/browser/eval.js 'document.title'
+~/.factory/skills/browser/eval.js 'document.querySelectorAll("a").length'
+```
+
+アクティブなタブでJavaScriptを実行します（asyncコンテキスト）。
+
+**重要**: コードは単一式にするか、複数文にはIIFEを使用する必要があります:
+
+- 単一式: `'document.title'`
+- 複数文: `'(() => { const x = 1; return x + 1; })()'`
+- コード文字列内の改行を避け、1行に保つ
+
+## スクリーンショット
+
+```bash
+~/.factory/skills/browser/screenshot.js
+```
+
+現在のビューポートのスクリーンショットを撮り、一時ファイルパスを返します。
+
+## 要素を選択
+
+```bash
+~/.factory/skills/browser/pick.js "送信ボタンをクリック"
+```
+
+対話的な要素ピッカーです。クリックで選択、Cmd/Ctrl+クリックで複数選択、Enterで完了します。
+
+## 使用上の注意
+
+- 他のツールを使用する前に、まずChromeを起動する
+- `--profile`フラグは実際のChromeプロファイルを同期するため、各サイトにログインした状態になります
+- JavaScript評価はページ内のasyncコンテキストで実行されます
+- Pickツールでは、クリックしてDOM要素を視覚的に選択できます
+
+```
+
+## ワークフローレシピ
+
+1. **Chromeを開始** - `start.js --profile`で認証状態をミラーリングします。
+2. **ナビゲーション操作** - `nav.js https://target.app`でナビゲートするか、`--new`でセカンダリタブを開きます。
+3. **DOMを検査** - `eval.js`を使用してクイックカウント、属性チェック、またはJSONペイロードの抽出を行います。
+4. **アーティファクトをキャプチャ** - 視覚的証拠のために`screenshot.js`を使用するか、正確なセレクタやテキストスナップショットが必要な場合は`pick.js`を使用します。
+5. **収集した証拠を返す** - セッションサマリーまたはPR説明に、ファイルパス、DOMメタデータ、クエリ出力を含めます。
+
+このワークフローにより、エージェントは現在のブラウジングコンテキストに集中し、生の認証情報やクッキーをマシンの外に送信することを回避できます。
+
+## 検証
+
+- `~/.factory/skills/browser/start.js --profile`は`✓ Chrome started on :9222 with your profile`を出力するはずです。
+- `~/.factory/skills/browser/nav.js https://example.com`はナビゲーションを確認するはずです。
+- `~/.factory/skills/browser/eval.js 'document.title'`は現在のページタイトルを表示するはずです。
+- `~/.factory/skills/browser/screenshot.js`はシステム一時ディレクトリ下の有効なPNGパスを出力するはずです。
+
+いずれかのステップが失敗した場合は、`start.js`を再実行し、Chromeが`localhost:9222/json/version`でリッスンしていることを確認し、`puppeteer-core`がインストールされていることを確認してください。
+```
+````

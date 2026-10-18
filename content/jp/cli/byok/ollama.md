@@ -1,0 +1,143 @@
+---
+id: jp/cli/byok/ollama
+title: "Ollama"
+status: published
+summary: "自分のハードウェアでモデルをローカル実行するか、Ollama Cloudを使用する"
+parent: jp/cli/byok/index
+tags: [cli, ollama, local, self-hosted, byok, llama, offline, on-premise]
+relations: [relates_to=cli/byok/ollama]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Ollama</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">自分のハードウェアでモデルをローカル実行するか、Ollama Cloudを使用する</p>
+
+
+Ollamaを使用してローカルハードウェアでモデルを実行するか、ホスト型推論にはOllama Cloudを使用してください。
+
+
+
+<Aside kind="note">
+**パフォーマンスに関する注意**: 300億パラメータ未満のモデルは、エージェント型コーディングタスクで大幅に低い性能を示しています。小型モデル（7B、13B）は実験や学習には役立ちますが、本番のコーディング作業や複雑なソフトウェアエンジニアリングタスクには一般的に推奨されません。
+</Aside>
+
+
+
+
+## ローカル Ollama {#local-ollama}
+
+インターネット接続不要で、マシン上で完全にモデルを実行します。
+
+### 設定 {#configuration}
+
+`~/.factory/settings.json` に追加：
+
+```json
+{
+  "customModels": [
+    {
+      "model": "qwen2.5-coder:32b",
+      "displayName": "Qwen 2.5 Coder 32B [Local]",
+      "baseUrl": "http://localhost:11434/v1",
+      "apiKey": "not-needed",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 16000
+    },
+    {
+      "model": "qwen2.5-coder:7b",
+      "displayName": "Qwen 2.5 Coder 7B [Local]",
+      "baseUrl": "http://localhost:11434/v1",
+      "apiKey": "not-needed",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 4000
+    }
+  ]
+}
+```
+
+### セットアップ {#setup}
+
+
+
+<Aside kind="warning">
+**コンテキストウィンドウ設定**: Factoryで最適なパフォーマンスを得るには、コンテキストウィンドウを少なくとも32,000トークンに設定してください。方法は次のいずれかです:
+  - Ollamaアプリのコンテキストウィンドウスライダーを使用する（最小32kに設定）
+  - 起動前に環境変数を設定する: `OLLAMA_CONTEXT_LENGTH=32000 ollama serve`
+
+  十分なコンテキストがない場合、体験は大幅に低下します。
+</Aside>
+
+
+
+1. [ollama.com/download](https://ollama.com/download) からOllamaをインストール
+2. 必要なモデルをプル：
+   ```bash
+   # Recommended models
+   ollama pull qwen2.5-coder:32b
+   ollama pull qwen2.5-coder:7b
+   ```
+3. 追加のコンテキストでOllamaサーバーを開始：
+   ```bash
+   OLLAMA_CONTEXT_LENGTH=32000 ollama serve
+   ```
+4. Factory設定に構成を追加
+
+
+### おおよそのハードウェア要件 {#approximate-hardware-requirements}
+
+| モデルサイズ | 必要RAM | VRAM (GPU) |
+|-----------|--------------|------------|
+| 3B params | 4GB | 3GB |
+| 7B params | 8GB | 6GB |
+| 13B params | 16GB | 10GB |
+| 30B params | 32GB | 20GB |
+| 70B params | 64GB | 40GB |
+
+## Ollama Cloud {#ollama-cloud}
+
+ローカルハードウェア要件なしで、Ollamaのクラウドサービスを使用してホスト型モデル推論を利用
+
+### 推奨クラウドモデル {#recommended-cloud-model}
+
+エージェント型コーディングに最適なパフォーマンスは **qwen3-coder:480b** で観測されています。
+
+利用可能なクラウドモデルの完全なリストについては：[ollama.com/search?c=cloud](https://ollama.com/search?c=cloud)
+
+### 設定 {#configuration-2}
+
+```json
+{
+  "customModels": [
+    {
+      "model": "qwen3-coder:480b-cloud",
+      "displayName": "qwen3-coder [Online]",
+      "baseUrl": "http://localhost:11434/v1/",
+      "apiKey": "not-needed",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 128000
+    }
+  ]
+}
+```
+
+### クラウドモデルを始める {#getting-started-with-cloud-models}
+
+1. Ollamaがインストールされ、ローカルで実行されていることを確認
+2. クラウドモデルはローカルOllamaインスタンス経由でアクセス - APIキー不要
+3. 上記の設定をFactory設定に追加
+4. 要求時にモデルが自動的にクラウドコンピュートを使用
+
+## トラブルシューティング {#troubleshooting}
+
+### ローカルサーバーが接続できない {#local-server-not-connecting}
+- Ollamaが実行中であることを確認：`ollama serve`
+- ポート11434が利用可能かチェック
+- テストには `curl http://localhost:11434/api/tags` を試行
+
+### モデルが見つからない {#model-not-found}
+- 最初にモデルをプル：`ollama pull model-name`
+- `ollama list` で正確なモデル名を確認
+
+## 注意事項 {#notes}
+
+- ローカルAPIは認証不要（`api_key` には任意のプレースホルダーを使用）
+- モデルは `~/.ollama/models/` に保存されます

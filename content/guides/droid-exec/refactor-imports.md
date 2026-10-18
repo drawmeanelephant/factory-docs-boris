@@ -1,0 +1,431 @@
+---
+id: guides/droid-exec/refactor-imports
+title: "Organize Imports"
+status: published
+summary: "Automatically organize imports across your entire codebase using Droid Exec"
+parent: guides/droid-exec/index
+tags: [guides, imports, organize-imports, refactor, automation, codebase, droid-exec]
+relations: [relates_to=jp/guides/droid-exec/refactor-imports]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Organize Imports</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Automatically organize imports across your entire codebase using Droid Exec</p>
+
+
+Use Droid Exec to refactor import statements across hundreds of files. The workflow groups, sorts, and optimizes imports while removing unused dependencies and converting module formats.
+
+## How it works {#how-it-works}
+
+The script:
+
+1. **Finds files**: Searches for all `.js`, `.jsx`, `.ts`, and `.tsx` files
+2. **Filters smartly**: Excludes `node_modules`, `.git`, `dist`, and `build` directories
+3. **Checks for imports**: Only processes files that contain import statements
+4. **Groups imports**: Organizes into external, internal, and relative imports
+5. **Sorts alphabetically**: Within each group for consistency
+6. **Removes unused**: Eliminates imports that aren't referenced
+7. **Modernizes syntax**: Converts `require()` to ES6 `import`
+8. **Consolidates duplicates**: Merges multiple imports from the same module
+
+## Get the script {#get-the-script}
+
+
+
+<Details summary="View full script source">
+```bash
+#!/bin/bash
+
+# Simplified Droid Import Refactoring Script
+# A cookbook example of using AI to refactor imports across a codebase
+#
+# Usage: ./droid-refactor-imports.sh [directory]
+# Example: ./droid-refactor-imports.sh src
+
+set -e
+
+# Configuration
+CONCURRENCY=${CONCURRENCY:-5}
+DRY_RUN=${DRY_RUN:-false}
+TARGET_DIR="${1:-.}"
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Temp files for tracking
+TEMP_DIR=$(mktemp -d)
+FILES_LIST="$TEMP_DIR/files.txt"
+MODIFIED_COUNT=0
+PROCESSED_COUNT=0
+
+# Cleanup on exit
+trap "rm -rf $TEMP_DIR" EXIT
+
+# Function to process a single file
+process_file() {
+    local filepath="$1"
+    local filename=$(basename "$filepath")
+
+    # Check if file has imports
+    if ! grep -qE "^import |^const .* = require\(|^export .* from" "$filepath" 2>/dev/null; then
+        return 0
+    fi
+
+    echo -e "${BLUE}Processing: $filepath${NC}"
+
+    # The AI prompt for refactoring imports
+    local prompt="Refactor the imports in $filepath:
+
+1. Group imports in this order with blank lines between:
+   - External packages (node_modules)
+   - Internal/absolute imports (@/ or src/)
+   - Relative imports (./ or ../)
+
+2. Sort alphabetically within each group
+3. Remove unused imports
+4. Convert require() to ES6 imports
+5. Consolidate duplicate imports from same module
+
+Only modify imports, preserve all other code exactly.
+Return the complete refactored file."
+
+    if [ "$DRY_RUN" = "true" ]; then
+        echo -e "${YELLOW}  [DRY RUN] Would refactor imports${NC}"
+        return 0
+    fi
+
+    # Get original file hash for comparison
+    local original_hash=$(md5sum "$filepath" 2>/dev/null | cut -d' ' -f1 || md5 -q "$filepath")
+
+    # Run droid to refactor the file
+    if droid exec --auto low "$prompt" 2>/dev/null; then
+        # Check if file was modified
+        local new_hash=$(md5sum "$filepath" 2>/dev/null | cut -d' ' -f1 || md5 -q "$filepath")
+        if [ "$original_hash" != "$new_hash" ]; then
+            echo -e "${GREEN}  ✓ Refactored${NC}"
+            ((MODIFIED_COUNT++))
+        fi
+        ((PROCESSED_COUNT++))
+    else
+        echo "  ✗ Failed to process"
+    fi
+}
+
+# Export function and variables for parallel execution
+export -f process_file
+export DRY_RUN GREEN YELLOW BLUE NC
+
+# Main execution
+echo -e "${BLUE}=== Droid Import Refactoring ===${NC}"
+echo -e "${BLUE}Directory: $TARGET_DIR${NC}"
+echo -e "${BLUE}Concurrency: $CONCURRENCY${NC}"
+[ "$DRY_RUN" = "true" ] && echo -e "${YELLOW}DRY RUN MODE${NC}"
+echo ""
+
+# Find JavaScript and TypeScript files
+find "$TARGET_DIR" -type f \
+    \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" \) \
+    ! -path "*/node_modules/*" \
+    ! -path "*/.git/*" \
+    ! -path "*/dist/*" \
+    ! -path "*/build/*" \
+    > "$FILES_LIST"
+
+FILE_COUNT=$(wc -l < "$FILES_LIST" | tr -d ' ')
+
+if [ "$FILE_COUNT" -eq 0 ]; then
+    echo -e "${YELLOW}No JavaScript/TypeScript files found${NC}"
+    exit 0
+fi
+
+echo -e "${BLUE}Found $FILE_COUNT files to check${NC}\n"
+
+# Process files in parallel
+cat "$FILES_LIST" | xargs -n 1 -P "$CONCURRENCY" -I {} bash -c 'process_file "$@"' _ {}
+
+# Show summary
+echo -e "\n${BLUE}=== Summary ===${NC}"
+echo -e "${GREEN}Files processed: $PROCESSED_COUNT${NC}"
+[ "$DRY_RUN" = "false" ] && echo -e "${GREEN}Files modified: $MODIFIED_COUNT${NC}"
+
+if [ "$DRY_RUN" = "false" ] && [ "$MODIFIED_COUNT" -gt 0 ]; then
+    echo -e "\n${BLUE}Next steps:${NC}"
+    echo "  git diff           # Review changes"
+    echo "  git add -A         # Stage changes"
+    echo "  git commit -m 'refactor: organize imports'"
+fi
+```
+</Details>
+
+
+
+## Prerequisites {#prerequisites}
+
+Before you begin, complete the [[cli/droid-exec/overview#installation|Droid Exec installation]].
+
+## Basic usage {#basic-usage}
+
+### Preview changes (dry run) {#preview-changes-dry-run}
+
+
+
+<Aside kind="warning">
+Always start with a dry run to preview changes before modifying files. This helps you understand what transformations will be applied.
+</Aside>
+
+
+
+The dry run feature is controlled by the `DRY_RUN` environment variable:
+
+```bash
+# Preview what would happen (no changes made)
+DRY_RUN=true ./droid-refactor-imports.sh src
+
+# Example output:
+# === Droid Import Refactoring ===
+# Directory: src
+# Concurrency: 5
+# DRY RUN MODE
+# 
+# Found 25 files to check
+# 
+# Processing: src/components/Button.tsx
+#   [DRY RUN] Would refactor imports
+# Processing: src/utils/api.ts
+#   [DRY RUN] Would refactor imports
+```
+
+**How dry run works:**
+- When `DRY_RUN=true`: The script finds all files that need processing and shows which files have imports to refactor, but doesn't modify any files
+- When `DRY_RUN=false` (default): Actually runs the AI refactoring and modifies the files
+
+This is particularly useful for:
+- Testing on a small directory first to understand the changes
+- Estimating time/cost before processing a large codebase
+- Verifying the script finds the right files before committing to changes
+
+### Apply refactoring {#apply-refactoring}
+
+Once you're satisfied with the preview, run the actual refactoring:
+
+```bash
+# Actually refactor the imports (default behavior)
+./droid-refactor-imports.sh packages/models
+
+# Or explicitly set DRY_RUN=false
+DRY_RUN=false ./droid-refactor-imports.sh packages/models
+
+# Adjust concurrency for faster processing
+CONCURRENCY=10 ./droid-refactor-imports.sh packages/models
+```
+
+Actual execution example:
+```
+=== Droid Import Refactoring ===
+Directory: packages/models
+Concurrency: 5
+
+Found 78 files to check
+
+Processing: packages/models/src/organization/test-utils/fixtures.ts
+Processing: packages/models/src/organization/agentReadiness/types.ts
+Processing: packages/models/src/organization/utils.ts
+Processing: packages/models/src/organization/agentReadiness/handlers.ts
+Processing: packages/models/jest.config.ts
+Processing: packages/models/src/organization/user/defaultRepositories/handlers.ts
+Perfect! I've successfully refactored the imports in the file...
+## Summary
+
+I've successfully refactored the imports in `packages/models/src/organization/test-utils/fixtures.ts`. 
+The imports are now properly organized with comments separating external packages from relative imports...
+...
+```
+
+## Real-world transformations {#real-world-transformations}
+
+### Example 1: CommonJS to ES6 Conversion {#example-1-commonjs-to-es6-conversion}
+
+
+
+<div class="factory-tabs">
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">Before</div>
+
+```typescript
+// customers.ts
+const getStripeInstance = require("./instance").getStripeInstance;
+import dayjs from 'dayjs';  // unused import
+import url from 'url';  // unused import
+```
+
+</div>
+
+
+  
+  
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">After</div>
+
+```typescript
+// customers.ts
+// Relative imports
+import { getStripeInstance } from './instance';
+```
+
+
+<Aside kind="note">
+CommonJS converted to ES6, unused imports removed
+</Aside>
+
+
+
+</div>
+
+</div>
+
+
+
+### Example 2: Consolidating Duplicate Imports {#example-2-consolidating-duplicate-imports}
+
+
+
+<div class="factory-tabs">
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">Before</div>
+
+```typescript
+// admin.ts
+const { auth } = require('firebase-admin');
+import { App } from "firebase-admin/app"
+import { Firestore } from 'firebase-admin/firestore';
+import dotenv from 'dotenv';  // unused import
+const { FirebaseProjectName } = require("./enums");
+import {
+  getFirestoreInstanceForProject,
+  getFirebaseAuthInstanceForProject,
+} from './multi-admin';
+const { initializeFirebaseAdminApp } = require('./multi-admin');
+import {
+  getFirestoreInstance as getDefaultFirestoreInstance,
+  getFirestoreInstanceForTest as getDefaultFirestoreInstanceForTest,
+  getFirebaseAuthInstance as getDefaultFirebaseAuthInstance,
+} from "./multi-admin"
+import express from 'express';  // unused import
+```
+
+</div>
+
+
+  
+  
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">After</div>
+
+```typescript
+// admin.ts
+// External packages
+import { auth } from 'firebase-admin';
+import { App } from 'firebase-admin/app';
+import { Firestore } from 'firebase-admin/firestore';
+
+// Relative imports
+import { FirebaseProjectName } from './enums';
+import {
+  getFirestoreInstanceForProject,
+  getFirebaseAuthInstanceForProject,
+  initializeFirebaseAdminApp,
+  getFirestoreInstance as getDefaultFirestoreInstance,
+  getFirestoreInstanceForTest as getDefaultFirestoreInstanceForTest,
+  getFirebaseAuthInstance as getDefaultFirebaseAuthInstance,
+} from './multi-admin';
+```
+
+
+<Aside kind="note">
+Multiple imports from same module consolidated, unused removed, CommonJS converted
+</Aside>
+
+
+
+</div>
+
+</div>
+
+
+
+## Best practices {#best-practices}
+
+
+
+<Aside kind="note">
+Follow these best practices for safe and effective import refactoring.
+</Aside>
+
+
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">Start with a dry run</div>
+
+Always preview changes before modifying files:
+```bash
+# Preview what would happen without making changes
+DRY_RUN=true ./droid-refactor-imports.sh packages/models
+```
+
+</div>
+
+
+  
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Test on a small scope first</div>
+
+Start with a specific subdirectory before processing entire codebase:
+```bash
+# Test on a single module first
+./droid-refactor-imports.sh packages/models/src/utils
+
+# Then expand to larger directories
+./droid-refactor-imports.sh packages/models
+```
+
+</div>
+
+
+  
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Process incrementally</div>
+
+For large codebases, process directories separately for easier review:
+```bash
+# Process each package separately
+./droid-refactor-imports.sh packages/models
+git add -A && git commit -m "refactor: organize imports in models"
+
+./droid-refactor-imports.sh packages/services  
+git add -A && git commit -m "refactor: organize imports in services"
+```
+
+</div>
+
+</div>

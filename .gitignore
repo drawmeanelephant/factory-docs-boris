@@ -1,0 +1,18 @@
+# Generated build outputs (recreate in ~2.1s with `boris build --profile boris.json -j 4`)
+dist/
+.boris/
+rag/
+rag-complete/
+context/
+.zig-cache/
+__pycache__/
+*.pyc
+.DS_Store
+.local-review/
+.tools/
+bin/
+public-site/
+.boris-pages-profile.json
+.pages-evidence/
+LOCAL-*-REPORT.md
+screenshots/local-*/

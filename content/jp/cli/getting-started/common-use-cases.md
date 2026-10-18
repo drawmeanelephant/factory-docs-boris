@@ -1,0 +1,246 @@
+---
+id: jp/cli/getting-started/common-use-cases
+title: "一般的なユースケース"
+status: published
+summary: "インタラクティブなターミナルUIですぐに実行できる実践的なワークフロー。"
+parent: jp/cli/getting-started/index
+tags: [cli, use-cases, examples, workflows, prompts, tasks, coding, refactoring]
+relations: [relates_to=cli/getting-started/common-use-cases]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">一般的なユースケース</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">インタラクティブなターミナルUIですぐに実行できる実践的なワークフロー。</p>
+
+
+Droidは実世界の開発タスクに優れています。このガイドでは、すぐに使える実用的なワークフローと、優れた結果を得られる具体的なプロンプトを紹介します。
+
+## 新しいコードベースを理解する {#understanding-a-new-codebase}
+
+**まず全体像から始める：**
+
+```
+Analyze this codebase and explain the overall architecture.
+What technologies and frameworks does this project use?
+Where are the main entry points and how is testing set up?
+```
+
+**具体的な詳細に掘り下げる：**
+
+```
+Explain how user authentication flows through this system.
+What are the main components in the frontend and how do they interact?
+Show me where the API routes are defined and list the key handlers.
+```
+
+**ドメインごとにナビゲートする：**
+
+```
+Where does payment processing happen? Walk me through a typical payment flow.
+Find all the database models and explain their relationships.
+Show me the error handling patterns used throughout this codebase.
+```
+
+Droidは組織の知識を活用し、プロジェクト全体の構造を読み取って、関連ファイルの参照とアーキテクチャの洞察を含む包括的な説明を提供できます。
+
+## バグ修正とデバッグ {#fixing-bugs-and-debugging}
+
+**エラーメッセージから解決策まで：**
+
+```
+I'm seeing this error in production:
+TypeError: Cannot read properties of undefined (reading 'title')
+at src/components/PostCard.tsx:37:14
+
+Help me reproduce locally and fix it. Explain the root cause first.
+```
+
+**デバッグでのログ使用：**
+
+```
+Here are the server logs from the last hour showing 500 errors.
+Find the failing code path and propose a fix with proper error handling.
+```
+
+**体系的なデバッグ：**
+
+```
+Users report that file uploads fail randomly with "Network timeout" errors.
+The upload logic is in src/upload/handler.ts.
+Add logging to diagnose the issue and implement retry logic.
+```
+
+Droidはエラーパターンを分析し、問題を再現する失敗テストを作成し、最小限の修正を提案し、解決策が機能することを確認します。
+
+## 機能の構築 {#building-features}
+
+**エンタープライズワークフロー統合：**
+
+```
+Implement the feature described in this Jira ticket: https://company.atlassian.net/browse/PROJ-123
+Follow our security standards and include comprehensive error handling.
+```
+
+**API開発：**
+
+```
+Add a PATCH /users/:id endpoint with email uniqueness validation.
+Return 200 on success, 400 on invalid payload, 404 if user missing.
+Update the OpenAPI spec and add integration tests.
+Similar patterns exist in src/routes/users/get.ts.
+```
+
+**Specification Modeの使用：**
+複雑な機能については、[[jp/cli/user-guides/specification-mode|Specification Mode]]を使用して実装前に自動的に計画を立てます。これにより適切なアーキテクチャが確保され、反復が減少します。
+
+## テストでの作業 {#working-with-tests}
+
+**テスト駆動開発：**
+
+```
+Write comprehensive tests for the user registration flow first.
+Don't implement the actual registration logic yet.
+Include tests for validation, duplicate emails, and password requirements.
+```
+
+**失敗するテストの修正：**
+
+```
+Run tests and fix the first failing test.
+Explain the root cause before making changes.
+Show me the diff before applying any fixes.
+```
+
+**テストカバレッジの改善：**
+
+```
+Identify untested critical paths in the payment processing module.
+Propose specific test cases and implement them with proper mocks.
+```
+
+## コードレビュー {#code-review}
+
+**ローカルレビューワークフロー：**
+
+ガイド付きコードレビューワークフローには`/review`コマンドを使用します：
+
+```
+/review
+# Choose from:
+# - Review against a base branch (PR-style)
+# - Review uncommitted changes
+# - Review a specific commit
+# - Custom review instructions
+```
+
+**直接的なレビュープロンプト：**
+
+```
+Review my uncommitted changes and suggest improvements before I commit.
+```
+
+```
+Review this PR for security vulnerabilities, performance issues, and code quality.
+Focus on SQL injection risks and authentication bypass scenarios.
+```
+
+```
+Review the last 3 commits for consistency with our coding standards.
+Flag any deviations from the patterns in AGENTS.md.
+```
+
+[[jp/cli/features/code-review|コードレビューについて詳しく見る →]]
+
+## 安全なリファクタリング {#safe-refactoring}
+
+**構造の改善：**
+
+```
+Refactor the authentication module into smaller files with no behavior change.
+Keep the public API identical and run all tests after each change.
+```
+
+**依存関係の更新：**
+
+```
+Replace the deprecated bcrypt library with bcryptjs project-wide.
+Update all imports and ensure compatibility across the codebase.
+Show a summary of all files changed.
+```
+
+**コード品質：**
+
+```
+Extract the shared date utility functions into a separate module.
+Update imports across the repository and run tests to confirm identical behavior.
+```
+
+## ドキュメント作成とコミュニケーション {#documentation-and-communication}
+
+**APIドキュメント：**
+
+```
+Generate comprehensive OpenAPI specification for the payments service.
+Include request/response examples and error codes.
+Create a TypeScript SDK based on the spec.
+```
+
+**コードの説明：**
+
+```
+Explain the relationship between the AutoScroller and ViewUpdater classes using a diagram.
+Document the data flow and key methods for new team members.
+```
+
+**リリース管理：**
+
+```
+Summarize all changes in this branch and draft a pull request description.
+Include breaking changes and migration notes for API consumers.
+```
+
+## エンタープライズ統合 {#enterprise-integration}
+
+**チームツール統合：**
+Factoryのダッシュボードを通じてプラットフォームを統合している場合、droidは特定のチケットやドキュメントへのリンクを貼り付けたときに自動的にコンテキストを読み取ることができます：
+
+```
+Read this Jira ticket and implement the feature: https://company.atlassian.net/browse/PROJ-123
+Include all the acceptance criteria and follow our security standards.
+```
+
+```
+Use the requirements from this Notion spec to implement the user preferences API: https://notion.so/team/user-prefs-spec
+Follow the data structure and validation rules outlined in the document.
+```
+
+**セキュリティ重視の開発：**
+
+```
+Add file upload functionality with proper validation to prevent directory traversal attacks.
+Follow the security patterns used in our existing document upload feature.
+Include rate limiting and file type validation.
+```
+
+**コンプライアンス考慮事項：**
+
+```
+Review this authentication implementation for GDPR compliance.
+Ensure proper data encryption and user consent handling.
+Add audit logging for all user data access.
+```
+
+## 最大限の価値を得る {#getting-the-most-value}
+
+**具体的で直接的に：** 「ログインのバグを修正して」の代わりに、「設定された30分ではなく5分後にユーザーがログアウトされる認証タイムアウトを修正して」と試してみてください。
+
+**検証手順を提供：** droidに成功を確認する方法を伝えます—特定のテストを実行する、サービスがきれいに開始することを確認する、またはUIの動作を確認するなど。
+
+**組織の知識を活用：** チームの慣例、既存のパターン、確立されたプラクティスを参照してください。Droidはあなたのコードベースから学習し、一貫性の維持を支援できます。
+
+**レビューワークフローを活用：** 承認前に必ず提案された変更をレビューしてください。透明な差分ビューにより、修正を理解し、より良い将来の結果のためのフィードバックを提供できます。
+
+## 次のステップ {#next-steps}
+
+これらのワークフローを試す準備はできましたか？[[jp/cli/getting-started/quickstart|Quickstart]]でdroidを実行するか、複雑な機能開発については[[jp/cli/user-guides/specification-mode|Specification Mode]]に飛び込んでください。
+コミュニケーションのヒントについては、[[jp/cli/getting-started/how-to-talk-to-a-droid|How to Talk to a Droid]]を参照して、より良い結果を得る実証されたプロンプトパターンを学んでください。
+コミュニケーションのヒントについては、[[jp/cli/getting-started/how-to-talk-to-a-droid|How to Talk to a Droid]]を参照して、より良い結果を得る実証されたプロンプトパターンを学んでください。

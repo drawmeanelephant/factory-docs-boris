@@ -1,0 +1,908 @@
+---
+id: jp/guides/hooks/code-validation
+title: "コード検証フック"
+status: published
+summary: "コード標準、セキュリティポリシー、ベストプラクティスを自動適用する"
+parent: jp/guides/hooks/index
+tags: [guides, validation, security, standards, lint, code-quality, policies, hook]
+relations: [relates_to=guides/hooks/code-validation]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">コード検証フック</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">コード標準、セキュリティポリシー、ベストプラクティスを自動適用する</p>
+
+
+このクックブックでは、Droidが変更を行う前に、フックを使用してコードの変更を検証し、セキュリティポリシーを強制し、コード品質基準を維持する方法を説明します。
+
+## 仕組み {#how-it-works}
+
+検証フックでは以下のことができます：
+
+1. **安全でない操作をブロック**: 機密ファイルやディレクトリの編集を防止
+2. **基準を強制**: スタイルガイドとベストプラクティスに対してコードをチェック
+3. **セキュリティを検証**: シークレット、脆弱性、セキュリティ問題をスキャン
+4. **フィードバックを提供**: 修正すべき内容についてDroidに具体的なガイダンスを提供
+5. **チェックを実行**: リンター、型チェッカー、カスタムバリデーターを実行
+
+## 前提条件 {#prerequisites}
+
+お使いのスタック用の検証ツールをインストールしてください：
+
+
+
+<div class="factory-codegroup">
+<div class="factory-codegroup-bar"><button type="button" class="factory-codegroup-tab is-active" data-tab-idx="0">JavaScript/TypeScript</button><button type="button" class="factory-codegroup-tab" data-tab-idx="1">Python</button><button type="button" class="factory-codegroup-tab" data-tab-idx="2">Go</button><button type="button" class="factory-codegroup-tab" data-tab-idx="3">Security Tools</button></div>
+
+<div class="factory-codegroup-panel is-active" data-panel-idx="0">
+
+```bash
+npm install -D eslint typescript @typescript-eslint/parser
+npm install -D semgrep  # For security scanning
+```
+
+</div>
+
+<div class="factory-codegroup-panel" data-panel-idx="1">
+
+```bash
+pip install flake8 pylint bandit  # Linting and security
+pip install semgrep  # Multi-language security scanner
+```
+
+</div>
+
+<div class="factory-codegroup-panel" data-panel-idx="2">
+
+```bash
+go install golang.org/x/tools/cmd/goimports@latest
+go install honnef.co/go/tools/cmd/staticcheck@latest
+```
+
+</div>
+
+<div class="factory-codegroup-panel" data-panel-idx="3">
+
+```bash
+# Gitleaks for secret detection
+brew install gitleaks  # macOS
+# or download from https://github.com/gitleaks/gitleaks
+```
+
+</div>
+
+</div>
+
+
+
+## 基本的な検証 {#basic-validation}
+
+### 機密ファイル編集のブロック {#block-sensitive-file-edits}
+
+Droidが重要なファイルを変更することを防止します。
+
+`.factory/hooks/protect-files.sh`を作成：
+
+```bash
+#!/bin/bash
+
+input=$(cat)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
+
+# Skip if no file path
+if [ -z "$file_path" ]; then
+  exit 0
+fi
+
+# List of protected patterns
+protected_patterns=(
+  "\.env"
+  "\.env\."
+  "package-lock\.json"
+  "yarn\.lock"
+  "\.git/"
+  "node_modules/"
+  "dist/"
+  "build/"
+  "secrets/"
+  "\.pem$"
+  "\.key$"
+  "\.p12$"
+  "credentials\.json"
+)
+
+# Check if file matches any protected pattern
+for pattern in "${protected_patterns[@]}"; do
+  if echo "$file_path" | grep -qE "$pattern"; then
+    echo "❌ Cannot modify protected file: $file_path" >&2
+    echo "This file is protected by project policy." >&2
+    echo "If you need to modify it, please do so manually." >&2
+    exit 2  # Exit code 2 blocks the operation
+  fi
+done
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/protect-files.sh
+```
+
+`.factory/hooks.json`に追加：
+
+```json
+{
+  "PreToolUse": [
+    {
+      "matcher": "Create|Edit|ApplyPatch",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DROID_PROJECT_DIR\"/.factory/hooks/protect-files.sh",
+          "timeout": 3
+        }
+      ]
+    }
+  ]
+}
+```
+
+### TypeScript構文の検証 {#validate-typescript-syntax}
+
+編集を受け入れる前にTypeScriptファイルの型エラーをチェックします。
+
+`.factory/hooks/validate-typescript.sh`を作成：
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+tool_name=$(echo "$input" | jq -r '.tool_name')
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
+
+# Only validate TypeScript files
+if ! echo "$file_path" | grep -qE '\.(ts|tsx)$'; then
+  exit 0
+fi
+
+# For Write operations, validate the content directly
+if [ "$tool_name" = "Write" ]; then
+  content=$(echo "$input" | jq -r '.tool_input.content')
+
+  # Write to temp file for validation
+  temp_file=$(mktemp --suffix=.ts)
+  echo "$content" > "$temp_file"
+
+  # Run TypeScript compiler on temp file
+  if ! npx tsc --noEmit "$temp_file" 2>&1; then
+    rm "$temp_file"
+    echo "❌ TypeScript validation failed" >&2
+    echo "The code contains type errors. Please fix them before proceeding." >&2
+    exit 2
+  fi
+
+  rm "$temp_file"
+fi
+
+# For Edit operations, validate the file will be valid after edit
+# (This requires reading the file and applying the edit, which is complex)
+# For now, we'll validate post-edit in PostToolUse
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/validate-typescript.sh
+```
+
+PostToolUse検証の場合：
+
+```json
+{
+  "PostToolUse": [
+    {
+      "matcher": "Create|Edit|ApplyPatch",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -qE '\\.(ts|tsx)$' && [ -f \"$file_path\" ]; then npx tsc --noEmit \"$file_path\" 2>&1 || { echo '⚠️ Type errors detected in '$file_path >&2; }; fi; }",
+          "timeout": 30
+        }
+      ]
+    }
+  ]
+}
+```
+
+## セキュリティ検証 {#security-validation}
+
+### シークレット検出 {#secret-detection}
+
+シークレットや認証情報のコミットを防止します。
+
+`.factory/hooks/scan-secrets.sh`を作成：
+
+```bash
+#!/bin/bash
+
+input=$(cat)
+tool_name=$(echo "$input" | jq -r '.tool_name')
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
+
+# Only scan file write/edit operations
+if [ "$tool_name" != "Write" ] && [ "$tool_name" != "Edit" ]; then
+  exit 0
+fi
+
+# Skip non-text files
+if echo "$file_path" | grep -qE '\.(jpg|png|gif|pdf|zip|tar|gz)$'; then
+  exit 0
+fi
+
+# Get content to scan
+if [ "$tool_name" = "Write" ]; then
+  content=$(echo "$input" | jq -r '.tool_input.content')
+else
+  # For Edit, we'd need to check the file after edit (PostToolUse is better)
+  exit 0
+fi
+
+# Create temp file for scanning
+temp_file=$(mktemp)
+echo "$content" > "$temp_file"
+
+# Pattern-based secret detection
+secret_patterns=(
+  "AKIA[0-9A-Z]{16}"  # AWS Access Key
+  "AIza[0-9A-Za-z\\-_]{35}"  # Google API Key
+  "sk-[a-zA-Z0-9]{32,}"  # OpenAI API Key
+  "[a-f0-9]{32}"  # Generic 32-char hex (MD5)
+  "ghp_[a-zA-Z0-9]{36}"  # GitHub Personal Access Token
+  "glpat-[a-zA-Z0-9\\-]{20}"  # GitLab Personal Access Token
+)
+
+found_secrets=0
+
+for pattern in "${secret_patterns[@]}"; do
+  if grep -qE "$pattern" "$temp_file"; then
+    echo "❌ Potential secret detected matching pattern: $pattern" >&2
+    found_secrets=1
+  fi
+done
+
+# Also check for common variable names with suspicious values
+if grep -qE "(password|secret|key|token|api_key)\s*[:=]\s*['\"][^'\"]{8,}" "$temp_file"; then
+  echo "⚠️ Suspicious credential-like assignment detected" >&2
+  echo "Review: $(grep -E "(password|secret|key|token|api_key)\s*[:=]" "$temp_file" | head -1)" >&2
+  found_secrets=1
+fi
+
+rm "$temp_file"
+
+if [ $found_secrets -eq 1 ]; then
+  echo "" >&2
+  echo "Please use environment variables or secure secret management instead." >&2
+  exit 2  # Block the operation
+fi
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/scan-secrets.sh
+```
+
+`.factory/hooks.json`に追加：
+
+```json
+{
+  "PostToolUse": [
+    {
+      "matcher": "Create|Edit|ApplyPatch",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DROID_PROJECT_DIR\"/.factory/hooks/scan-secrets.sh",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 依存関係セキュリティスキャン {#dependency-security-scanning}
+
+脆弱な依存関係をチェックします。
+
+`.factory/hooks/check-deps.sh`を作成：
+
+```bash
+#!/bin/bash
+
+input=$(cat)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
+
+# Only check package files
+if [[ ! "$file_path" =~ (package\.json|requirements\.txt|go\.mod|Cargo\.toml)$ ]]; then
+  exit 0
+fi
+
+echo "🔍 Checking for vulnerable dependencies..."
+
+case "$file_path" in
+  *package.json)
+    if command -v npm &> /dev/null; then
+      # Run npm audit
+      if ! npm audit --audit-level=high 2>&1; then
+        echo "⚠️ Vulnerable dependencies detected" >&2
+        echo "Run 'npm audit fix' to resolve issues" >&2
+        # Don't block, just warn
+        exit 0
+      fi
+    fi
+    ;;
+
+  *requirements.txt)
+    if command -v pip-audit &> /dev/null; then
+      if ! pip-audit -r "$file_path" 2>&1; then
+        echo "⚠️ Vulnerable Python packages detected" >&2
+        exit 0
+      fi
+    fi
+    ;;
+
+  *Cargo.toml)
+    if command -v cargo-audit &> /dev/null; then
+      if ! cargo audit 2>&1; then
+        echo "⚠️ Vulnerable Rust crates detected" >&2
+        exit 0
+      fi
+    fi
+    ;;
+esac
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/check-deps.sh
+```
+
+`.factory/hooks.json`に追加：
+
+```json
+{
+  "PostToolUse": [
+    {
+      "matcher": "Create|Edit|ApplyPatch",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DROID_PROJECT_DIR\"/.factory/hooks/check-deps.sh",
+          "timeout": 30
+        }
+      ]
+    }
+  ]
+}
+```
+
+## コード品質検証 {#code-quality-validation}
+
+### リンティングルールの強制 {#enforce-linting-rules}
+
+変更を受け入れる前にリンティングルールに対してコードを検証します。
+
+`.factory/hooks/lint-check.sh`を作成：
+
+```bash
+#!/bin/bash
+
+input=$(cat)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
+
+if [ ! -f "$file_path" ]; then
+  # File doesn't exist yet (Write operation), skip for now
+  exit 0
+fi
+
+# Run appropriate linter based on file type
+case "$file_path" in
+  *.ts|*.tsx|*.js|*.jsx)
+    if command -v eslint &> /dev/null; then
+      if ! eslint "$file_path" 2>&1; then
+        echo "" >&2
+        echo "❌ ESLint found issues in $file_path" >&2
+        echo "Please fix the linting errors above." >&2
+        exit 2  # Block the operation
+      fi
+      echo "✓ ESLint passed for $file_path"
+    fi
+    ;;
+
+  *.py)
+    if command -v flake8 &> /dev/null; then
+      if ! flake8 "$file_path" 2>&1; then
+        echo "" >&2
+        echo "❌ Flake8 found issues in $file_path" >&2
+        exit 2
+      fi
+      echo "✓ Flake8 passed for $file_path"
+    fi
+    ;;
+
+  *.go)
+    if command -v golint &> /dev/null; then
+      if ! golint "$file_path" 2>&1; then
+        echo "" >&2
+        echo "❌ Golint found issues in $file_path" >&2
+        exit 2
+      fi
+    fi
+    ;;
+
+  *.rs)
+    if command -v clippy &> /dev/null; then
+      if ! cargo clippy -- -D warnings 2>&1; then
+        echo "❌ Clippy found issues" >&2
+        exit 2
+      fi
+    fi
+    ;;
+esac
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/lint-check.sh
+```
+
+`.factory/hooks.json`に追加：
+
+```json
+{
+  "PostToolUse": [
+    {
+      "matcher": "Create|Edit|ApplyPatch",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DROID_PROJECT_DIR\"/.factory/hooks/lint-check.sh",
+          "timeout": 30
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 複雑度チェック {#complexity-checks}
+
+過度に複雑なコードを拒否します。
+
+`.factory/hooks/check-complexity.py`を作成：
+
+```python
+#!/usr/bin/env python3
+"""
+Check code complexity and reject changes that are too complex.
+Uses radon for Python, or custom heuristics for other languages.
+"""
+import json
+import sys
+import subprocess
+import re
+
+def check_python_complexity(file_path):
+    """Check Python file complexity using radon."""
+    try:
+        result = subprocess.run(
+            ['radon', 'cc', file_path, '-s', '-n', 'C'],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+
+        if result.returncode == 0 and result.stdout:
+            print(f"❌ Code complexity too high in {file_path}", file=sys.stderr)
+            print(result.stdout, file=sys.stderr)
+            print("\nPlease simplify the code by:", file=sys.stderr)
+            print("- Breaking down large functions", file=sys.stderr)
+            print("- Reducing nesting levels", file=sys.stderr)
+            print("- Extracting helper functions", file=sys.stderr)
+            return False
+
+    except (subprocess.SubprocessError, FileNotFoundError):
+        pass
+
+    return True
+
+def check_js_complexity(file_path):
+    """Basic complexity check for JavaScript/TypeScript."""
+    with open(file_path, 'r') as f:
+        content = f.read()
+
+    # Count nesting level (very basic check)
+    max_nesting = 0
+    current_nesting = 0
+
+    for char in content:
+        if char == '{':
+            current_nesting += 1
+            max_nesting = max(max_nesting, current_nesting)
+        elif char == '}':
+            current_nesting -= 1
+
+    if max_nesting > 5:
+        print(f"⚠️ High nesting level ({max_nesting}) in {file_path}", file=sys.stderr)
+        print("Consider refactoring to reduce nesting.", file=sys.stderr)
+        # Warning only, don't block
+
+    return True
+
+try:
+    input_data = json.load(sys.stdin)
+    file_path = input_data.get('tool_input', {}).get('file_path', '')
+
+    if not file_path:
+        sys.exit(0)
+
+    if file_path.endswith('.py'):
+        if not check_python_complexity(file_path):
+            sys.exit(2)
+    elif file_path.endswith(('.js', '.jsx', '.ts', '.tsx')):
+        if not check_js_complexity(file_path):
+            sys.exit(2)
+
+except Exception as e:
+    print(f"Error checking complexity: {e}", file=sys.stderr)
+    sys.exit(0)  # Don't block on errors
+```
+
+```bash
+chmod +x .factory/hooks/check-complexity.py
+pip install radon  # For Python complexity checking
+```
+
+`.factory/hooks.json`に追加：
+
+```json
+{
+  "PostToolUse": [
+    {
+      "matcher": "Create|Edit|ApplyPatch",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DROID_PROJECT_DIR\"/.factory/hooks/check-complexity.py",
+          "timeout": 15
+        }
+      ]
+    }
+  ]
+}
+```
+
+## 高度な検証 {#advanced-validation}
+
+### カスタムビジネスロジック検証 {#custom-business-logic-validation}
+
+ドメイン固有のルールを強制します。
+
+`.factory/hooks/validate-business-logic.sh`を作成：
+
+```bash
+#!/bin/bash
+
+input=$(cat)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
+content=$(echo "$input" | jq -r '.tool_input.content // ""')
+
+# Example: Ensure API routes have authentication
+if echo "$file_path" | grep -qE 'routes/.*\.ts$'; then
+  if echo "$content" | grep -qE 'router\.(get|post|put|delete)' && \
+     ! echo "$content" | grep -qE '(authenticate|requireAuth|isAuthenticated)'; then
+    echo "❌ API routes must include authentication middleware" >&2
+    echo "Add authenticate() or requireAuth() to your route handlers." >&2
+    exit 2
+  fi
+fi
+
+# Example: Ensure database queries use parameterized statements
+if echo "$content" | grep -qE 'db\.query\([^?]*\$\{'; then
+  echo "❌ SQL injection risk detected" >&2
+  echo "Use parameterized queries instead of string interpolation." >&2
+  echo "Bad:  db.query(\`SELECT * FROM users WHERE id = \${id}\`)" >&2
+  echo "Good: db.query('SELECT * FROM users WHERE id = ?', [id])" >&2
+  exit 2
+fi
+
+# Example: Ensure React components have prop type validation
+if echo "$file_path" | grep -qE 'components/.*\.(tsx|jsx)$'; then
+  if echo "$content" | grep -qE 'export (const|function)' && \
+     ! echo "$content" | grep -qE '(PropTypes|interface.*Props|type.*Props)'; then
+    echo "⚠️ React component should have prop type definitions" >&2
+    echo "Consider adding TypeScript interfaces or PropTypes." >&2
+    # Warning only, don't block
+  fi
+fi
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/validate-business-logic.sh
+```
+
+`.factory/hooks.json`に追加：
+
+```json
+{
+  "PostToolUse": [
+    {
+      "matcher": "Create|Edit|ApplyPatch",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DROID_PROJECT_DIR\"/.factory/hooks/validate-business-logic.sh",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
+}
+```
+
+### アーキテクチャ準拠 {#architecture-compliance}
+
+コードがアーキテクチャパターンに従うことを確保します。
+
+`.factory/hooks/check-architecture.py`を作成：
+
+```python
+#!/usr/bin/env python3
+"""
+Enforce architectural boundaries and patterns.
+"""
+import json
+import sys
+import os
+import re
+
+ARCHITECTURE_RULES = {
+    # Frontend components shouldn't import from backend
+    r'src/frontend/.*\.tsx?$': {
+        'forbidden_imports': [r'src/backend/', r'../backend/'],
+        'message': 'Frontend code cannot import from backend'
+    },
+
+    # Domain layer shouldn't import from infrastructure
+    r'src/domain/.*\.ts$': {
+        'forbidden_imports': [r'src/infrastructure/', r'express', r'axios'],
+        'message': 'Domain layer must be framework-agnostic'
+    },
+
+    # Tests shouldn't import from src
+    r'tests/.*\.test\.ts$': {
+        'forbidden_imports': [r'src/(?!test-utils)'],
+        'message': 'Tests should use public APIs, not internal imports'
+    },
+}
+
+def check_imports(file_path, content):
+    """Check if imports violate architecture rules."""
+    for pattern, rule in ARCHITECTURE_RULES.items():
+        if re.search(pattern, file_path):
+            # Extract all imports from the file
+            import_pattern = r'from [\'"](.+?)[\'"]|import .+ from [\'"](.+?)[\'"]'
+            imports = re.findall(import_pattern, content)
+
+            for imp in imports:
+                import_path = imp[0] or imp[1]
+
+                # Check against forbidden patterns
+                for forbidden in rule['forbidden_imports']:
+                    if re.search(forbidden, import_path):
+                        print(f"❌ Architecture violation in {file_path}", file=sys.stderr)
+                        print(f"   {rule['message']}", file=sys.stderr)
+                        print(f"   Forbidden import: {import_path}", file=sys.stderr)
+                        return False
+
+    return True
+
+try:
+    input_data = json.load(sys.stdin)
+    file_path = input_data.get('tool_input', {}).get('file_path', '')
+    content = input_data.get('tool_input', {}).get('content', '')
+
+    if not file_path or not content:
+        sys.exit(0)
+
+    if not check_imports(file_path, content):
+        sys.exit(2)
+
+except Exception as e:
+    print(f"Error: {e}", file=sys.stderr)
+    sys.exit(0)
+```
+
+```bash
+chmod +x .factory/hooks/check-architecture.py
+```
+
+`.factory/hooks.json`に追加：
+
+```json
+{
+  "PostToolUse": [
+    {
+      "matcher": "Create|Edit|ApplyPatch",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DROID_PROJECT_DIR\"/.factory/hooks/check-architecture.py",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
+}
+```
+
+## ベストプラクティス {#best-practices}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">明確なフィードバックを提供する</div>
+
+操作をブロックするときは、何が問題でどう修正するかを説明します:
+```bash
+echo "❌ Problem: TypeScript errors found" >&2
+echo "Solution: Fix the type errors shown above" >&2
+echo "Example: Add proper type annotations to parameters" >&2
+exit 2
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">警告とエラーを適切に使い分ける</div>
+
+すべてがDroidをブロックする必要はありません:
+```bash
+# Warning (exit 0) - inform but don't block
+echo "⚠️ Code complexity is high, consider refactoring" >&2
+exit 0
+
+# Error (exit 2) - block the operation
+echo "❌ Secret detected, cannot proceed" >&2
+exit 2
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">パフォーマンスを重視する</div>
+
+検証を高速に保ちます:
+```bash
+# Use grep for quick checks before expensive operations
+if grep -q "password" "$file"; then
+  # Only run expensive scan if simple check passes
+  run_detailed_security_scan "$file"
+fi
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">ルールを設定可能にする</div>
+
+チームが検証をカスタマイズできるようにします:
+```bash
+# Read config from project settings
+MAX_COMPLEXITY="${DROID_MAX_COMPLEXITY:-10}"
+ENFORCE_TESTS="${DROID_ENFORCE_TESTS:-false}"
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">バリデーターをテスト</div>
+
+成功すべきテストファイルと失敗すべきテストファイルを作成します:
+```bash
+# Create test cases
+echo '{"tool_input":{"file_path":"test.ts","content":"..."}}' | \
+  .factory/hooks/validate.sh
+```
+
+</div>
+
+</div>
+
+
+
+## トラブルシューティング {#troubleshooting}
+
+### 偽陽性 {#false-positives}
+
+**問題**: 検証が正当なコードをブロックする
+
+**解決策**: 除外パターンを追加：
+```bash
+# Skip test files
+if echo "$file_path" | grep -qE '\.(test|spec)\.(ts|js)$'; then
+  exit 0
+fi
+
+# Skip generated files
+if echo "$file_path" | grep -qE '(generated|\.gen\.)'; then
+  exit 0
+fi
+```
+
+### 検証が遅すぎる {#validation-too-slow}
+
+**問題**: フックの実行に時間がかかりすぎる
+
+**解決策**: 検証を最適化：
+```bash
+# Cache validation results
+CACHE_FILE="/tmp/droid-validation-$(md5sum "$file_path" | cut -d' ' -f1)"
+
+if [ -f "$CACHE_FILE" ]; then
+  # File hasn't changed, use cached result
+  exit 0
+fi
+
+# Run validation...
+touch "$CACHE_FILE"
+```
+
+### CIとの不整合 {#inconsistent-with-ci}
+
+**問題**: フックは通るがCIが失敗する
+
+**解決策**: 同じツールと設定を使用：
+```bash
+# Use exact same commands as CI
+# .github/workflows/ci.yml:
+#   npm run lint
+
+# Hook should run:
+npm run lint "$file_path"
+```
+
+## 関連項目 {#see-also}
+
+- [[jp/reference/hooks-reference|フックリファレンス]] - 完全なフックAPIドキュメント
+- [[jp/cli/configuration/hooks-guide|Get started with hooks]] - 基本的なフックの紹介
+- [[jp/guides/hooks/auto-formatting|Auto-formatting]] - 自動コードフォーマット
+- [[jp/guides/hooks/git-workflows|Git workflow hooks]] - Git統合

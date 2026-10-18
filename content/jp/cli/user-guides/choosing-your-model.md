@@ -1,0 +1,155 @@
+---
+id: jp/cli/user-guides/choosing-your-model
+title: "モデルの選択"
+status: published
+summary: "Droidはモデルに依存せず、セッションの途中でモデルを変更できます。Anthropic、OpenAI、Google、NVIDIA など、主要なプロバイダーのモデルを提供しています。"
+parent: jp/cli/user-guides/index
+tags: [cli, model, models, llm, claude, sonnet, opus, haiku]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">モデルの選択</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Droidはモデルに依存せず、セッションの途中でモデルを変更できます。Anthropic、OpenAI、Google、NVIDIA など、主要なプロバイダーのモデルを提供しています。</p>
+
+
+各タスクに適したモデルと推論レベルを選び、精度、速度、コストのバランスを取りましょう。Factoryが提供するすべてのモデルは、独自の品質基準とコスト効率要件を満たしています。
+
+モデルの品質は急速に進化し、エコシステムの変化に合わせてCLIのデフォルト設定を調整しています。このガイドは現在の主要オプションの比較のスナップショットとして活用し、更新を公開する際には再確認してください。
+
+このガイドの最終更新日は2026年6月3日水曜日です。
+
+---
+
+## 1 · 現在のスタックランク（2026年6月） {#1-20266-77147d58}
+
+| ランク | モデル | 選ぶ理由 |
+| ---- | ---- | ---- |
+| 1    | **Claude Fable 5**<sup>\*†</sup> | 初の一般公開された Mythos モデル；複数ステップの自律的なソフトウェアエンジニアリング作業に最適。4×価格設定。 |
+| 2    | **Claude Opus 4.8** | **Max**推論を持つ最新の Anthropic 主力モデル；最も困難な作業に最適。2×価格設定。 |
+| 3    | **Claude Opus 4.8 Fast** | より高速な応答時間向けに調整された Opus 4.8；4×価格設定。 |
+| 4    | **Claude Opus 4.7** | **Max**推論を持つ Anthropic 主力モデル；最も困難な作業に最適。2×価格設定。 |
+| 5    | **Claude Opus 4.7 Fast** | より高速な応答時間向けに調整された Opus 4.7；12×価格設定。 |
+| 6    | **Claude Opus 4.6** | **Max**推論を持つ前世代の Anthropic 主力モデル；複雑な作業でも優れた深さと安全性を維持。 |
+| 7    | **Claude Opus 4.6 Fast** | より高速な応答時間向けに調整された Opus 4.6；12×価格設定。 |
+| 8    | **Claude Opus 4.5** | 実証済みの品質と安全性のバランス；TUI と exec の強力なデフォルト。 |
+| 9    | **Claude Sonnet 4.6** | Sonnet の価格帯（1.2×）で **Max**推論；計画と実装の日常的な利用に適した強力な選択肢。 |
+| 10   | **GPT-5.4** | 922K コンテキスト、128K 出力、verbosity サポート、**Extra High**推論を持つ最新の OpenAI モデル；大規模コンテキストのタスクに優秀。 |
+| 11   | **Claude Sonnet 4.5** | コストと品質のバランスが取れた強力な日常向けモデル；Opus レベルの深さが不要な場合に優れた汎用選択肢。 |
+| 12   | **GPT-5.3-Codex** | **Extra High**推論と verbosity サポートを持つ最新の OpenAI コーディングモデル；実装中心のタスクに強い。 |
+| 13   | **GPT-5.2-Codex** | **Extra High**推論を持つ実績のある OpenAI コーディングモデル；実装中心のタスクに堅実。 |
+| 14   | **GPT-5.2** | verbosity サポートと最大 **Extra High** までの推論を備えた OpenAI モデル。 |
+| 15   | **Claude Haiku 4.5** | ルーチンタスクや大量自動化向けに高速でコスト効率が高い。 |
+| 16   | **Grok 4.5** | 最新の xAI Grok モデルで、混合推論（Low/Medium/High）に対応；0.8×価格設定でコスト効率にも優れた先端モデルの有力な選択肢。 |
+| 17   | **Gemini 3.1 Pro** | 構造化出力に強く、リサーチ集約型タスク向けに混合推論制御を備えた新しい Gemini Pro 世代。 |
+| 18   | **Gemini 3 Flash** | 高速で低コスト（0.2×価格設定）かつ完全な推論サポート付き；スピードが重要な大量タスクに最適。 |
+| 19   | **Droid Core (NVIDIA Nemotron 3 Ultra)** | オープンソース、0.4×価格設定、高頻度の自動化向けに高速でコスト効率の高いモデル；画像サポートなし。 |
+| 20   | **Droid Core (MiniMax M3)** | オープンソース、マルチモーダルな画像サポートと強力な agentic 機能を備えた 0.12×価格設定；拡張コンテキストを活かせる日常タスク向けの信頼できる主力モデル。 |
+| 21   | **Droid Core (MiniMax M2.7)** | オープンソース、推論サポート（Low/Medium/High）と画像サポート付きの 0.12×価格設定；利用可能な中で最も安価なモデル。 |
+| 22   | **Droid Core (GLM-5.2)** | オープンソース、0.55×価格設定、大量自動化とエアギャップ環境向けの最新 GLM オプション；画像サポートなし。 |
+| 23   | **Droid Core (GLM-5.1)** | オープンソース、0.55×価格設定、大量自動化とエアギャップ環境向けの新しい GLM オプション；画像サポートなし。 |
+| 24   | **Droid Core (GLM-5)** | オープンソース、0.4×価格設定、大量自動化とエアギャップ環境向けの安定した選択肢；画像サポートなし。 |
+| 25   | **Droid Core (Kimi K2.7 Code)** | コーディング特化の Kimi で、0.4×価格設定かつ任意の High 推論に対応；コスト重視の開発作業で強力な agentic 性能とツール使用能力を発揮。 |
+| 26   | **Droid Core (Kimi K2.6)** | オープンソース、画像サポートと任意の High 推論付き 0.4×価格設定；思考トグルも欲しいコスト重視の作業に適している。 |
+| 27   | **Droid Core (Kimi K2.5)** | オープンソース、画像サポート付き 0.25×価格設定；コスト重視の作業向けの旧 Kimi オプション。 |
+
+<sup>\*</sup> Anthropic では、すべての Mythos クラスのモデルに対して信頼と安全性のため 30 日間のデータ保持を求めています。詳しくは[こちら](https://support.claude.com/en/articles/15425996-data-retention-practices-for-mythos-class-models)を参照してください。
+
+<sup>†</sup> 2026年6月12日時点で、Claude Fable 5 は現在利用できません。詳細は Mythos アクセスに関する Anthropic の更新情報を[こちら](https://www.anthropic.com/news/fable-mythos-access)で確認してください。
+
+
+
+<Aside kind="note">
+モデルの更新を定期的に配信しています。新しいリリースが上記のリストを上回る場合、
+  このページとCLIのデフォルトを更新します。
+</Aside>
+
+
+
+---
+
+## 2 · 作業に適したモデルの選択 {#2-38016c43}
+
+| シナリオ                                                         | 推奨モデル                                                                                                                          |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **深い計画立案、アーキテクチャレビュー、曖昧な製品仕様** | 最高の深度と安全性のため**Opus 4.8**から始めるか、より高速な処理のため**Opus 4.7** / **Opus 4.6**にフォールバック。バランスの取れたコスト/品質なら**Sonnet 4.6**または**Sonnet 4.5**、大規模コンテキスト推論なら**GPT-5.4**を使用。 |
+| **フルフィーチャー開発、大規模リファクタリング**                    | 深度と安全性のため**Opus 4.8**または**Opus 4.7**。スピードと**Extra High**推論が必要な場合は**GPT-5.4**、**GPT-5.3-Codex**、または**GPT-5.2-Codex**；バランスの取れたループには**Sonnet 4.6**または**Sonnet 4.5**。 |
+| **反復可能な編集、要約、ボイラープレート生成**      | スピードとコストのため**Haiku 4.5**または**Droid Core**（0.12×の**MiniMax M2.7**を含む）。より高い品質や構造化出力が必要な場合は**GPT-5.2**。 |
+| **CI/CDまたは自動化ループ**                                    | 予測可能で低コストなスループットのため**Haiku 4.5**または**Droid Core**を優先。自動化により強力な推論が必要な場合は**GPT-5.3-Codex**または**GPT-5.4**を使用。 |
+| **大量自動化、頻繁なクイックターン**                 | 迅速なフィードバックのため**Haiku 4.5**。コストが重要または エアギャップ展開が必要な場合は**Droid Core**（特に推論付き0.12×の**MiniMax M2.7**）。 |
+
+
+
+<Aside kind="tip">
+**Claude Opus 4.8**は、極めて複雑なアーキテクチャの決定や最大限の推論能力が必要な重要な作業に向けた最新の最上位オプションです。**Claude Opus 4.7**と**Claude Opus 4.6**も引き続き優れた代替候補であり、**Opus 4.6 Fast**はより高いコストでより高速な応答向けに調整されています。ほとんどのタスクはOpusレベルのパワーを必要としません—Sonnet 4.6またはSonnet 4.5から始めて、必要な場合のみエスカレートしてください。
+</Aside>
+
+
+
+ヒント：`/model`またはセッティングパネル（`Shift+Tab` → **Settings**）で切り替えることで、セッション中にモデルを変更できます。
+
+---
+
+## 3 · セッション中のモデル切り替え {#3-d5e93c00}
+
+- `/model`（または**Shift+Tab → Settings → Model**）を使用して、チャット履歴を失うことなく変更できます。
+- プロバイダーを変更する場合（例：AnthropicからOpenAI）、CLIがAnthropicとOpenAI形式間でセッション記録を変換します。変換は非可逆的で、プロバイダー固有のメタデータは失われますが、実際には精度の低下は確認されていません。
+- 最適なコンテキスト継続性のため、自然な節目でモデルを切り替えてください：コミット後、PRがマージされた時、または失敗したアプローチを放棄して計画をリセットする時。
+- 頻繁に切り替えると、アシスタントが再グラウンディングに1ターンを費やすことがあります；切り替え時に最近の進捗をまとめることを検討してください。
+
+---
+
+## 4 · 推論努力設定 {#4-7ab5e4d8}
+
+- **Opus 4.8**: Off / Low / Medium / High / **Max**（デフォルト：High）
+- **Opus 4.7**: Off / Low / Medium / High / **Max**（デフォルト：High）
+- **Opus 4.6 / Opus 4.6 Fast**: Off / Low / Medium / High / **Max**（デフォルト：High）
+- **Sonnet 4.6**: Off / Low / Medium / High / **Max**（デフォルト：High）
+- **Opus 4.5 / Sonnet 4.5 / Haiku 4.5**: Off / Low / Medium / High（デフォルト：Off）
+- **GPT-5.4**: None / Low / Medium / High / **Extra High**（デフォルト：Medium）
+- **GPT-5.2**: Off / Low / Medium / High / **Extra High**（デフォルト：Low）
+- **GPT-5.2-Codex**: None / Low / Medium / High / **Extra High**（デフォルト：Medium）
+- **GPT-5.3-Codex**: None / Low / Medium / High / **Extra High**（デフォルト：Medium）
+- **Gemini 3.1 Pro**: Low / Medium / High（デフォルト：High）
+- **Gemini 3 Flash**: Minimal / Low / Medium / High（デフォルト：High）
+- **Grok 4.5**: Low / Medium / High（デフォルト：Medium）
+- **Droid Core (GLM-5.2)**: Off / High（デフォルト：High；画像サポートなし）
+- **Droid Core (GLM-5)**: Noneのみ（デフォルト：None；画像サポートなし）
+- **Droid Core (GLM-5.1)**: Noneのみ（デフォルト：None；画像サポートなし）
+- **Droid Core (Kimi K2.6)**: Off / High（デフォルト：High）
+- **Droid Core (Kimi K2.5)**: Noneのみ（デフォルト：None）
+- **Droid Core (MiniMax M2.7)**: Low / Medium / High（デフォルト：High）
+
+推論努力は遅延とコストを増加させます—シンプルな作業では低めから始めて、必要に応じてエスカレートしてください。**Max**はClaude Opus 4.8、Claude Opus 4.7、Opus 4.6ファミリー（Opus 4.6とOpus 4.6 Fast）、およびSonnet 4.6で利用可能です。**Extra High**はGPT-5.4、GPT-5.2、GPT-5.2-Codex、およびGPT-5.3-Codexで利用可能です。
+
+
+
+<Aside kind="tip">
+推論努力は`/model` → **Reasoning effort**から、またはセッティングメニューから変更できます。
+</Aside>
+
+
+
+---
+
+## 5 · Bring Your Own Key（BYOK） {#5-bring-your-own-keybyok}
+
+Factoryは管理されたAnthropicとOpenAIアクセスを提供しています。独自のアカウントで実行したい場合、BYOKはオプトイン方式です—セットアップ手順、サポートされているプロバイダー、課金に関する注意事項については[[jp/cli/byok/overview|Bring Your Own Keys]]を参照してください。
+
+### オープンソースモデル {#h6-fa11809f}
+
+**Droid Core (GLM-5.2)**、**Droid Core (GLM-5)**、**Droid Core (GLM-5.1)**、**Droid Core (Kimi K2.6)**、**Droid Core (Kimi K2.5)**、および**Droid Core (MiniMax M2.7)**は、CLIで利用可能なオープンソースの代替案です。これらは以下に有用です：
+
+- 外部API呼び出しが許可されていない**エアギャップ環境**
+- 無制限のローカル推論が必要な**コスト重視のプロジェクト**
+- コードがインフラストラクチャから出ることができない**プライバシー要件**
+- オープンソースモデル機能の**実験**
+
+**注意：** GLM-5、GLM-5.1、およびGLM-5.2は画像添付をサポートしていません。Kimi K2.5、Kimi K2.6、およびMiniMax M2.7は画像をサポートしています。Kimi K2.6にはOff/High推論切り替えが追加され、MiniMax M2.7（0.12×価格設定で利用可能な最安モデル）はLow/Medium/High推論をサポートしています。画像ベースのワークフローには、Claude、GPT、Kimi、またはMiniMax M2.7を使用してください。
+
+オープンソースモデルを使用するには、ローカル推論サーバー（Ollamaなど）またはホストされたプロバイダーでBYOK経由で設定する必要があります。セットアップ手順については[[jp/cli/byok/overview|BYOKドキュメント]]を参照してください。
+
+---
+
+## 6 · 効果的なことをメモする {#6-b6986727}
+
+- 高影響ワークフロー（例：仕様生成 vs. クイック編集）と、モデル+推論努力の組み合わせで最適に感じるものを追跡する。
+- モデルの劣化に気づいた時は、コミュニティやFactoryの担当者に連絡して、迅速にベンチマークを取り、このガイダンスを更新できるようにしてください。

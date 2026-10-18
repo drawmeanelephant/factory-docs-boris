@@ -1,0 +1,615 @@
+---
+id: jp/guides/droid-exec/refactor-fix-lint
+title: "自動Lint修正"
+status: published
+summary: "Droid Execを使ってコードベース全体のESLint違反を自動修正する"
+parent: jp/guides/droid-exec/index
+tags: [guides, lint, eslint, fix, automation, code-quality, droid-exec]
+relations: [relates_to=guides/droid-exec/refactor-fix-lint]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">自動Lint修正</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Droid Execを使ってコードベース全体のESLint違反を自動修正する</p>
+
+
+このチュートリアルでは、Droid Execを使用してコードベース全体のESLint違反を自動修正する方法を説明します。このスクリプトは、lint エラーのあるファイルを特定し、機能を保持しながらインテリジェントに修正します。
+
+
+
+<Aside kind="info">
+このアプローチは、単純なフォーマット問題から複雑なアーキテクチャパターンまで、あらゆるESLintルールで機能します。
+</Aside>
+
+
+
+## 動作原理 {#how-it-works}
+
+このスクリプトは以下のように動作します：
+
+1. **違反を検出**: ESLintを実行してmiddlewareが不足している全てのroute.tsファイルを特定
+2. **コンテキストを分析**: ルートパスに基づいて適切なmiddlewareタイプを決定
+3. **middlewareを追加**: 最初のステートメントとして正しいhandle*Middleware呼び出しを挿入
+4. **ロジックを保持**: 既存のコードをmiddlewareコールバック内にラップ
+5. **型を維持**: TypeScript型が正しく保持されるようにする
+6. **コードをフォーマット**: 一貫したコードスタイルを維持
+
+## スクリプトの取得 {#get-the-script}
+
+
+
+<Details summary="完全なスクリプトソースを表示">
+```bash
+#!/bin/bash
+
+# Droid Route Middleware Fix Script
+# Automatically adds required middleware to NextJS API routes that are missing them
+#
+# Usage: ./droid-fix-route-middleware.sh [directory]
+# Example: ./droid-fix-route-middleware.sh apps/factory-app
+
+set -e
+
+# Configuration
+CONCURRENCY=${CONCURRENCY:-5}
+DRY_RUN=${DRY_RUN:-false}
+TARGET_DIR="${1:-.}"
+ESLINT_RULE="factory/require-route-middleware"
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+# Temp files for tracking
+TEMP_DIR=$(mktemp -d)
+VIOLATIONS_FILE="$TEMP_DIR/violations.txt"
+PROCESSED_COUNT=0
+FIXED_COUNT=0
+FAILED_COUNT=0
+
+# Cleanup on exit
+trap "rm -rf $TEMP_DIR" EXIT
+
+# Function to detect violations using ESLint
+find_violations() {
+    echo -e "${BLUE}Scanning for route middleware violations...${NC}"
+
+    # Run ESLint with the specific rule and capture violations
+    # Using --format json for easier parsing
+    npx eslint "$TARGET_DIR" \
+        --ext .ts,.tsx \
+        --rule "${ESLINT_RULE}: error" \
+        --format json 2>/dev/null | \
+        jq -r '.[] | select(.errorCount > 0) | .filePath' > "$VIOLATIONS_FILE" || true
+
+    # Alternative approach if the above doesn't work - find all route.ts files
+    # and check them individually
+    if [ ! -s "$VIOLATIONS_FILE" ]; then
+        find "$TARGET_DIR" -type f -name "route.ts" \
+            ! -path "*/node_modules/*" \
+            ! -path "*/.next/*" \
+            ! -path "*/dist/*" \
+            ! -path "*/build/*" | while read -r file; do
+            # Check if file has middleware violations
+            if npx eslint "$file" \
+                --rule "${ESLINT_RULE}: error" \
+                --format compact 2>&1 | grep -q "require-route-middleware"; then
+                echo "$file" >> "$VIOLATIONS_FILE"
+            fi
+        done
+    fi
+}
+
+# Function to determine the appropriate middleware type based on route path
+get_middleware_type() {
+    local filepath="$1"
+
+    # Check for specific route patterns
+    if [[ "$filepath" == *"/api/cron/"* ]]; then
+        echo "cron"
+    elif [[ "$filepath" == *"/api/webhooks/"* ]]; then
+        echo "public"
+    elif [[ "$filepath" == *"/api/admin/"* ]]; then
+        echo "admin"
+    elif [[ "$filepath" == *"/api/auth/"* ]] && [[ "$filepath" != *"/logout"* ]]; then
+        echo "public"
+    elif [[ "$filepath" == *"/api/health"* ]] || [[ "$filepath" == *"/api/echo"* ]]; then
+        echo "public"
+    elif [[ "$filepath" == *"factory-admin"* ]]; then
+        echo "admin"
+    else
+        echo "authenticated"
+    fi
+}
+
+# Function to process a single file
+process_file() {
+    local filepath="$1"
+    local filename=$(basename "$filepath")
+    local middleware_type=$(get_middleware_type "$filepath")
+
+    echo -e "${BLUE}Processing: $filepath${NC}"
+    echo -e "  Detected type: $middleware_type middleware needed"
+
+    # The AI prompt for adding middleware
+    local prompt="Fix the middleware violations in $filepath by adding the appropriate middleware handler.
+
+IMPORTANT CONTEXT:
+This is a NextJS API route file that needs middleware added to each exported HTTP handler (GET, POST, PUT, DELETE, etc.).
+The middleware must be the FIRST statement in each handler function.
+
+Based on the route type ($middleware_type), use the appropriate middleware:
+
+1. For 'authenticated' routes (require user login):
+\`\`\`typescript
+import { handleAuthenticatedMiddleware } from '@/app/api/_utils/middleware';
+
+export async function GET(req: NextRequest) {
+  return handleAuthenticatedMiddleware(req, async ({ req, user }) => {
+    // Existing route logic here
+    // 'user' is the authenticated UserRecord
+    return NextResponse.json({ data });
+  });
+}
+\`\`\`
+
+2. For 'public' routes (no auth required):
+\`\`\`typescript
+import { handlePublicMiddleware } from '@/app/api/_utils/middleware';
+
+export async function POST(req: NextRequest) {
+  return handlePublicMiddleware(req, async (req) => {
+    // Existing route logic here
+    return NextResponse.json({ data });
+  });
+}
+\`\`\`
+
+3. For 'cron' routes (require cron secret):
+\`\`\`typescript
+import { handleCronMiddleware } from '@/app/api/_utils/middleware';
+
+export async function POST(req: NextRequest) {
+  return handleCronMiddleware(req, async (req) => {
+    // Existing route logic here
+    return NextResponse.json({ success: true });
+  });
+}
+\`\`\`
+
+4. For 'admin' routes (require admin role):
+\`\`\`typescript
+import { handleAuthenticatedMiddleware, AdminRole } from '@/app/api/_utils/middleware';
+
+export async function GET(req: NextRequest) {
+  return handleAuthenticatedMiddleware(
+    req,
+    async ({ req, user }) => {
+      // Existing route logic here
+      return NextResponse.json({ data });
+    },
+    { requiredRole: AdminRole.ADMIN_1 }
+  );
+}
+\`\`\`
+
+Additional options can be passed:
+- \`context\`: String for error logging context
+- \`requireCsrf\`: Boolean to enable CSRF validation
+- \`requiredRole\`: AdminRole enum value for role-based access
+
+INSTRUCTIONS:
+1. Add the appropriate import for the middleware function if not present
+2. Wrap the ENTIRE body of each exported HTTP handler with the middleware call
+3. The middleware should return the result of the middleware function
+4. Move ALL existing logic inside the middleware callback
+5. Preserve all existing imports, types, and logic exactly as-is
+6. If the handler already uses try-catch for error handling, you can remove it as the middleware handles errors
+7. Ensure the callback parameters match the middleware type (some provide 'user', others just 'req')
+
+Only modify the route handlers to add middleware. Return the complete fixed file."
+
+    if [ "$DRY_RUN" = "true" ]; then
+        echo -e "${YELLOW}  [DRY RUN] Would add $middleware_type middleware${NC}"
+        return 0
+    fi
+
+    # Run droid to fix the middleware
+    if droid exec --auto low "$prompt" 2>/dev/null; then
+        # Verify the fix worked by running ESLint again
+        if npx eslint "$filepath" \
+            --rule "${ESLINT_RULE}: error" \
+            --no-eslintrc \
+            --plugin factory \
+            --format compact 2>&1 | grep -q "require-route-middleware"; then
+            echo -e "${RED}  ✗ Failed to fix all violations${NC}"
+            ((FAILED_COUNT++))
+        else
+            echo -e "${GREEN}  ✓ Fixed middleware violations${NC}"
+            ((FIXED_COUNT++))
+        fi
+        ((PROCESSED_COUNT++))
+    else
+        echo -e "${RED}  ✗ Failed to process${NC}"
+        ((FAILED_COUNT++))
+    fi
+}
+
+# Export function and variables for parallel execution
+export -f process_file get_middleware_type
+export DRY_RUN GREEN YELLOW BLUE RED NC ESLINT_RULE
+
+# Main execution
+echo -e "${BLUE}=== Droid Route Middleware Fix ===${NC}"
+echo -e "${BLUE}Directory: $TARGET_DIR${NC}"
+echo -e "${BLUE}Concurrency: $CONCURRENCY${NC}"
+[ "$DRY_RUN" = "true" ] && echo -e "${YELLOW}DRY RUN MODE${NC}"
+echo ""
+
+# Find violations
+find_violations
+
+VIOLATION_COUNT=$(wc -l < "$VIOLATIONS_FILE" 2>/dev/null | tr -d ' ' || echo 0)
+
+if [ "$VIOLATION_COUNT" -eq 0 ]; then
+    echo -e "${GREEN}No middleware violations found!${NC}"
+    exit 0
+fi
+
+echo -e "${YELLOW}Found $VIOLATION_COUNT files with middleware violations${NC}\n"
+
+# Process files in parallel
+cat "$VIOLATIONS_FILE" | xargs -n 1 -P "$CONCURRENCY" -I {} bash -c 'process_file "$@"' _ {}
+
+# Show summary
+echo -e "\n${BLUE}=== Summary ===${NC}"
+echo -e "${GREEN}Files processed: $PROCESSED_COUNT${NC}"
+if [ "$DRY_RUN" = "false" ]; then
+    echo -e "${GREEN}Files fixed: $FIXED_COUNT${NC}"
+    [ "$FAILED_COUNT" -gt 0 ] && echo -e "${RED}Files failed: $FAILED_COUNT${NC}"
+fi
+
+if [ "$DRY_RUN" = "false" ] && [ "$FIXED_COUNT" -gt 0 ]; then
+    echo -e "\n${BLUE}Next steps:${NC}"
+    echo "  npm run lint           # Verify all violations are fixed"
+    echo "  npm run typecheck      # Check TypeScript compilation"
+    echo "  npm run test           # Run tests"
+    echo "  git diff              # Review changes"
+    echo "  git add -A            # Stage changes"
+    echo "  git commit -m 'fix: add required middleware to API routes'"
+fi
+
+# Exit with error if some files failed
+[ "$FAILED_COUNT" -gt 0 ] && exit 1
+exit 0
+```
+</Details>
+
+
+
+
+
+<Aside kind="warning">
+**成功の鍵**: このスクリプトを独自のlintルール向けにカスタマイズする場合は、Droid Execに渡すプロンプトに具体的な変更前/変更後の例を必ず含めてください。精度が大幅に向上します。
+
+  良いプロンプト構成:
+  1. 修正する違反を説明する
+  2. 違反を含む「変更前」のコード例を示す
+  3. 修正適用後の「変更後」のコード例を示す
+  4. 保持すべきエッジケースやパターンを列挙する
+
+  例が具体的であるほど、Droidは修正パターンをより正確に理解して実装できます。
+</Aside>
+
+
+
+## 前提条件 {#prerequisites}
+
+開始する前に、[[jp/cli/droid-exec/overview#installation|Droid Exec installation]]が完了していることを確認してください。
+
+## 基本的な使用方法 {#basic-usage}
+
+### 違反のプレビュー（ドライラン） {#preview-violations-dry-run}
+
+
+
+<Aside kind="warning">
+変更前に、修正が必要なファイルを確認するため必ずドライランから始めます。
+</Aside>
+
+
+
+ドライランでは、middlewareルールに違反しているファイルと追加されるmiddlewareのタイプが表示されます：
+
+```bash
+# Preview what would happen (no changes made)
+DRY_RUN=true ./droid-fix-route-middleware.sh apps/factory-admin/src/app/api
+
+# Example output:
+# === Droid Route Middleware Fix ===
+# Directory: apps/factory-admin/src/app/api
+# Concurrency: 5
+# DRY RUN MODE
+#
+# Scanning for route middleware violations...
+# Found 3 files with middleware violations
+#
+# Processing: apps/factory-admin/src/app/api/health/route.ts
+#   Detected type: public middleware needed
+#   [DRY RUN] Would add public middleware
+# Processing: apps/factory-admin/src/app/api/orgs/route.ts
+#   Detected type: admin middleware needed
+#   [DRY RUN] Would add admin middleware
+# Processing: apps/factory-admin/src/app/api/cron/batch-friction/poll-and-report/route.ts
+#   Detected type: cron middleware needed
+#   [DRY RUN] Would add cron middleware
+#
+# === Summary ===
+# Files processed: 0
+```
+
+**ドライランの動作原理：**
+- `DRY_RUN=true`の場合：違反を特定し、追加されるmiddlewareタイプを表示
+- `DRY_RUN=false`（デフォルト）の場合：middlewareを追加して違反を実際に修正
+
+これにより以下のことが可能になります：
+- どのルートにmiddlewareが不足しているかを理解
+- 正しいmiddlewareタイプが使用されることを確認
+- 変更の範囲を見積もり
+
+### 修正の適用 {#apply-fixes}
+
+準備ができたら、実際の修正を実行します：
+
+```bash
+# Fix all violations in a directory
+./droid-fix-route-middleware.sh apps/factory-admin/src/app/api
+
+# Example output:
+# === Droid Route Middleware Fix ===
+# Directory: apps/factory-admin/src/app/api
+# Concurrency: 5
+#
+# Scanning for route middleware violations...
+# Found 3 files with middleware violations
+#
+# Processing: apps/factory-admin/src/app/api/health/route.ts
+#   Detected type: public middleware needed
+# Processing: apps/factory-admin/src/app/api/cron/batch-friction/poll-and-report/route.ts
+#   Detected type: cron middleware needed
+# Processing: apps/factory-admin/src/app/api/orgs/route.ts
+#   Detected type: admin middleware needed
+# ✓ Fixed middleware violations
+# ✓ Fixed middleware violations
+# ✓ Fixed middleware violations
+```
+
+## 実際の変換例 {#real-world-transformations}
+
+### 例1：シンプルなGETハンドラー {#example-1-simple-get-handler}
+
+
+
+<div class="factory-tabs">
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">変更前</div>
+
+
+
+<Aside kind="note">
+ミドルウェアが不足 - 認証チェックがありません！
+</Aside>
+
+
+```typescript
+// apps/factory-app/src/app/api/sessions/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { getFirestoreInstance } from '@factory/services/firebase/admin';
+
+export async function GET(req: NextRequest) {
+  const searchParams = req.nextUrl.searchParams;
+  const userId = searchParams.get('userId');
+
+  ...
+
+  return NextResponse.json({
+    sessions: sessions.docs.map(doc => doc.data())
+  });
+}
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">変更後</div>
+
+
+
+<Aside kind="note">
+ユーザーオブジェクトにアクセスできる状態で適切に認証されました
+</Aside>
+
+
+```typescript
+// apps/factory-app/src/app/api/sessions/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { getFirestoreInstance } from '@factory/services/firebase/admin';
+import { handleAuthenticatedMiddleware } from '@/app/api/_utils/middleware';
+
+export async function GET(req: NextRequest) {
+  return handleAuthenticatedMiddleware(req, async ({ req, user }) => {
+    const searchParams = req.nextUrl.searchParams;
+    const userId = searchParams.get('userId');
+
+    ...
+
+    return NextResponse.json({
+      sessions: sessions.docs.map(doc => doc.data())
+    });
+  });
+}
+```
+
+</div>
+
+</div>
+
+
+
+### 例2：Cronジョブハンドラー {#example-2-cron-job-handler}
+
+
+
+<div class="factory-tabs">
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">変更前</div>
+
+
+
+<Aside kind="note">
+認可なしのcronジョブ - 誰でもトリガーできてしまいます！
+</Aside>
+
+
+```typescript
+// apps/factory-admin/src/app/api/cron/batch-friction/poll-and-report/route.ts
+export async function GET(request: NextRequest) {
+
+  logInfo('[poll-report] Starting poll and report workflow');
+
+  const results = {
+    polledBatches: 0,
+    processedBatches: 0,
+    failedBatches: [],
+    reportGenerated: false,
+    reportError: null,
+  };
+
+  // ... rest of the cron job logic ...
+
+  return NextResponse.json({
+    success,
+    message,
+    summary: {
+      processedBatches: results.processedBatches,
+      failedBatches: results.failedBatches.length,
+      reportGenerated: results.reportGenerated,
+    },
+  });
+}
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">変更後</div>
+
+
+
+<Aside kind="note">
+Now protected by cron secret, entire handler wrapped in middleware
+</Aside>
+
+
+```typescript
+// apps/factory-admin/src/app/api/cron/batch-friction/poll-and-report/route.ts
+export async function GET(request: NextRequest) {
+  return handleCronMiddleware(request, async (req) => {
+    logInfo('[poll-report] Starting poll and report workflow');
+
+    const results = {
+      polledBatches: 0,
+      processedBatches: 0,
+      failedBatches: [],
+      reportGenerated: false,
+      reportError: null,
+    };
+
+    // ... rest of the cron job logic ...
+
+    return NextResponse.json({
+      success,
+      message,
+      summary: {
+        processedBatches: results.processedBatches,
+        failedBatches: results.failedBatches.length,
+        reportGenerated: results.reportGenerated,
+      },
+    });
+  });
+}
+```
+
+</div>
+
+</div>
+
+
+
+
+## ベストプラクティス {#best-practices}
+
+
+
+<Aside kind="note">
+安全で効果的なミドルウェア追加のため、これらのベストプラクティスに従ってください。
+</Aside>
+
+
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">ドライランから始める</div>
+
+適用前に変更をプレビューします:
+```bash
+# See what would be fixed without making changes
+DRY_RUN=true ./droid-fix-route-middleware.sh apps
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">アプリごとに処理する</div>
+
+レビューしやすくするため、一度に1つのアプリケーションを修正します:
+```bash
+# Fix factory-app routes
+./droid-fix-route-middleware.sh apps/factory-app
+npm run typecheck -- --filter=factory-app
+git add -A && git commit -m "fix(factory-app): add required middleware to API routes"
+
+# Fix factory-admin routes
+./droid-fix-route-middleware.sh apps/factory-admin
+npm run typecheck -- --filter=factory-admin
+git add -A && git commit -m "fix(factory-admin): add required middleware to API routes"
+```
+
+</div>
+
+</div>

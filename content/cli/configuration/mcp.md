@@ -1,0 +1,623 @@
+---
+id: cli/configuration/mcp
+title: "Model Context Protocol (MCP)"
+status: published
+summary: "Connect your own tools with Model Context Protocol"
+parent: cli/configuration/index
+tags: [cli, mcp, model-context-protocol, tools, droid-mcp, mcp-servers, mcp-tools, integrations]
+relations: [relates_to=jp/cli/configuration/mcp]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Model Context Protocol (MCP)</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Connect your own tools with Model Context Protocol</p>
+
+
+Model Context Protocol (MCP) servers extend droid's capabilities by providing additional tools and context. Droid offers two ways to manage them: an interactive UI for easy browsing and setup, or CLI commands for scripting and automation.
+
+## Quick Start: Add from Registry {#quick-start-add-from-registry}
+
+The easiest way to get started is using the built-in registry. Type `/mcp` in droid and select **"Add from Registry"** to browse 40+ pre-configured servers:
+
+| Server | Description |
+| :----- | :---------- |
+| figma | Design exploration and implementation |
+| linear | Issue tracking and project management |
+| sentry | Error tracking and performance monitoring |
+| notion | Notes, docs, and project management |
+| supabase | Create and manage Supabase projects |
+| stripe | Payment processing APIs |
+| vercel | Manage projects and deployments |
+| playwright | End-to-end browser testing |
+| hubspot | CRM data management |
+| mongodb | Database management |
+| ... | and many more |
+
+Select a server from the list, authenticate if required (most HTTP servers support OAuth—just follow the browser prompt), and the server is ready to use.
+
+
+
+<Aside kind="tip">
+The registry is the fastest way to get started. For custom servers or automation, use the CLI commands below.
+</Aside>
+
+
+
+## Interactive Manager (`/mcp`) {#interactive-manager-mcp}
+
+Type `/mcp` within droid to open the interactive MCP manager. From here you can:
+
+- **Browse servers** - See all configured servers and their connection status
+- **View tools** - Inspect what tools each connected server provides
+- **Enable/disable** - Temporarily disable servers without removing them
+- **Authenticate** - Connect to OAuth-enabled servers via browser
+- **Clear auth** - Remove stored credentials for a server
+- **Add from registry** - One-click setup for popular MCP servers
+- **Remove servers** - Delete user-configured servers
+
+## Adding Servers via CLI {#adding-servers-via-cli}
+
+For scripting and automation, use `droid mcp add`. Droid supports three transports: **http** (Streamable HTTP — the current MCP standard, which uses SSE internally to stream responses), **sse** (the legacy standalone HTTP+SSE transport, for older servers), and **stdio** (local processes).
+
+### Adding HTTP Servers {#adding-http-servers}
+
+HTTP servers are remote MCP endpoints - the recommended way to connect to cloud services and APIs.
+
+**Syntax:**
+
+```bash
+droid mcp add <name> <url> --type http [--header "KEY: VALUE"...]
+```
+
+**Arguments:**
+
+- `name` - Unique server identifier
+- `url` - HTTP/HTTPS URL of the MCP server
+- `--type http` - Required flag to specify HTTP transport
+- `--header "KEY: VALUE"` - HTTP headers for authentication (can be used multiple times)
+
+### Popular HTTP MCP Servers {#popular-http-mcp-servers}
+
+#### Development & Testing {#development-testing}
+
+**Sentry** - Monitor errors, debug production issues
+
+```bash
+droid mcp add sentry https://mcp.sentry.dev/mcp --type http
+```
+
+**Hugging Face** - Access Hugging Face Hub and Gradio AI applications
+
+```bash
+droid mcp add hugging-face https://huggingface.co/mcp --type http
+```
+
+**Socket** - Security analysis for dependencies
+
+```bash
+droid mcp add socket https://mcp.socket.dev/ --type http
+```
+
+#### Project Management & Documentation {#project-management-documentation}
+
+**Notion** - Read docs, update pages, manage tasks
+
+```bash
+droid mcp add notion https://mcp.notion.com/mcp --type http
+```
+
+**Linear** - Issue tracking and project management
+
+```bash
+droid mcp add linear https://mcp.linear.app/mcp --type http
+```
+
+**Intercom** - Access customer conversations and tickets
+
+```bash
+droid mcp add intercom https://mcp.intercom.com/mcp --type http
+```
+
+**Monday** - Manage monday.com boards and items
+
+```bash
+droid mcp add monday https://mcp.monday.com/mcp --type http
+```
+
+#### Payments & Commerce {#payments-commerce}
+
+**Stripe** - Payment processing and subscriptions
+
+```bash
+droid mcp add stripe https://mcp.stripe.com --type http
+```
+
+**PayPal** - PayPal commerce and payment processing
+
+```bash
+droid mcp add paypal https://mcp.paypal.com/mcp --type http
+```
+
+#### Design & Media {#design-media}
+
+**Figma** - Generate code with Figma context
+
+```bash
+droid mcp add figma https://mcp.figma.com/mcp --type http
+```
+
+**Canva** - Browse, summarize, and generate Canva designs
+
+```bash
+droid mcp add canva https://mcp.canva.com/mcp --type http
+```
+
+**TwelveLabs** - Video analysis, search, and AI-powered insights
+
+```bash
+droid mcp add twelvelabs-mcp https://mcp.twelvelabs.io --type http \
+  --header "x-api-key: YOUR_TWELVELABS_API_KEY"
+```
+
+#### Infrastructure & DevOps {#infrastructure-devops}
+
+**Netlify** - Create, deploy, and manage websites
+
+```bash
+droid mcp add netlify https://netlify-mcp.netlify.app/mcp --type http
+```
+
+**Vercel** - Manage projects, deployments, and logs
+
+```bash
+droid mcp add vercel https://mcp.vercel.com/ --type http
+```
+
+**Stytch** - Configure authentication services
+
+```bash
+droid mcp add stytch https://mcp.stytch.dev/mcp --type http
+```
+
+
+
+<Aside kind="tip">
+Many remote servers (HTTP and SSE) require OAuth authentication. After adding,
+  use the interactive `/mcp` UI to complete the authentication flow.
+</Aside>
+
+
+
+### Adding SSE Servers {#adding-sse-servers}
+
+`sse` is the legacy HTTP+SSE transport (MCP protocol version `2024-11-05`), which exposes a standalone Server-Sent Events endpoint. It was superseded by Streamable HTTP (`--type http`), which already streams over SSE internally — so prefer `http` and reach for `sse` only when a server offers just the older standalone SSE endpoint. Arguments mirror HTTP servers; only `--type` changes.
+
+**Syntax:**
+
+```bash
+droid mcp add <name> <url> --type sse [--header "KEY: VALUE"...]
+```
+
+**Example:**
+
+```bash
+droid mcp add example-sse https://mcp.example.com/sse --type sse \
+  --header "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Adding Stdio Servers {#adding-stdio-servers}
+
+Stdio servers run as local processes on your machine - ideal for tools that need direct system access.
+
+**Syntax:**
+
+```bash
+droid mcp add <name> "<command>" [--env KEY=VALUE...]
+```
+
+**Arguments:**
+
+- `name` - Unique server identifier
+- `command` - Command to start the server (quote if it contains spaces)
+- `--env KEY=VALUE` - Environment variables (can be used multiple times)
+
+### Popular Stdio MCP Servers {#popular-stdio-mcp-servers}
+
+
+
+<Aside kind="tip">
+These `npx` examples install the latest published version of each package. For security-sensitive setups, pin an explicit version (e.g. `airtable-mcp-server@1.4.0`) so updates are deliberate and you can audit changes before they run.
+</Aside>
+
+
+
+**Airtable** - Read/write records, manage bases and tables
+
+```bash
+droid mcp add airtable "npx -y airtable-mcp-server" \
+  --env AIRTABLE_API_KEY=your_key
+```
+
+**ClickUp** - Task management and project tracking
+
+```bash
+droid mcp add clickup "npx -y @hauptsache.net/clickup-mcp" \
+  --env CLICKUP_API_KEY=your_key \
+  --env CLICKUP_TEAM_ID=your_team_id
+```
+
+**HubSpot** - Access and manage CRM data
+
+```bash
+droid mcp add hubspot "npx -y @hubspot/mcp-server" \
+  --env HUBSPOT_ACCESS_TOKEN=your_token
+```
+
+## Removing Servers {#removing-servers}
+
+Remove a server from your configuration:
+
+```bash
+droid mcp remove <name>
+```
+
+**Example:**
+
+```bash
+droid mcp remove notion
+```
+
+## Managing Servers {#managing-servers}
+
+Type `/mcp` within droid to open an interactive UI for managing MCP servers.
+- See all configured servers with status
+- View all tools provided by each server
+- Authenticate remote servers that require OAuth authentication
+- Add/remove and enable/disable servers
+
+## Configuration {#configuration}
+
+MCP server configurations are loaded from local files at the following levels:
+
+| Level | Location | Purpose |
+| :---- | :------- | :------ |
+| **User** | `~/.factory/mcp.json` | Your personal servers, available in all projects |
+| **Folder** | `.factory/mcp.json` in any ancestor directory of the project | Servers shared across nested projects under a common parent folder |
+| **Project** | `.factory/mcp.json` in the project root | Shared team servers, committed to the repo |
+
+Organization administrators can also centrally provide servers and restrict which ones are allowed via organization-managed settings (see [[cli/configuration/mcp#enterprise-mcp-policy|Enterprise MCP policy]]).
+
+### How Layering Works {#how-layering-works}
+
+When the same server is defined at multiple levels, user config takes priority, followed by folder-level config, then project config.
+
+**Key behaviors:**
+- When you **enable/disable** a project-defined server, a copy is saved to your user config with the new state. The original project config remains unchanged, so your teammates aren't affected.
+- **Project servers cannot be removed** via CLI or the `/mcp` UI. To remove them, edit `.factory/mcp.json` directly.
+- Servers you add via `droid mcp add` or the registry always go to your **user config**.
+
+### OAuth Tokens {#oauth-tokens}
+
+OAuth tokens are stored globally in your system keyring (or fallback file), **not per-project**. If you authenticate with a server in one project, you're authenticated everywhere that server is configured.
+
+To clear authentication for a server, use the `/mcp` interactive manager and select "Clear Auth".
+
+### Configuration Schema {#configuration-schema}
+
+Each server entry includes:
+
+| Field | Type | Description |
+| :---- | :--- | :---------- |
+| `type` | `"stdio" \| "http" \| "sse"` | Server type. May be omitted for stdio servers, which default to `stdio`. |
+| `disabled` | `boolean` | Temporarily disable the server (default: `false`) |
+| `enabledTools` | `string[]` | Allowlist of tool names to load from this server. When set, only listed tools are loaded into context. |
+| `disabledTools` | `string[]` | Blocklist of tool names to exclude from this server. Disabled tools are not loaded into context. |
+| `timeoutMs` | `number` | Per-server override for the MCP tool call timeout in milliseconds. Falls back to the global default when omitted. |
+
+For **stdio** servers:
+- **command**: Executable to run
+- **args**: Command-line arguments (array)
+- **env**: Environment variables (object)
+
+For **http** and **sse** servers:
+- **url**: HTTP/HTTPS endpoint URL
+- **headers**: HTTP headers for authentication (object)
+- **oauth**: OAuth overrides for this server (object), or `false` to disable OAuth entirely
+
+### OAuth Overrides {#oauth-overrides}
+
+For most remote servers, OAuth works with zero configuration: droid discovers the authorization server, registers a client automatically via Dynamic Client Registration (DCR), and uses Factory's published client metadata when the server supports Client ID Metadata Documents (CIMD). **Prefer these defaults.** Only set `oauth` overrides when a provider requires a custom trust or compatibility policy.
+
+The `oauth` object on an **http** or **sse** server supports:
+
+| Field | Type | Description |
+| :---- | :--- | :---------- |
+| `scopes` | `string[]` | OAuth scopes to request instead of the discovered defaults |
+| `resource` | `string \| false` | OAuth resource indicator to send instead of the normalized MCP server URL; set to `false` to omit it |
+| `authorizationServerIssuer` | `string` | Authorization server issuer URL. Required when `clientId` / `clientSecret` are set. |
+| `clientId` | `string` | Pre-registered OAuth client ID, skipping dynamic registration |
+| `clientSecret` | `string` | Client secret for the pre-registered client |
+| `clientMetadataUrl` | `string` | HTTPS URL of a custom Client ID Metadata Document (CIMD) to use as the public client identity |
+| `tokenEndpointAuthMethod` | `"none" \| "client_secret_basic" \| "client_secret_post"` | Force a token endpoint authentication method instead of the discovered one |
+| `callbackPort` | `number` | Fixed localhost port for the OAuth callback (1-65535) |
+
+**Constraints:**
+
+- `clientMetadataUrl` must be an HTTPS URL with a non-root path and no credentials, query string, fragment, or dot segments.
+- `clientMetadataUrl` is mutually exclusive with `clientId` / `clientSecret`: a metadata document **is** the client identity, so pre-registered credentials cannot be combined with it.
+- `clientMetadataUrl` describes a public client, so `tokenEndpointAuthMethod` must be `"none"` (or omitted) when it is set.
+- `clientId` / `clientSecret` require `authorizationServerIssuer` to be set.
+
+**Example: custom CIMD document**
+
+Point a CIMD-capable server at your own hosted client metadata document:
+
+```json
+{
+  "mcpServers": {
+    "internal-tools": {
+      "type": "http",
+      "url": "https://mcp.internal.example.com/mcp",
+      "oauth": {
+        "clientMetadataUrl": "https://auth.example.com/oauth/client-metadata.json"
+      }
+    }
+  }
+}
+```
+
+**Example: force public client authentication**
+
+Force `"none"` when an authorization server advertises confidential methods but your deployment requires a public client flow:
+
+```json
+{
+  "mcpServers": {
+    "partner-api": {
+      "type": "http",
+      "url": "https://mcp.partner.example.com/mcp",
+      "oauth": {
+        "tokenEndpointAuthMethod": "none"
+      }
+    }
+  }
+}
+```
+
+
+
+<Aside kind="warning">
+Project-level `.factory/mcp.json` is committed to the repo. Never put secrets — `headers` auth tokens (e.g. `Authorization`), `oauth.clientSecret`, or API keys — in project config. Keep them in your user-level config (`~/.factory/mcp.json`) or supply them via environment variables, and rely on Droid's keyring for OAuth tokens.
+</Aside>
+
+
+
+**Example `mcp.json`:**
+
+```json
+{
+  "mcpServers": {
+    "linear": {
+      "type": "http",
+      "url": "https://mcp.linear.app/mcp",
+      "disabled": false
+    },
+    "example-sse": {
+      "type": "sse",
+      "url": "https://mcp.example.com/sse",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN"
+      },
+      "disabled": false
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "disabled": false
+    }
+  }
+}
+```
+
+Droid automatically reloads when the configuration file changes, so servers are immediately available after adding them.
+
+### Variable expansion {#variable-expansion}
+
+Droid expands `${VAR}` and `${VAR:-default}` references in `mcp.json` against your current shell environment when the configuration is loaded. This lets you keep secrets out of the file itself and source them from a secret manager, `.env` loader, or your shell profile.
+
+Variable expansion is supported in:
+
+- `command` and `args` entries for **stdio** servers
+- `env` values for **stdio** servers
+- `url` for **http** servers
+- `headers` values for **http** servers
+
+**Example — sourcing an API key from the environment:**
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      },
+      "disabled": false
+    },
+    "airtable": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "airtable-mcp-server"],
+      "env": {
+        "AIRTABLE_API_KEY": "${AIRTABLE_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+If a referenced variable is unset and no default is provided, droid leaves the placeholder in place and surfaces a warning the next time the server is started. Use `${VAR:-fallback}` to provide a safe default.
+
+
+
+<Aside kind="note">
+The raw `mcp.json` file is never rewritten with expanded values — expansion happens in memory at load time, so secrets stay out of disk and version control.
+</Aside>
+
+
+
+### Per-tool filtering {#per-tool-filtering}
+
+Servers can expose many tools, and not all of them need to be loaded into every session. `enabledTools` and `disabledTools` let you trim the tool surface persistently in `mcp.json`, mirroring the `--restrict-tools` / `--disabled-tools` flags available on `droid exec`.
+
+- `disabledTools`: blocklist — every tool the server reports is loaded **except** the listed names.
+- `enabledTools`: allowlist — **only** the listed tools are loaded.
+- If both are set, `enabledTools` takes precedence and `disabledTools` is ignored.
+- Filtered-out tools are never registered with the model, so they don't consume context tokens.
+
+**Example — blocklist a noisy tool:**
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@some/mcp-server"],
+      "disabledTools": ["tool_i_dont_need", "another_unused_tool"]
+    }
+  }
+}
+```
+
+**Example — allowlist only the tools you use:**
+
+```json
+{
+  "mcpServers": {
+    "another-server": {
+      "type": "http",
+      "url": "https://mcp.example.com/mcp",
+      "enabledTools": ["only_tool_i_want", "and_this_one"]
+    }
+  }
+}
+```
+
+
+
+<Aside kind="tip">
+Run `/mcp` inside droid to see the full list of tools a server exposes, then copy the exact tool names into `enabledTools` or `disabledTools`.
+</Aside>
+
+
+
+### MCP call timeout {#mcp-call-timeout}
+
+By default, droid applies a global timeout to every MCP tool invocation. Long-running tools (large data exports, browser automations, model-backed servers) can exceed this default and fail with a timeout error.
+
+Override the timeout per server with `timeoutMs`:
+
+```json
+{
+  "mcpServers": {
+    "slow-server": {
+      "type": "stdio",
+      "command": "my-long-running-server",
+      "timeoutMs": 120000
+    }
+  }
+}
+```
+
+You can also set a global default via the `mcp.callTimeoutMs` setting in `settings.json`:
+
+```json
+{
+  "mcp": {
+    "callTimeoutMs": 60000
+  }
+}
+```
+
+Resolution order, highest priority first:
+
+1. Per-server `timeoutMs` in `mcp.json`
+2. Global `mcp.callTimeoutMs` in `settings.json`
+3. Built-in default
+
+
+
+<Aside kind="note">
+Increasing the timeout only changes how long droid waits for a response — it does not extend any timeouts enforced by the MCP server itself or its upstream APIs.
+</Aside>
+
+
+
+## Per-droid server selection {#per-droid-server-selection}
+
+[[cli/configuration/custom-droids|Custom droids]] can select which configured MCP servers they're allowed to use via the `mcpServers` field in their frontmatter. This scopes a subagent to specific servers (e.g., `mcpServers: ["linear", "github"]`) instead of inheriting every server in the session. For finer-grained control, a droid's `tools` list can name exact registered MCP tool IDs. See [[cli/configuration/custom-droids#selecting-mcp-servers|Selecting MCP servers]] for details.
+
+## Enterprise MCP policy {#enterprise-mcp-policy}
+
+Organizations can centrally control which MCP servers are allowed via the `mcpPolicy` setting in org-managed settings. This lets administrators restrict MCP access at the org level so users can only connect to vetted servers.
+
+| Field | Type | Description |
+| :---- | :--- | :---------- |
+| `enabled` | `boolean` | Whether policy enforcement is active. Enforcement applies only when `enabled` is `true`. When `enabled` is absent or `false`, no policy is enforced and configured MCP servers are allowed. |
+| `allowlist` | `string[]` | List of allowed server matchers, applied only when the policy is enabled. Entries match the hostname of a remote HTTP/SSE server's URL, or the command and arguments of a stdio server — not the configured server name. When the policy is enabled with an empty or absent allowlist, all servers are blocked. |
+
+**Example org-managed settings:**
+
+```json
+{
+  "mcpPolicy": {
+    "enabled": true,
+    "allowlist": ["mcp.linear.app", "mcp.sentry.dev", "npx"]
+  }
+}
+```
+
+
+
+<Aside kind="note">
+`mcpPolicy` is an enterprise/org-level setting and is enforced through managed settings — individual users cannot override it. Servers disallowed by policy remain in `mcp.json` and are still loaded into your configuration, but they are filtered out from running or connecting and do not appear as available in the `/mcp` manager.
+</Aside>
+
+
+
+## MCP autonomy URL overrides {#mcp-autonomy-url-overrides}
+
+Administrators can assign a default [[cli/user-guides/auto-run|autonomy risk level]] to remote MCP servers by URL with the `mcpAutonomyUrlOverrides` org-managed setting, controlling how much confirmation a matching server's tools require before Droid runs them.
+
+Each rule maps a URL pattern to a risk level:
+
+| Field | Type | Description |
+| :---- | :--- | :---------- |
+| `urlPattern` | `string` | Glob pattern ([picomatch](https://github.com/micromatch/picomatch) syntax) matched against the server's URL. |
+| `defaultLevel` | `"low" \| "medium" \| "high"` | Risk level for the matching server's tools, compared against the user's Autonomy Level to decide auto-run vs. confirm. |
+
+**Example org-managed settings:**
+
+```json
+{
+  "mcpAutonomyUrlOverrides": [
+    { "urlPattern": "https://mcp.internal.example.com/**", "defaultLevel": "low" },
+    { "urlPattern": "https://*.partner.example.com/**", "defaultLevel": "medium" },
+    { "urlPattern": "https://**", "defaultLevel": "high" }
+  ]
+}
+```
+
+### Matching and precedence {#matching-and-precedence}
+
+- **Remote servers only.** Rules match remote servers that have a URL (`http` and `sse` transports); local `stdio` servers are unaffected.
+- **First match wins.** Rules are checked in order, so list them most-specific first.
+- **Safety floor.** A rule sets a tool's risk *classification*, not an absolute prompt: `high`-classified tools still follow the normal [[cli/user-guides/auto-run|Autonomy Level]] comparison (High autonomy runs them without an extra prompt unless another safety check intervenes). The floor is one-directional — `low` or `medium` cannot pull a tool that isn't read-only (destructive, or missing safety metadata) below `high`, so you can relax confirmation for read-only tools but never auto-approve destructive ones.
+- **Fallback.** Servers with no matching rule use Droid's built-in tool risk classification (read-only hints and curated defaults).
+
+
+
+<Aside kind="note">
+`mcpAutonomyUrlOverrides` is admin-managed (MDM): it is delivered through [[enterprise/hierarchical-settings-and-org-control|org-managed settings]] and users cannot override or weaken it.
+</Aside>

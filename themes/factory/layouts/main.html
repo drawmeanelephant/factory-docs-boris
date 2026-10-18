@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" data-layout="main" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>{{title}} — Factory Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="{{asset-url assets/img/favicon.svg}}">
+  <link rel="stylesheet" href="{{asset-url assets/css/factory.css}}">
+  {{head}}
+</head>
+<body class="factory-body" data-layout="main">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="factory-topbar" role="banner">
+    <div class="factory-topbar-row1">
+      <div class="factory-brand-group">
+        <a id="boris-ui-brand-link" class="factory-brand" href="#">
+          <img class="factory-logo" src="{{asset-url assets/img/dark.svg}}" alt="Factory">
+        </a>
+        <div class="factory-lang-switcher" id="boris-ui-lang-switcher">
+          <button id="boris-ui-lang-badge" class="factory-lang-pill" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <span id="boris-ui-lang-label">English</span>
+            <span class="factory-lang-caret" aria-hidden="true">▾</span>
+          </button>
+          <div id="boris-ui-lang-menu" class="factory-lang-menu" role="listbox" aria-label="Select language" hidden>
+            <a id="boris-ui-lang-en" class="factory-lang-option is-active" role="option" aria-selected="true" href="#">
+              <span class="factory-lang-option-text">English</span>
+              <span class="factory-lang-option-check" aria-hidden="true">✓</span>
+            </a>
+            <a id="boris-ui-lang-jp" class="factory-lang-option" role="option" aria-selected="false" href="#">
+              <span class="factory-lang-option-text">日本語</span>
+              <span class="factory-lang-option-check" aria-hidden="true">✓</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="factory-search-box" role="search">
+        <input id="boris-ui-search-input" class="factory-search-input" type="search" placeholder="Search..." autocomplete="off" aria-label="Search documentation">
+        <span class="factory-search-kbd">⌘K</span>
+        <div id="boris-ui-search-results" class="factory-search-results" hidden></div>
+      </div>
+      <div class="factory-topbar-actions">
+        <nav class="factory-topbar-links" id="boris-ui-topbar-links" aria-label="Quick links">
+          <a class="factory-topbar-link" data-topbar-target="pricing" href="#">Plans &amp; Pricing</a>
+          <a class="factory-topbar-link" data-topbar-target="models" href="#">Available Models</a>
+          <a class="factory-topbar-link" data-topbar-target="enterprise/index" href="#">Enterprise</a>
+          <a class="factory-topbar-link" data-topbar-target="support" href="#">Support</a>
+        </nav>
+        <button id="boris-ui-theme-toggle" class="factory-theme-btn" type="button" aria-label="Toggle color theme">☾</button>
+      </div>
+    </div>
+    <div class="factory-topbar-row2" role="navigation" aria-label="Primary sections">
+      <div class="factory-top-tabs" id="boris-ui-top-tabs">
+        <a class="factory-top-tab is-active" data-tab-section="docs" href="#">Docs</a>
+        <a class="factory-top-tab" data-tab-section="guides" href="#">Guides</a>
+        <a class="factory-top-tab" data-tab-section="changelog" href="#">Changelog</a>
+        <a class="factory-top-tab" data-tab-section="benchmarks" href="#">Benchmarks</a>
+        <a class="factory-top-tab" data-tab-section="api-reference" href="#">API Reference</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="factory-shell">
+    <aside id="boris-ui-sidebar" class="factory-sidebar" aria-label="Documentation Navigation">
+      {{nav}}
+    </aside>
+
+    <main id="main-content" class="factory-main" tabindex="-1" data-boris-search-root>
+      {{metadata}}
+      <div class="factory-page-header" data-boris-search-exclude>
+        <div class="factory-page-eyebrow">{{breadcrumb}}</div>
+      </div>
+      <article class="factory-article factory-prose">
+        {{content}}
+      </article>
+      <div class="factory-graph-links" data-boris-search-exclude>{{relations}}{{backlinks}}</div>
+    </main>
+
+    <aside class="factory-toc" aria-label="On this page">
+      <div class="factory-toc-inner">
+        <div id="boris-ui-toc-heading" class="factory-toc-heading">≡ On this page</div>
+        {{toc}}
+      </div>
+    </aside>
+  </div>
+
+  <footer class="factory-footer" role="contentinfo">{{footer}}</footer>
+  <script src="{{asset-url assets/js/factory.js}}" defer></script>
+</body>
+</html>

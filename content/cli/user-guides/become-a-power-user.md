@@ -1,0 +1,451 @@
+---
+id: cli/user-guides/become-a-power-user
+title: "Become a Power User"
+status: published
+summary: "Maximize Droid performance with IDE integration, smart planning, and project optimization."
+parent: cli/user-guides/index
+tags: [cli, power-user, advanced, tips, optimization, performance, productivity, efficiency]
+relations: [relates_to=jp/cli/user-guides/become-a-power-user]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Become a Power User</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Maximize Droid performance with IDE integration, smart planning, and project optimization.</p>
+
+
+Want Droid to work faster, smarter, and with fewer iterations? The techniques on this page transform good results into exceptional ones. Each one saves tokens, reduces tool calls, and ships better code — start with the four foundational features, then layer on the workflow boosters below.
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**Fewer Tool Calls**
+
+IDE plugin provides real-time context so Droid sees what you see
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**Better First Attempts**
+
+Spec Mode explores before coding, preventing false starts
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**Consistent Quality**
+
+AGENTS.md captures your standards once, applies them always
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**Self-Correcting Code**
+
+Linters and tests let Droid fix issues before you even see them
+
+</div>
+
+</div>
+
+
+
+## Factory IDE Plugin — Real-time context awareness {#factory-ide-plugin-real-time-context-awareness}
+
+Make sure to install Factory IDE plugin for Droid. The Factory IDE plugin acts as an MCP server that gives Droid immediate awareness of your development environment. No more explaining what file you're looking at or copying error messages—Droid sees exactly what you see.
+
+**What Droid gets automatically:**
+- Open files and selected lines
+- VSCode error highlighting and diagnostics
+- Project structure and active terminal output
+- Your cursor position and recent edits
+
+**Without the plugin:**
+```
+"Fix 'Property user does not exist on type AuthContext' error in auth.ts"
+```
+
+**With the plugin:**
+```
+"Fix error"
+```
+
+The plugin eliminates entire categories of back-and-forth. Droid knows the context, sees the errors that you see, and understands your intent from minimal input.
+
+
+
+<Aside kind="tip">
+**Quick setup:** Install the Factory extension from VSCode marketplace.
+</Aside>
+
+
+
+## Spec Mode — Explore and plan first, code second {#spec-mode-explore-and-plan-first-code-second}
+
+Complex features need exploration before implementation. Spec Mode prevents costly false starts by letting Droid investigate your codebase thoroughly before writing a single line of code.
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">Activate Spec Mode</div>
+
+Press **Shift+Tab** when starting complex work
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Describe your goal</div>
+
+Write 1-2 sentences about what you want or provide fully-featured existing technical specs.
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Droid explores</div>
+
+Searches relevant files, understands patterns, identifies dependencies
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Review the plan</div>
+
+Get a detailed specification with implementation steps before any changes
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Approve and execute</div>
+
+Only after you approve does Droid start making changes
+
+</div>
+
+</div>
+
+
+
+**Perfect for:**
+- Features touching 2+ files
+- Architectural changes
+- Unfamiliar codebases
+- Security-sensitive work
+
+Without Spec Mode, Droid might jump into implementation too early and not do the work in the exact way you would like. With it, you get a detailed specification and a chance to correct the path before too many tokens are wasted.
+
+
+
+<Aside kind="note">
+Spec Mode isn't just for features—use it for complex debugging, refactoring, or any task where understanding comes before doing.
+</Aside>
+
+
+
+## AGENTS.md — Your preferences, remembered {#agentsmd-your-preferences-remembered}
+
+AGENTS.md captures your coding standards, project conventions, and personal preferences in one place. Droid reads it automatically for every task.
+
+**What to document:**
+
+| Category | Examples |
+| --- | --- |
+| **Code style** | "Use arrow functions, not function declarations" <br/> "Prefer early returns over nested conditionals" |
+| **Testing** | "Every new endpoint needs integration tests" <br/> "Use factories, not fixtures for test data" |
+| **Architecture** | "Services go in src/services with matching interfaces" <br/> "All database queries use the repository pattern" |
+| **Tooling** | "Run `npm run verify` before marking any task complete" <br/> "Deploy with `scripts/deploy.sh`, never manual commands" |
+| **Mistakes to avoid** | "Never commit .env files" <br/> "Don't use any! type annotations" |
+
+**Start simple, evolve over time:**
+
+Create `AGENTS.md` in your project root:
+```markdown
+# Project Guidelines
+
+## Testing
+- Run `npm test` before completing any feature
+- New features need unit tests
+- API changes need integration tests
+
+## Code Style  
+- Use TypeScript strict mode
+- Prefer composition over inheritance
+- Keep functions under 20 lines
+
+## Common Commands
+- Lint: `npm run lint:fix`
+- Test: `npm test`
+- Build: `npm run build`
+```
+
+Every time Droid repeats a mistake or you explain something twice, add it to AGENTS.md. Within weeks, you'll have a personalized assistant that knows exactly how you work.
+
+
+
+<Aside kind="tip">
+**Pro tip:** Include examples of good code from your project. "Follow the pattern in src/services/UserService.ts" gives Droid a concrete template.
+</Aside>
+
+
+
+## Agent Readiness — Let your tools do the teaching {#agent-readiness-let-your-tools-do-the-teaching}
+
+Make your project self-correcting. When Droid can run the same verification tools as your CI/CD pipeline, it fixes problems immediately instead of waiting for you to point them out.
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**Linters**
+
+ESLint, Pylint catch style issues instantly
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**Type Checkers**
+
+TypeScript, mypy prevent type errors before runtime
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**Fast Tests**
+
+Unit tests that run in seconds provide immediate feedback
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**Pre-commit Hooks**
+
+Husky, pre-commit ensure consistency before commits
+
+</div>
+
+</div>
+
+
+
+
+
+<Aside kind="warning">
+**Critical:** Keep verification fast. Slow tests will make the end-to-end work slower.
+</Aside>
+
+
+
+## Keyboard shortcuts — Navigate the TUI like a pro {#keyboard-shortcuts-navigate-the-tui-like-a-pro}
+
+The TUI ships with shortcuts for nearly every common action. Learn a handful and you'll stop reaching for the mouse or scrolling endlessly.
+
+| Shortcut | Action |
+| --- | --- |
+| `Ctrl+O` | Toggle the detailed transcript view (full message details) |
+| `Ctrl+T` | Toggle Mission Control overlay (orchestrator sessions) |
+| `Ctrl+N` | Cycle through available models |
+| `Ctrl+L` | Cycle autonomy level (low / medium / high) |
+| `Ctrl+Y` | Toggle `/btw` side-question scroll view |
+| `Ctrl+E` | Toggle approval details |
+| `Tab` | Cycle reasoning effort (`low` → `medium` → `high` → `off`) |
+| `Shift+Tab` | Cycle interaction modes (Auto → Spec → Mission) |
+| `@` | File path autocomplete — typing `@` triggers fuzzy file search |
+| `Up` / `Down` | Navigate input history — cycle through previously submitted messages |
+| `Double Escape` | Second press clears the input draft; a third Escape opens the rewind menu |
+| `Ctrl+V` | Paste an image from the clipboard as an attachment |
+| `?` | Toggle the help popup (when the input is empty) |
+| `Ctrl+/` | Toggle the help popup (works even with content in the input) |
+| `Ctrl+A` | Move the cursor to the start of the line |
+| `Ctrl+W` | Delete the word before the cursor |
+| `Ctrl+K` | Delete from the cursor to the end of the line |
+| `Ctrl+U` | Delete from the cursor to the start of the line |
+| `Ctrl+D` | Clear attached images, or forward-delete a character if none are attached |
+| `Ctrl+R` | Rename the highlighted session (in the `/sessions` list view) |
+| `Ctrl+X` | Archive the highlighted session (in the `/sessions` list view) |
+| `Alt+Up` / `Alt+Down` | Scroll the transcript turn-by-turn |
+| `Alt+PageUp` / `Alt+PageDown` | Jump between user turns only |
+| `Shift+Enter` | Insert a newline in the prompt input |
+| `Escape` | Close any active overlay or menu |
+| `!` | Toggle bash mode when the input is empty |
+
+
+
+<Aside kind="tip">
+See the full list in the [[reference/cli-reference#keyboard-shortcuts|CLI reference]].
+</Aside>
+
+
+
+## Bash mode — Quick shell access without leaving the TUI {#bash-mode-quick-shell-access-without-leaving-the-tui}
+
+Press `!` on an empty input to drop into bash mode. Anything you type runs in your shell, and the output stays in the transcript so Droid can see it on the next turn — no copy/paste required.
+
+```
+! git status
+! npm test -- --watch=false
+```
+
+Use it to check state, run a quick build, or capture output you want Droid to react to. Press `Escape` or send an empty input to exit bash mode.
+
+## Worktrees — Run parallel sessions on the same repo {#worktrees-run-parallel-sessions-on-the-same-repo}
+
+The `--worktree` flag launches Droid inside a fresh git worktree so multiple sessions can edit the same repository without stepping on each other. Combine it with `--worktree-dir` (or the `worktreeDirectory` setting) to keep all worktrees in one place.
+
+```bash
+droid --worktree feature-auth
+droid --worktree feature-billing
+```
+
+Each session lives on its own branch, so you can run experiments in parallel and merge whichever results win.
+
+## Session management — `/sessions`, `/fork`, `/compress` {#session-management-sessions-fork-compress}
+
+Long-running work doesn't have to live in a single session. Use these commands to navigate, branch, and trim conversations as you go:
+
+- `/sessions` — list and resume any previous session
+- `/fork` — branch the current session so you can explore an alternative without losing your place
+- `/compress` — compact the transcript when you start hitting context limits (also available as `/compact` or `/handoff`)
+
+```
+/fork
+/compress focus on the failing migration
+```
+
+Forking is especially powerful for "what if" experiments — branch, try the risky refactor, and come back to the original session if it doesn't pan out.
+
+## Speed and iteration — `/fast` {#speed-and-iteration-fast}
+
+`/fast` flips the current model into its fast variant for snappier turns when you're iterating on small edits or exploration. Toggle it back with `/fast off`.
+
+```
+/fast
+```
+
+## Context management — `/context` and `/btw` {#context-management-context-and-btw}
+
+`/context` shows a live breakdown of your context window: how many tokens are spent on system prompts, files, tool results, and conversation. Use it to spot bloat before compaction kicks in.
+
+`/btw` lets you ask a side question — Droid answers in a separate scroll buffer (`Ctrl+Y` to view) without polluting the main transcript or shifting focus from the task.
+
+```
+/context
+/btw what does the @decorator pattern in src/auth.ts do?
+```
+
+Together they keep the main session focused while still letting you research on the side.
+
+## Custom slash commands — `/commands` {#custom-slash-commands-commands}
+
+Save your most-used prompts as reusable shortcuts. `/commands` opens the manager where you can create, edit, and scope custom slash commands at the project or user level.
+
+```
+/commands
+```
+
+Define a `/ship` command that runs your release checklist, a `/triage` command that scans new bugs, or anything else you find yourself typing repeatedly. Custom commands accept arguments, so they compose well with the rest of your workflow.
+
+## Hooks — Automate around tool calls {#hooks-automate-around-tool-calls}
+
+`/hooks` lets you register lifecycle scripts that fire before or after Droid runs tools — think pre-commit checks, audit logging, automatic formatters, or guardrails that reject risky shell commands.
+
+```
+/hooks
+```
+
+Hooks live in your settings and apply to every session, so they're an excellent way to enforce team conventions without repeating yourself in every prompt.
+
+## MCP integrations — `/mcp` {#mcp-integrations-mcp}
+
+The Model Context Protocol lets Droid talk to external tools — databases, issue trackers, design tools, internal services — through a standard interface. Manage servers with `/mcp` in the TUI or `droid mcp add/remove` from the command line.
+
+```bash
+droid mcp add linear https://mcp.linear.app/mcp --type http
+```
+
+Once connected, Droid can read tickets, query databases, or invoke any other capability the server exposes — all without bespoke integrations.
+
+## Missions — Coordinate large multi-agent projects {#missions-coordinate-large-multi-agent-projects}
+
+For work that spans many features or files, switch to Missions with `/missions`. Droid plans the work, spawns specialist worker agents, and validates each milestone — closing the gap between "agent in a chat" and "team of agents executing a plan."
+
+```
+/missions
+```
+
+Configure worker and validator models via `missionModelSettings` and run them headlessly with `droid exec --mission`. See [[features/missions/overview|Missions]] for the full guide.
+
+## Custom droids — Specialized agents on demand {#custom-droids-specialized-agents-on-demand}
+
+`/droids` manages your library of custom droids: subagents with their own system prompts, tool sets, and models. Use them to encapsulate expertise — a "frontend reviewer" droid, a "SQL migration writer" droid, a "release notes" droid — and invoke them from any session.
+
+```
+/droids
+```
+
+You can also generate a new droid from a natural-language description, then iterate on it like any other config. See [[cli/configuration/custom-droids|Custom droids]] for details.
+
+## Customization — Sounds, themes, and statusline {#customization-sounds-themes-and-statusline}
+
+Make the TUI feel like home. `/themes` switches color schemes, `/statusline` configures a custom status bar, and the `completionSound`, `soundFocusMode`, and `subagentSounds` settings let you wire audio cues to important events (completion, awaiting input, subagent activity).
+
+```
+/themes
+/statusline
+```
+
+Combine sound notifications with long-running missions to step away from the terminal without losing situational awareness.
+
+## Putting it all together {#putting-it-all-together}
+
+These features compound. The IDE plugin and AGENTS.md feed Droid the context and conventions it needs; Spec Mode and Agent Readiness keep its first attempts on target; keyboard shortcuts, bash mode, and `/btw` keep your hands on the keyboard; `/fast`, worktrees, missions, and custom droids scale the work itself.
+
+
+
+<Aside kind="note">
+**Getting started?** Install the IDE plugin first—it's the fastest path to better results. Add AGENTS.md with your test commands, learn three or four shortcuts, and grow from there.
+</Aside>

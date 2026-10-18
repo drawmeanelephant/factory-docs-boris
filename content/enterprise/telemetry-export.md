@@ -1,0 +1,176 @@
+---
+id: enterprise/telemetry-export
+title: "Telemetry Export (OTEL)"
+status: published
+summary: "Export OpenTelemetry metrics from Droid to your own OTLP-compatible collector for full visibility in your existing observability stack."
+parent: enterprise/index
+tags: [enterprise]
+relations: [relates_to=jp/enterprise/telemetry-export]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Telemetry Export (OTEL)</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Export OpenTelemetry metrics from Droid to your own OTLP-compatible collector for full visibility in your existing observability stack.</p>
+
+
+Droid can export OpenTelemetry (OTEL) metrics to your own OTLP-compatible collector, giving you full visibility into Droid activity within your existing observability stack. Metrics are sent to both Factory's collector and yours in the same export cycle -- if your collector is unreachable, Factory's own export is not affected.
+
+---
+
+## Configuration {#configuration}
+
+Set these environment variables before launching Droid:
+
+```bash
+export OTEL_TELEMETRY_ENDPOINT="https://your-collector.example.com:4318"
+export OTEL_TELEMETRY_HEADERS="Authorization=Bearer <your-token>"
+```
+
+| Variable                  | Required | Description                                                                                                          |
+| :------------------------ | :------- | :------------------------------------------------------------------------------------------------------------------- |
+| `OTEL_TELEMETRY_ENDPOINT` | Yes      | Base URL of your OTLP HTTP collector. Metrics are sent to `{endpoint}/v1/metrics`.                                   |
+| `OTEL_TELEMETRY_HEADERS`  | No       | Comma-separated `key=value` pairs sent as HTTP headers on every export. Values may contain `=` (e.g. base64 tokens). |
+| `OTEL_LOG_MESSAGE_CONTENT` | No      | Set to `true` or `1` to export message content (user/assistant messages, tool input/results) as trace spans to **your endpoint only** -- never to Factory. Requires `OTEL_TELEMETRY_ENDPOINT`; content is dropped if no endpoint is set. |
+
+---
+
+## How it works {#how-it-works}
+
+- When `OTEL_TELEMETRY_ENDPOINT` is set, metrics are sent to your endpoint in the same export cycle via a fan-out exporter -- no extra timers, no duplication of metric readers.
+- Failures to your collector do not affect Factory's own export. Each endpoint is isolated.
+- Metrics use **delta temporality** -- each export contains only new values since the last flush (60-second intervals).
+
+---
+
+## Exported metrics {#exported-metrics}
+
+All metrics use the `droid.*` namespace.
+
+| Metric                            | Type      | Description                        |
+| :-------------------------------- | :-------- | :--------------------------------- |
+| `droid.code.files_modified`       | Counter   | Files modified during a session    |
+| `droid.code.files_read`           | Counter   | Files read during a session        |
+| `droid.code.lines_modified`       | Counter   | Lines of code modified             |
+| `droid.git.commits`               | Counter   | Commits created                    |
+| `droid.git.pull_requests`         | Counter   | Pull requests created              |
+| `droid.tool.invocations`          | Counter   | Tool invocations                   |
+| `droid.tool.execution_time`       | Histogram | Tool execution duration (ms)       |
+| `droid.mcp.tool_invocations`      | Counter   | MCP tool invocations               |
+| `droid.skill.invocations`         | Counter   | Skill invocations                  |
+| `droid.hook.invocations`          | Counter   | Hook invocations                   |
+| `droid.slash_command.invocations` | Counter   | Slash command invocations          |
+| `droid.auth.login_success`        | Counter   | Successful logins                  |
+| `droid.repo.metadata`             | Gauge     | Repository metadata snapshot       |
+
+---
+
+## Common attributes {#common-attributes}
+
+Every data point includes these attributes automatically:
+
+| Attribute         | Description              |
+| :---------------- | :----------------------- |
+| `user.id`         | Authenticated user ID    |
+| `organization.id` | Organization ID          |
+| `session.id`      | Current Droid session ID |
+
+Tool-specific attributes (`tool.name`, `mcp.server`, `skill.name`, etc.) are included where applicable. Resource attributes include `service.name` (`cli`) and `service.version`.
+
+---
+
+## Message content logging {#message-content-logging}
+
+By default, telemetry export includes only metrics -- the text of prompts, model responses, and tool I/O is **not** exported. Metrics fan out to both Factory and your collector (see above); message content does not.
+
+To capture message content (for example, for session auditing), set:
+
+```bash
+export OTEL_LOG_MESSAGE_CONTENT=true   # or 1
+```
+
+When enabled, Droid emits message content as OTEL **trace spans** (on the `/v1/traces` path of your endpoint), covering:
+
+- User messages (`droid.message.user`)
+- Assistant responses (`droid.message.assistant`)
+- Tool calls and their inputs (`droid.tool.call`)
+- Tool results (`droid.tool.result`)
+
+
+
+<Aside kind="note">
+**Message content is sent only to the collector you configure and never reaches Factory.** Unlike metrics, content spans are routed exclusively to your `OTEL_TELEMETRY_ENDPOINT`; Factory's collector is never a destination for message content.
+
+  - A customer endpoint (`OTEL_TELEMETRY_ENDPOINT`) is **required**. If none is set, content is dropped rather than sent to Factory.
+  - If your endpoint resolves to the same URL as Factory's collector, content logging is automatically disabled.
+  - Metrics export is unaffected and continues to fan out to both Factory and your collector.
+</Aside>
+
+
+
+---
+
+## Example configurations {#example-configurations}
+
+
+
+
+
+<Details summary="Generic OTEL Collector / Grafana Alloy">
+```bash
+export OTEL_TELEMETRY_ENDPOINT="https://collector.example.com:4318"
+```
+</Details>
+
+
+
+  
+
+<Details summary="Datadog (via Agent OTLP ingestion)">
+```bash
+export OTEL_TELEMETRY_ENDPOINT="http://localhost:4318"
+```
+</Details>
+
+
+
+  
+
+<Details summary="Datadog (direct OTLP intake)">
+```bash
+export OTEL_TELEMETRY_ENDPOINT="https://otlp.datadoghq.com"
+export OTEL_TELEMETRY_HEADERS="dd-api-key=<your-datadog-api-key>"
+```
+</Details>
+
+
+
+  
+
+<Details summary="New Relic">
+```bash
+export OTEL_TELEMETRY_ENDPOINT="https://otlp.nr-data.net:4318"
+export OTEL_TELEMETRY_HEADERS="api-key=<your-new-relic-license-key>"
+```
+</Details>
+
+
+
+  
+
+<Details summary="Honeycomb">
+```bash
+export OTEL_TELEMETRY_ENDPOINT="https://api.honeycomb.io"
+export OTEL_TELEMETRY_HEADERS="x-honeycomb-team=<your-api-key>,x-honeycomb-dataset=droid-metrics"
+```
+</Details>
+
+
+
+
+
+---
+
+## Troubleshooting {#troubleshooting}
+
+- Verify your collector accepts OTLP HTTP on the `/v1/metrics` path.
+- Confirm `OTEL_TELEMETRY_HEADERS` includes valid auth credentials.
+- Ensure network connectivity from the machine running Droid to your collector.

@@ -1,0 +1,348 @@
+---
+id: jp/cli/configuration/settings
+title: "設定"
+status: published
+summary: "ドロイドの動作とワークフローとの統合を設定します。"
+parent: jp/cli/configuration/index
+tags: [cli, settings, configuration, config, preferences, options, customize, settings-json]
+relations: [relates_to=cli/configuration/settings]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">設定</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">ドロイドの動作とワークフローとの統合を設定します。</p>
+
+
+## 設定へのアクセス {#accessing-settings}
+
+droidの設定を行うには：
+
+1. `droid`を実行
+2. `/settings`を入力
+3. 好みに合わせて対話的に調整
+
+変更は即座に反映され、設定ファイルに保存されます。
+
+## 設定の保存場所 {#where-settings-live}
+
+| OS        | 場所                               |
+| --------- | -------------------------------------- |
+| macOS / Linux | `~/.factory/settings.json` |
+| Windows   | `%USERPROFILE%\.factory\settings.json` |
+
+ファイルが存在しない場合は、初回**droid**実行時にデフォルト設定で作成されます。
+
+### ローカル上書き {#local-overrides}
+
+任意の`.factory/`フォルダ内で、`settings.json`と一緒に`settings.local.json`を作成できます：
+
+- `~/.factory/settings.local.json`（ユーザーレベル）
+- `<project>/.factory/settings.local.json`（プロジェクトレベル）
+
+ローカル上書きは、同一レベルの対応する`settings.json`の上に統合され、同じ階層の優先順位に従います。マシン固有の設定をバージョン管理から除外したい場合は、`settings.local.json`を`.gitignore`に追加してください。
+
+## 従来のDroid YAML設定 {#legacy-droid-yaml-configuration}
+
+`.droid.yaml`は以前のプロジェクト設定インターフェースです。代わりに現在の`.factory/`ファイルを使用してください：
+
+- Droidの設定とローカル上書きには`settings.json`と`settings.local.json`を使用します。
+- リポジトリの指示、規約、検証コマンドには[[jp/cli/configuration/agents-md|AGENTS.md]]を使用します。
+- 連携、自動化、再利用可能なワークフローには[[jp/cli/configuration/mcp|MCPサーバー]]、[[jp/cli/configuration/hooks-guide|フック]]、[[jp/cli/configuration/skills|スキル]]を使用します。
+
+## 利用可能な設定 {#available-settings}
+
+| 設定 | オプション | デフォルト | 説明 |
+| ------- | ------- | ------- | ----------- |
+| `model` | 任意の[[jp/models|利用可能なモデルID]] | 製品のデフォルト | droidが使用するデフォルトのAIモデル |
+| `reasoningEffort` | `off`, `none`, `low`, `medium`, `high`（可用性はモデルに依存） | モデル依存のデフォルト | モデルが実行する構造化された思考の量を制御します。 |
+| `sessionDefaultSettings.interactionMode` | `auto`, `spec` | `auto` | 新しいセッションをAutoとSpec Modeのどちらで開始するかを設定します。 |
+| `sessionDefaultSettings.autonomyLevel` | `off`, `low`, `medium`, `high` | `off` | 新しいセッションのデフォルト[[jp/cli/user-guides/auto-run|自律レベル]]を設定します。 |
+| `cloudSessionSync` | `true`, `false` | `true` | CLIセッションをFactory webに同期します。 |
+| `diffMode` | `github`, `unified` | `github` | 分割されたGitHubスタイルのdiffと単一列表示を選択します。 |
+| `completionSound` | `off`, `bell`, `fx-ok01`, `fx-ack01`、またはカスタムファイルパス | `fx-ok01` | レスポンス完了時の音声キュー。 |
+| `awaitingInputSound` | `off`, `bell`, `fx-ok01`, `fx-ack01`、またはカスタムファイルパス | `fx-ack01` | droidがユーザー入力を待機中の音声キュー。 |
+| `soundFocusMode` | `always`, `focused`, `unfocused` | `always` | 音声通知を再生するタイミング。 |
+| `commandAllowlist` | コマンドの配列 | 安全なデフォルトが提供 | 追加確認なしで実行されるコマンド。 |
+| `commandDenylist` | コマンドの配列 | 制限的なデフォルトが提供 | 常に確認が必要なコマンド。 |
+| `commandBlocklist` | コマンドの配列 | `[]`（なし） | 承認をスキップしても絶対に実行されないコマンド。 |
+| `includeCoAuthoredByDroid` | `true`, `false` | `true` | コミットにDroidの共同作成者トレーラーを自動追加します。 |
+| `enableDroidShield` | `true`, `false` | `true` | シークレットスキャンとgitガードレールを有効にします。 |
+| `hooksDisabled` | `true`, `false` | `false` | 全てのフックの実行をグローバルに無効にします。 |
+| `ideAutoConnect` | `true`, `false` | `false` | 外部ターミナルからIDEへの自動接続。 |
+| `showThinkingInMainView` | `true`, `false` | `false` | メインチャット画面にAIの思考/推論ブロックを表示します。 |
+| `customModels` | モデル設定の配列 | `[]` | BYOK用のカスタムモデル設定。[[jp/cli/byok/overview|BYOKドキュメント]]を参照。 |
+| `mcp.callTimeoutMs` | 整数（ミリ秒） | 組み込みのデフォルト | MCP ツール呼び出しのグローバルタイムアウト。`mcp.json` の `timeoutMs` によってサーバー単位で上書きできます。詳しくは [[jp/cli/configuration/mcp#mcp-call-timeout|MCP 呼び出しタイムアウト]] を参照してください。 |
+| `blockOnMcpLoad` | `true`, `false` | `false` | エージェントターンを開始する前に、MCPサーバーの読み込み完了を待機します。 |
+
+### モデル {#model}
+
+`model`には、[[jp/models|利用可能なモデルID]]を設定します。カスタムモデルについては、[[jp/cli/byok/overview|Bring Your Own Key (BYOK)]]を参照してください。
+
+### 推論努力 {#reasoning-effort}
+
+`reasoningEffort`は、モデルが回答前に実行する構造化された思考の量を調整します。利用可能な値はモデルによって異なりますが、通常は以下が含まれます：
+
+- **`off` / `none`** – 構造化推論を無効化（最高速）。
+- **`low`**, **`medium`**, **`high`** – より複雑な推論のため段階的に検討時間を増加。
+
+Anthropicモデルはデフォルトで`off`、GPT-5は`medium`で開始します。
+
+### 自律レベル {#autonomy-level}
+
+`sessionDefaultSettings.interactionMode`を使って新しいセッションをAutoとSpec Modeのどちらで開始するかを選び、`sessionDefaultSettings.autonomyLevel`でデフォルトの[[jp/cli/user-guides/auto-run|自律レベル]]を設定します。`off`では手動承認を維持し、`low`、`medium`、`high`ではそのリスクレベル以下の作業を事前承認します。
+
+`sessionDefaultSettings.autonomyMode`は非推奨で、古い設定との互換性のために残されています。
+
+### Diffモード {#diff-mode}
+
+droidがコード変更を表示する方法を制御します：
+
+- **`github`** – 横並び、高忠実度レンダリング（推奨）。
+- **`unified`** – 従来の単一列diff形式。
+
+### クラウドセッション同期 {#cloud-session-sync}
+
+このスイッチをオンにすると、全てのCLIセッションがFactory webに同期され、ブラウザで会話を再確認できます：
+
+- **`true`** – セッションをwebアプリに同期。
+- **`false`** – セッションをローカルのみに保持。
+
+### 音声通知 {#sound-notifications}
+
+droidイベントの音声フィードバックを設定します：
+
+**完了音**（`completionSound`） - レスポンス完了時に再生：
+- **`fx-ok01`** – 内蔵完了音（デフォルト） - ソフトな成功ブループ
+- **`fx-ack01`** – 代替内蔵効果音 - 触覚的リップルフィードバック
+- **`bell`** – システムターミナルベルを使用
+- **`off`** – 音声通知なし
+- **カスタムパス** – 独自の音声ファイルへのパスを指定（例：`"/path/to/sound.wav"`）
+
+**入力待機音**（`awaitingInputSound`） - droidがユーザー入力を待機中に再生。完了音と同じオプション、デフォルトは`fx-ack01`。
+
+**音声フォーカスモード**（`soundFocusMode`） - 音声再生タイミングを制御：
+- **`always`** – ウィンドウフォーカスに関係なく音声を再生（デフォルト）
+- **`focused`** – ターミナルがフォーカスされている時のみ音声を再生
+- **`unfocused`** – ターミナルがフォーカスされていない時のみ音声を再生
+
+
+
+<Aside kind="note">
+TUIで`/settings`または`Shift+Tab` → **Settings**から音声設定にアクセスできます。
+</Aside>
+
+
+
+### フック {#hooks}
+
+`hooksDisabled`設定は、フック設定を削除せずに全てのフック実行を無効化するグローバルトグルを提供します：
+
+- **`false`** – フックが有効で正常に実行されます（デフォルト）
+- **`true`** – 全てのフックがグローバルに無効
+
+これは`/hooks`メニューまたは`/settings`からも切り替えられます。
+
+### IDE自動接続 {#ide-auto-connect}
+
+`ideAutoConnect`設定は、外部ターミナル（IDE内蔵ターミナル以外）からの実行時にdroidが自動的にIDEに接続するかを制御します：
+
+- **`false`** – IDEターミナル内での実行時のみ自動接続（デフォルト）
+- **`true`** – 任意のターミナルからIDEに自動接続
+
+## コマンド許可リスト、拒否リスト、ブロックリスト {#command-allowlist-denylist-blocklist}
+
+これらの設定を使用して、droidが自動実行できるコマンドと絶対に実行してはいけないコマンドを制御します：
+
+- **`commandAllowlist`** – この配列内のコマンドは安全として扱われ、自律プロンプトに関係なく追加確認なしで実行されます。頻繁に使用する低リスクユーティリティのみを含めてください（例：`ls`、`pwd`、`dir`）。
+- **`commandDenylist`** – この配列内のコマンドは常に確認が必要で、破壊的または危険なため通常ブロックされます（例：再帰的`rm`、`mkfs`、特権システム操作）。拒否されたコマンドでも、明示的に承認すれば実行できます。
+- **`commandBlocklist`** – この配列内のコマンドは**絶対に**実行されません。拒否リストとは異なり、承認のプロンプトも承認する手段もありません。完全自律、自動実行、`--skip-permissions-unsafe`のいずれの場合でもブロックが適用されます。droidは実際に呼び出されるプログラムを解決してから照合するため、ラッパーシェル、絶対パス、クォートのトリック、コマンド置換でブロックを回避することはできません。
+
+許可リストと拒否リストの両方に登場するコマンドは、拒否リストの動作がデフォルトとなります。ブロックリストは常に両者より優先されます。いずれのリストにもないコマンドは、セッションで選択した自律レベルにフォールバックします。
+
+### 許可/拒否/ブロック設定例 {#example-allowdenyblock-configuration}
+```json
+{
+  "commandAllowlist": [
+    "ls",
+    "pwd",
+    "dir"
+  ],
+  "commandDenylist": [
+    "rm -rf /",
+    "mkfs",
+    "shutdown"
+  ],
+  "commandBlocklist": [
+    "shutdown",
+    "mkfs",
+    "curl"
+  ]
+}
+```
+承認に関係なくハードストップすべきコマンドには`commandBlocklist`を、明示的な確認後にのみ許可するコマンドには`commandDenylist`を使用してください。これらの配列を定期的に見直し更新して、ワークフローとセキュリティ体制に合わせてください。特にチーム間で設定を共有する場合は重要です。
+
+## セッションデフォルト {#session-defaults}
+
+新しいセッションが開始されるときに適用されるデフォルト値です。上記の表にある`sessionDefaultSettings.interactionMode`と`sessionDefaultSettings.autonomyLevel`もあわせて参照してください。
+
+| 設定 | 型 | オプション | デフォルト | 説明 |
+| ------- | ------ | ------- | ------- | ----------- |
+| `sessionDefaultSettings.specModeModel` | string | 任意の[[jp/models|利用可能なモデルID]] | `model`を継承 | セッションがSpec Modeで開始されたときに使用するモデルを上書きします。 |
+| `sessionDefaultSettings.specModeReasoningEffort` | string | `off`, `none`, `low`, `medium`, `high` | モデルのデフォルト | Specモデルに適用される推論努力。 |
+
+## 表示とUI {#display-and-ui}
+
+droidがターミナルでコンテンツをどのように描画するかを調整します。
+
+| 設定 | 型 | オプション | デフォルト | 説明 |
+| ------- | ------ | ------- | ------- | ----------- |
+| `toolResultDisplay` | string | `expanded`, `compact` | `expanded` | ツール結果をトランスクリプトでどのように表示するか。 |
+| `showTokenUsageIndicator` | boolean | `true`, `false` | `false` | 入力欄の下部にライブのトークン使用量インジケーターを表示します。 |
+| `logoAnimation` | string | `once`, `always`, `off` | `once` | 起動時にdroidロゴをアニメーションさせます。 |
+| `theme` | string | テーマID（`/themes`を参照） | システムテーマ | TUIで使用するカラーテーマ。 |
+| `overrideTerminalColors` | boolean | `true`, `false` | `false` | droidのテーマでターミナルのカラースキームを強制的に上書きします。 |
+| `nerdFont` | boolean | `true`, `false` | `false` | UIでNerd Fontのグリフを有効にします（ターミナルにNerd Fontが必要です）。 |
+
+## 追加の音声・通知設定 {#additional-sound-and-notification-settings}
+
+[[jp/cli/configuration/settings#sound-notifications|音声通知]]セクションを拡張し、ベル、イベントごとのフォーカスモード、サブエージェントのアクティビティに対するトグルを追加します。
+
+| 設定 | 型 | オプション | デフォルト | 説明 |
+| ------- | ------ | ------- | ------- | ----------- |
+| `subagentSounds` | string | `on`, `off` | `off` | サブエージェントのライフサイクルイベント（開始、完了、エラー）の音声を再生します。 |
+
+## ミッション設定 {#mission-settings}
+
+[[jp/features/missions/overview|ミッション]] — マルチエージェントオーケストレーションの実行を設定します。
+
+| 設定 | 型 | オプション | デフォルト | 説明 |
+| ------- | ------ | ------- | ------- | ----------- |
+| `missionModelSettings.workerModel` | string | 任意の[[jp/models|利用可能なモデルID]] | 継承 | ミッションのワーカーサブエージェントが使用するデフォルトモデル。 |
+| `missionModelSettings.workerReasoningEffort` | string | `off`, `none`, `low`, `medium`, `high` | モデルのデフォルト | ミッションワーカーの推論努力。 |
+| `missionModelSettings.validationWorkerModel` | string | 任意の[[jp/models|利用可能なモデルID]] | 継承 | ミッションのバリデーター（scrutiny / user-testingワーカー）が使用するモデル。 |
+| `missionModelSettings.validationWorkerReasoningEffort` | string | `off`, `none`, `low`, `medium`, `high` | モデルのデフォルト | バリデーションワーカーの推論努力。 |
+| `missionModelSettings.skipScrutiny` | boolean | `true`, `false` | `false` | ミッション中のscrutiny検証マイルストーンをスキップします。 |
+| `missionModelSettings.skipUserTesting` | boolean | `true`, `false` | `false` | ミッション中のuser-testing検証マイルストーンをスキップします。 |
+| `missionOrchestratorModel` | string | 任意の[[jp/models|利用可能なモデルID]] | 継承 | ミッションオーケストレーターが使用するモデル。 |
+| `missionOrchestratorReasoningEffort` | string | `off`, `none`, `low`, `medium`, `high` | モデルのデフォルト | ミッションオーケストレーターの推論努力。 |
+| `keepSystemAwakeDuringMissions` | boolean | `true`, `false` | `true` | ミッション実行中にOSがスリープしないようにします。 |
+
+## サブエージェント設定 {#subagent-settings}
+
+Task ツールによって起動されるサブエージェントの自律性とモデルを設定します。これらは `/settings` の **Subagents** タブに表示されます。
+
+| 設定 | 型 | オプション | デフォルト | 説明 |
+| ------- | ------ | ------- | ------- | ----------- |
+| `subagentAutonomyLevel` | string | `inherit`, `off`, `low`, `medium`, `high` | `inherit` | Task ツールによって起動されるサブエージェントに適用される[[jp/cli/user-guides/auto-run|自律レベル]]。 |
+
+### サブエージェントの自律レベル {#subagent-autonomy-level}
+
+`subagentAutonomyLevel` は、サブエージェントが承認なしでどこまで実行できるかを制御します：
+
+- **`inherit`** – サブエージェントは親セッションの自律レベルを使用します（デフォルト）。
+- **`off`** – サブエージェントはすべてのアクションで手動承認が必要です。
+- **`low`**, **`medium`**, **`high`** – そのリスクレベル以下のサブエージェント作業を事前承認します。
+
+明示的なレベルを設定しても、組織管理の `maxAutonomyLevel` によって制限されるため、エンタープライズの上限を超えることはありません。ミッションワーカーにはこの設定は適用されません。
+
+### サブエージェントのモデル設定 {#subagent-model-settings}
+
+サブエージェントは複雑度ティア（`light`、`medium`、`heavy`）によってルーティングされます。各ティアは `subagentModelSettings` の下で独自のモデルと推論努力を固定できます。
+
+| 設定 | 型 | オプション | デフォルト | 説明 |
+| ------- | ------ | ------- | ------- | ----------- |
+| `subagentModelSettings.lightModel` | string | 任意の[[jp/models|利用可能なモデルID]] または `inherit` | `inherit` | light 複雑度のサブエージェント（例：組み込みの `explorer`）が使用するモデル。 |
+| `subagentModelSettings.lightReasoningEffort` | string | `off`, `none`, `low`, `medium`, `high` | モデルのデフォルト | light 複雑度のサブエージェントの推論努力。 |
+| `subagentModelSettings.mediumModel` | string | 任意の[[jp/models|利用可能なモデルID]] または `inherit` | `inherit` | medium 複雑度のサブエージェント（例：組み込みの `worker`）が使用するモデル。 |
+| `subagentModelSettings.mediumReasoningEffort` | string | `off`, `none`, `low`, `medium`, `high` | モデルのデフォルト | medium 複雑度のサブエージェントの推論努力。 |
+| `subagentModelSettings.heavyModel` | string | 任意の[[jp/models|利用可能なモデルID]] または `inherit` | `inherit` | heavy 複雑度のサブエージェントが使用するモデル。 |
+| `subagentModelSettings.heavyReasoningEffort` | string | `off`, `none`, `low`, `medium`, `high` | モデルのデフォルト | heavy 複雑度のサブエージェントの推論努力。 |
+
+ティアの選択方法：
+
+- 組み込みの `worker` サブエージェントは `medium` 複雑度、`explorer` は `light` 複雑度で実行されます。カスタム droid や Task ツールは特定のティアを要求できます。
+- **`inherit`**（デフォルト）は、サブエージェントが起動元セッションのモデルを使用することを意味します。親セッションのモデルをアップグレードしても、特定のモデルに固定されたティアが遡って変更されることはありません。
+- 設定に明示的な `model` を持つカスタム droid はそのモデルを直接使用し、複雑度ルーティングをバイパスします。
+- 推論努力は選択したモデルのデフォルトになり、そのモデルがサポートする範囲に制限されます。
+
+## コンテキストとコンパクション {#context-and-compaction}
+
+モデルのコンテキストウィンドウ内に収めるために、droidが会話をいつ・どのようにコンパクションするかを制御します。
+
+| 設定 | 型 | オプション | デフォルト | 説明 |
+| ------- | ------ | ------- | ------- | ----------- |
+| `compactionTokenLimit` | number | トークン数 | モデル依存 | 現在のセッションの自動コンパクションをトリガーするトークンしきい値。 |
+| `compactionTokenLimitPerModel` | object | `{ "<modelId>": number }`マップ | `{}` | `compactionTokenLimit`のモデルごとの上書き。 |
+| `compactionModelMode` | string | `same`, `<modelId>` | `same` | コンパクションを実行するモデル：`same`は現在のセッションモデルを使用し、特定のモデルIDを指定することもできます。 |
+
+## Spec Mode設定 {#spec-mode-settings}
+
+Spec Modeによって作成される永続的なspecストアを制御します。
+
+| 設定 | 型 | オプション | デフォルト | 説明 |
+| ------- | ------ | ------- | ------- | ----------- |
+| `specSaveDir` | string | ディレクトリパス | `~/.factory/specs` | 保存されたspecを書き込むディレクトリ。`~`の展開をサポートします。 |
+
+## インフラストラクチャ {#infrastructure}
+
+ステータスライン、worktree、リクエストタイムアウトに関するシステムレベルの設定。
+
+| 設定 | 型 | オプション | デフォルト | 説明 |
+| ------- | ------ | ------- | ------- | ----------- |
+| `statusLine` | object | `{ "command": string, "padding"?: number, "maxRows"?: number }` | 未設定 | カスタムステータスライン設定。`command`が実行され、その標準出力が入力欄の上に表示されます。`/statusline`で対話的に設定できます。 |
+| `worktreeDirectory` | string | ディレクトリパス | `~/.factory/worktrees` | `--worktree` / `-w`で作成されるgit worktreeのデフォルト親ディレクトリ。 |
+| `llmRequestTimeout` | number | ミリ秒 | 製品のデフォルト | 個々のLLMリクエストが中断されるまでのタイムアウト。 |
+
+## エンタープライズおよび組織レベルの設定 {#enterprise-and-org-level-settings}
+
+
+
+<Aside kind="note">
+**エンタープライズ / 組織レベル。** 以下の設定は通常、組織管理者によって管理され、Factory App または管理された`settings.json`を通じてメンバーに配布されます。個々のユーザーが直接設定することは通常ありません。
+</Aside>
+
+
+
+| 設定 | 型 | オプション | デフォルト | 説明 |
+| ------- | ------ | ------- | ------- | ----------- |
+| `maxAutonomyLevel` | string | `off`, `low`, `medium`, `high` | `high` | **エンタープライズ。** 任意のセッションで使用できる最大[[jp/cli/user-guides/auto-run|自律レベル]]。ユーザーが選択したより高いレベルはこの値に制限されます。 |
+| `modelPolicy` | object | `{ "allowedModelIds"?: string[], "blockedModelIds"?: string[], "allowCustomModels"?: boolean, "allowedBaseUrls"?: string[] }` | 未設定 | **エンタープライズ。** メンバーが選択できるモデルを制限し、カスタムモデルの許可可否を制御し、カスタムモデルプロバイダーのベースURLを許可リスト化します。 |
+| `mcpPolicy` | object | `{ "enabled"?: boolean, "allowlist"?: string[] }` | 未設定 | **エンタープライズ。** MCPサーバーの実行可否と許可されるサーバーを制御します。[[jp/cli/configuration/mcp|MCP]]を参照してください。 |
+| `missionPolicy` | object | `{ "restrictedAccess"?: boolean, "allowedUserIds"?: string[] }` | 未設定 | **エンタープライズ。** [[jp/features/missions/overview|ミッション]]を起動できるユーザーを制限します。 |
+| `networkPolicy` | object | `{ "allowedIps": string[] }` | 未設定 | **エンタープライズ。** droidセッションからのアウトバウンドネットワークアクセスを `allowedIps` に指定したIPまたはCIDRレンジに制限します。 |
+| `sandbox` | object | `{ "enabled"?: boolean, "mode"?: string, "filesystem"?: object, "network"?: object }` | 未設定 | **Beta。** ツール実行のファイルシステムとネットワーク隔離を制御するサンドボックス設定。詳しくは[[jp/cli/configuration/sandbox|サンドボックス]]を参照してください。 |
+| `restrictMemberVisibility` | boolean | `true`, `false` | `false` | **組織レベル。** 管理者以外のユーザーから他の組織メンバーを非表示にします。 |
+| `restrictApiKeyCreationToManagers` | boolean | `true`, `false` | `false` | **組織レベル。** 組織のマネージャーのみがAPIキーを作成できます。 |
+| `sessionRetentionDays` | number | `14`–`365` | 組織のデフォルト | **組織レベル。** 同期されたセッション履歴が削除されるまで保持される日数。 |
+| `wikiCloudSync` | boolean | `true`, `false` | `true` | **組織レベル。** 生成された[[jp/cli/features/wiki/overview|Wiki]]コンテンツをFactoryクラウドに同期します。 |
+| `managedComputersEnabled` | boolean | `true`, `false` | `false` | **エンタープライズ。** 組織でFactoryマネージドのリモートコンピューターを有効にします。 |
+| `byomComputersEnabled` | boolean | `true`, `false` | `false` | **エンタープライズ。** メンバーが`droid computer register`で自分のマシンを登録できるようにします（BYOM）。 |
+| `disableWeeklyUsageSummary` | boolean | `true`, `false` | `false`（サマリー有効） | **エンタープライズ/組織レベル。** 月間クレジット上限の80%以上に達したユーザーと有効なサービスアカウントを一覧にした週次メールを、組織のマネージャーおよびオーナーへ送信しないようにします。停止するには`true`に設定します。 |
+
+## Factory Appの使用上限アラート設定 {#factory-app-usage-alert-preferences}
+
+以下の設定は、各ユーザーの Factory App プロファイルに保存されます。`settings.json`では設定できません。
+
+| 設定 | 型 | オプション | デフォルト | 説明 |
+| ---- | -- | ---------- | ------------ | ---- |
+| `disableUsageLimitAlerts` | boolean | `true`, `false` | `false`（アラート有効） | 月間クレジット上限の80%および100%に達したときに送信されるメールを停止します。停止するには`true`に設定します。 |
+
+## 設定例 {#example-configuration}
+```json
+{
+  "model": "claude-opus-4-7",
+  "reasoningEffort": "low",
+  "diffMode": "github",
+  "cloudSessionSync": true,
+  "completionSound": "fx-ok01",
+  "awaitingInputSound": "fx-ack01",
+  "soundFocusMode": "always"
+}
+```
+---
+
+### さらに詳しく知りたい場合は？ {#need-more}
+
+- [[jp/cli/getting-started/overview|CLI概要]] – メインのTUIワークフローを確認
+- [[jp/reference/cli-reference|CLIリファレンス]] – コマンドフラグとオプション
+- [[jp/integrations/ide-integrations|IDE統合]] – エディター固有のセットアップ
+- [[jp/cli/byok/overview|カスタムモデルとBYOK]] - カスタムモデルとAPIキーの追加

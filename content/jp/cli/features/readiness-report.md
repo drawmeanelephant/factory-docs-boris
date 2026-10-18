@@ -1,0 +1,163 @@
+---
+id: jp/cli/features/readiness-report
+title: "スラッシュコマンド"
+status: published
+summary: "/readiness-reportスラッシュコマンドでリポジトリの自律性成熟度を評価します。"
+parent: jp/cli/features/index
+tags: [cli]
+relations: [relates_to=cli/features/readiness-report]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">スラッシュコマンド</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">/readiness-reportスラッシュコマンドでリポジトリの自律性成熟度を評価します。</p>
+
+
+`/readiness-report` スラッシュコマンドは、現在のリポジトリをAutonomy Maturity Modelに対して評価し、5つの成熟度レベルでスコアリングを行い、改善のための実践的な推奨事項を提供します。
+
+---
+
+## 前提条件 {#prerequisites}
+
+- `origin` リモートが設定されている git リポジトリ内からコマンドを実行してください（リポジトリのURLは Factory App でレポートをプロジェクトに紐づけるために使用されます）。
+
+---
+
+## 使用方法 {#usage}
+
+コマンドを使用するには、評価したいリポジトリに移動して次を実行します：
+
+```bash
+droid
+> /readiness-report
+```
+
+評価は現在のリポジトリディレクトリに対して実行されます。
+
+---
+
+## 実行内容 {#what-happens}
+
+`/readiness-report` を実行すると、droid はリポジトリの包括的な評価を実行します：
+
+1. **言語検出** — 設定ファイルとソースコードに基づいてリポジトリの言語（JavaScript/TypeScript、Python、Rust、Go、Java、Ruby）を特定
+2. **サブアプリケーション発見** — リポジトリがモノレポか単一のサービス/パッケージ/ライブラリかを判定。モノレポの場合、この手順でリポジトリ内のすべての独立してデプロイ可能なサブアプリケーションを特定
+3. **基準評価** — 5つすべての成熟度レベルにわたって基準をチェック
+4. **レポート保存** — Factory Appでの視覚化のため評価結果を永続化
+5. **サマリー出力** — 評価結果を含む人間が読みやすいレポートを出力
+
+---
+
+## 出力の理解 {#understanding-the-output}
+
+評価後、構造化されたレポートが表示されます：
+
+### 達成レベル {#level-achieved}
+
+リポジトリの現在の成熟度レベル（1-5）：
+
+- **レベル1：機能的** — 基本的なツールが整備されている
+- **レベル2：文書化済み** — プロセスと文書化が確立されている
+- **レベル3：標準化済み** — セキュリティと可観測性が設定されている
+- **レベル4：最適化済み** — 迅速なフィードバックと継続的な測定
+- **レベル5：自律的** — 自己改善システム
+
+### 発見されたサブアプリケーション {#applications-discovered}
+
+モノレポの場合、レポートは発見された各サブアプリケーションを簡単な説明とともに一覧表示します：
+
+```
+Example:
+1. apps/web - Main Next.js application for user interface
+2. apps/api - Backend API service
+```
+
+### 基準結果 {#criteria-results}
+
+評価された各基準にはスコアと根拠が割り当てられます：
+
+```
+**Style & Validation**
+- Linter Configuration: 2/2 - ESLint configured in both applications
+- Type Checker: 2/2 - TypeScript strict mode enabled
+- Pre-commit Hooks: 0/1 - No husky or lint-staged configuration found
+```
+
+各基準のスコアは `numerator/denominator` の形式で表示され、ここで：
+
+- **分子：** 基準を満たすサブアプリケーションの数
+- **分母：** 評価されたサブアプリケーションの数
+
+### アクションアイテム {#action-items}
+
+レポートは次のレベルに到達するための2-3の最も影響力の高い推奨事項で終了します：
+
+```
+Action Items:
+- Add pre-commit hooks with husky to enforce linting and formatting
+- Configure branch protection rules on the main branch
+- Add AGENTS.md with setup and development instructions
+```
+
+---
+
+## 過去のレポートの表示 {#viewing-historical-reports}
+
+すべての準備状況レポートは自動的に保存され、[[jp/web/agent-readiness/dashboard|web dashboard]] で表示できます。これにより以下が可能になります：
+
+- 時間の経過とともに準備状況の進歩を追跡
+- リポジトリ間でスコアを比較
+- チームと結果を共有
+
+
+
+<Aside kind="tip">
+`/readiness-report`を定期的に実行します（例: 大きなインフラ変更後や
+  変更後）に、組織がより高い準備状況レベルへ進む状況を追跡します。
+</Aside>
+
+
+
+---
+
+## `/readiness-fix` による修復 {#remediation-with-readiness-fix}
+
+readiness レポートを生成した後は、`/readiness-fix` スラッシュコマンドを使うことで、最新レポートで失敗したシグナルを droid が自動的に修復できます。これにより、レポートは診断ツールから自動化された改善ワークフローへと変わります。
+
+### 何をするか {#what-it-does}
+
+`/readiness-fix` は、リポジトリで保存されている最新の readiness レポートを取得し、失敗した基準に対して順番に作業を進めるエージェントセッションを開始します。例えば、pre-commit フックの追加、`AGENTS.md` の作成、CI チェックの設定、ドキュメントの改善などの修正を実装します。
+
+### 使用方法 {#usage-2}
+
+`/readiness-report` を実行したのと同じリポジトリに移動して実行します：
+
+```bash
+droid
+> /readiness-fix
+```
+
+実行を絞り込むために、追加の自然言語による指示を渡すこともできます：
+
+```bash
+> /readiness-fix prioritize style & validation; do not touch CI configuration
+```
+
+### 期待される動作 {#what-to-expect}
+
+1. **レポート検索** — コマンドは `git remote get-url origin` からリポジトリを解決し、そのリポジトリに対して保存されている最新の readiness レポートを取得します。
+2. **エージェントセッション** — droid は通常のコーディングセッションと同様に、失敗した基準に対処するための変更を一度に1つずつ計画して適用します。発生する変更をレビューおよび承認できます。
+3. **検証** — 修正が適用された後、`/readiness-report` を再実行してリポジトリを再スコアし、シグナルが改善したことを確認します。
+
+
+
+<Aside kind="note">
+`/readiness-fix` を使用するには、対象リポジトリの readiness レポートが既に生成されている必要があります。事前のレポートが見つからない場合は、まず `/readiness-report` を実行してください。
+</Aside>
+
+
+
+
+
+<Aside kind="tip">
+`/readiness-fix` は他のエージェント実行と同様に扱ってください：提案された変更をレビューし、テストを実行し、コードベースに適していると判断したものだけをコミットしてください。
+</Aside>

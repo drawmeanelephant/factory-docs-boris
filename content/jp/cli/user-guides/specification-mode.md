@@ -1,0 +1,326 @@
+---
+id: jp/cli/user-guides/specification-mode
+title: "仕様モード"
+status: published
+summary: "平易な仕様を、自動計画とレビューで本番対応コードに変換する。"
+parent: jp/cli/user-guides/index
+tags: [cli, spec-mode, specification, planning, plan, spec, feature-planning, implementation-plan]
+relations: [relates_to=cli/user-guides/specification-mode]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">仕様モード</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">平易な仕様を、自動計画とレビューで本番対応コードに変換する。</p>
+
+
+Specification Modeは、シンプルな機能説明を自動計画と安全性チェックを備えた動作するコードに変換します。実現したい内容の簡単な説明を提供すると、droidが変更を加える前に詳細な仕様と実装計画を作成します。
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**シンプルな入力**
+
+作りたいものを4〜6文で説明するだけ
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**自動計画**
+
+Droidが詳細な仕様と実装計画を作成します
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**安全な実行**
+
+完全な計画を承認するまでコード変更は行われません
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**エンタープライズ対応**
+
+組み込みのセキュリティ、コンプライアンス、チーム標準
+
+</div>
+
+</div>
+
+
+
+## 仕組み {#how-it-works}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">機能を説明</div>
+
+4〜6文で簡単な説明を提供します。正式な仕様を書く必要はありません。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Droidが仕様を作成</div>
+
+Droidがリクエストを分析し、完全な仕様を生成します。
+受け入れ基準、実装計画、技術詳細を含みます。必要に応じて[[jp/cli/configuration/mixed-models|混合モデル]]を使い、計画用に別のモデルを設定できます。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">確認して承認</div>
+
+生成された仕様と実装計画を確認します。必要に応じて修正を依頼するか、そのまま承認できます。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">実装</div>
+
+承認後にのみdroidが実際のコード変更を開始し、各変更をレビュー用に表示します。
+
+</div>
+
+</div>
+
+
+
+## ワークフロー例 {#example-workflow}
+
+**あなたの入力:**
+
+```
+Add a feature for users to export their personal data.
+It should create a ZIP file with their profile, posts, and uploaded files.
+Send them an email when it's ready. Make sure it follows GDPR requirements.
+The export should work for accounts up to 2GB of data.
+```
+
+**Droidが生成:**
+
+- 詳細な受け入れ基準を含む完全な仕様
+- バックエンド、フロントエンド、メールをカバーする技術実装計画
+- 必要な変更のファイル別内訳
+- テスト戦略と検証手順
+- セキュリティとコンプライアンスの考慮事項
+
+**承認後、droidが実装**各変更をレビュー用に表示しながら完全なソリューションを実装します。
+
+
+
+<Aside kind="note">
+仕様モードはCLIで**Shift+Tab**を使って手動で有効化する必要があります。
+  自動では有効化されません。
+</Aside>
+
+
+
+## Specification Modeの有効化方法 {#how-to-activate-specification-mode}
+
+Specification Modeに入るには、CLI上で**Shift+Tab**を押してください。これにより次のリクエストに対して仕様計画ワークフローが有効になります。
+
+## 計画中に起こること {#what-happens-during-planning}
+
+**分析フェーズ（読み取り専用）:**
+
+- 既存のコードベースとパターンを調査
+- 関連ファイルと依存関係をレビュー
+- AGENTS.mdの規約を研究
+- 外部ソースからコンテキストを収集
+
+**計画フェーズ:**
+
+- 包括的な実装戦略を開発
+- 変更が必要なすべてのファイルを特定
+- 変更の順序を計画
+- テストと検証手順を考慮
+
+**安全性の保証:**
+
+- 分析中はファイルを編集できません
+- 何かを変更するコマンドは実行できません
+- ファイルの作成、削除、移動はできません
+- 承認されるまですべての探索は読み取り専用
+
+## 効果的なリクエストの書き方 {#writing-effective-requests}
+
+**結果に焦点を当てる:** 構築方法ではなく、ソフトウェアが達成すべきことを説明してください。
+
+```
+Users need to be able to reset their passwords using email verification.
+The reset link should expire after 24 hours for security.
+Include rate limiting to prevent abuse.
+```
+
+**重要な制約を含める:**
+
+```
+Add user data export functionality that works for accounts up to 5GB.
+Must comply with GDPR and include audit logging.
+Should complete within 10 minutes and not impact application performance.
+```
+
+**既存のパターンを参照:**
+
+```
+Add a notification system similar to how we handle email confirmations.
+Use the same background job pattern as our existing report generation.
+Follow the authentication patterns we use for other sensitive operations.
+```
+
+**検証について具体的に記述:** 実装が正しく動作することをdroidがどのように確認するかを伝えてください。
+
+**完全なユーザージャーニーを考慮:** 技術要件だけでなく、完全な体験を説明してください。
+
+**エラーシナリオを含める:** 障害をどのように処理し、ユーザーに伝達すべきかを指定してください。
+
+**規模について考える:** パフォーマンス要件と予想される使用パターンを言及してください。
+
+## エンタープライズ統合 {#enterprise-integration}
+
+リンクを貼り付けて外部要件を参照:
+
+```
+Implement the user management features described in this Jira ticket:
+https://company.atlassian.net/browse/PROJ-123
+
+Follow our security standards and include comprehensive error handling.
+```
+
+FactoryのダッシュボードからプラットフォームをSCIM統合している場合、droidは分析中にチケット、ドキュメント、仕様からコンテキストを読み取ることができます。
+
+## メリット {#benefits}
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**安全第一**
+
+調査中に意図しない変更は行われません。コード変更前に完全な計画を確認できます。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**徹底した計画**
+
+包括的な分析により、より良いアーキテクチャ判断ができ、予期しない問題を減らせます。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**完全な制御**
+
+コード変更が行われる前に、何が実行されるかを完全に把握できます。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**より良い成果**
+
+十分に計画された実装は、正確で完全かつ保守しやすくなる可能性が高まります。
+
+</div>
+
+</div>
+
+
+
+## AGENTS.md統合 {#agentsmd-integration}
+
+Specification Modeの計画を強化するため、プロジェクトの規約を文書化してください。詳細については[[jp/cli/configuration/agents-md|AGENTS.md]]を参照してください。
+
+Specification Modeはこれらの規約を自動的に組み込み、チームの基準との一貫性を保証します。
+
+## 大きな機能の分割 {#breaking-down-large-features}
+
+複数のコンポーネントにまたがる複雑な機能については、集中的なフェーズに分割してください:
+
+**フェーズ1:**
+
+```
+Implement user data export backend API and job processing.
+Focus only on the server-side functionality, not the UI yet.
+```
+
+**フェーズ2:**
+
+```
+Add the frontend UI for data export using the API from Phase 1.
+Include progress indicators and download management.
+```
+
+このアプローチにより、次のフェーズに進む前に各フェーズを検証できます。
+
+## 仕様承認オプション {#specification-approval-options}
+
+droidが仕様を提示した後、続行方法を選択してください:
+
+1. **実装を進める** – 計画を承認し、通常の（手動）実行制御を維持します。
+2. **進める、ファイル編集と読み取り専用コマンドを許可（低）** – 自律レベルをLowに設定し、droidがファイルを編集し、安全な読み取り専用コマンドを自動的に実行できるようにします。
+3. **進める、可逆的コマンドを許可（中）** – 自律レベルをMediumに設定し、droidが追加プロンプトなしで可逆的コマンドも実行できるようにします。
+4. **進める、すべてのコマンドを許可（高）** – 自律レベルをHighに設定し、簡単に元に戻せないコマンドを含む完全自動実行を有効にします。
+5. **いいえ、仕様の改良を続ける** – 実装前に計画を改良するためSpecification Modeに留まります。
+
+いずれかの自律レベルオプションを選択すると、そのレベルがセッションの残り時間に設定されます。改良を続けることを選択すると、計画を継続的に形作れるようSpecification Modeがアクティブなままになります。
+
+## 仕様をMarkdownとして保存 {#saving-your-specifications-as-markdown}
+
+Specification Modeは承認された計画を自動的にディスクに書き込むことができます。CLIの設定を開き、**仕様をMarkdownで保存**を有効にしてこれを有効にしてください。
+
+- デフォルトでは、計画は最寄りのプロジェクトレベル`.factory`ディレクトリ内の`.factory/docs`に保存されます。存在しない場合、CLIはホームディレクトリの`~/.factory/docs`にフォールバックします。
+- **仕様保存ディレクトリ**設定を使用して、プロジェクトディレクトリ、ホームディレクトリ、またはカスタムパスから選択してください。カスタム値は絶対パス、`~`展開、`.factory/...`ショートカット、現在のワークスペースからの相対パスをサポートします。
+- 対象ディレクトリが存在しない場合CLIがディレクトリを作成し、承認ダイアログに表示されたとおりにMarkdownを書き込みます。
+- ファイルは`YYYY-MM-DD-slug.md`として命名され、スラグは仕様タイトルまたは最初の見出しから生成され、同名のファイルが既に存在する場合はカウンタが追加されます。
+
+## 承認後に起こること {#what-happens-after-approval}
+
+仕様計画を承認すると、droidはレビュー用に各変更を表示しながら体系的に変更を実装します。承認ワークフローを通じて完全な制御を維持し、要件との品質と整合性を確保できます。
+
+包括的な計画が不要なシンプルな変更については、droidはすべての変更を承認用に表示しながら直接進めることができます。
+
+Specification Modeを試す準備はできましたか？構築したい内容のシンプルな説明から始めて、droidに仕様と計画の複雑さを処理させましょう。

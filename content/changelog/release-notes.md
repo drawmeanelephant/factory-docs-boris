@@ -1,0 +1,5044 @@
+---
+id: changelog/release-notes
+title: "Release notes"
+status: published
+summary: "Recent features and improvements to the Factory App, Droid CLI, and other product surfaces"
+published_at: 2026-04-15T00:00:00Z
+parent: changelog/index
+tags: [changelog]
+relations: [relates_to=jp/changelog/release-notes]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Release notes</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Recent features and improvements to the Factory App, Droid CLI, and other product surfaces</p>
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 23</span></div>
+
+`v0.179.0`
+
+## Improvements {#improvements}
+
+- **Sandbox hardening** - Strengthened isolation of processes running inside the command sandbox
+- **macOS hardening** - Hardened macOS releases against code injection
+
+## Bug fixes {#bug-fixes}
+
+- **Mission approvals** - The mission proposal body now renders once during approval instead of repeating
+- **Capacity errors** - The CLI now backs off gracefully when a model is temporarily at capacity and no alternative is available
+- **Voice dictation** - Long voice dictations are no longer cut off (app)
+- **Visualization flicker** - Streamed visualizations no longer flicker while rendering (app)
+- **Autonomy chip** - The autonomy chip in the composer now keeps a fixed width (app)
+- **GitHub Enterprise Server repositories** - Repository lists are now correctly scoped to your organization (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 22</span></div>
+
+`v0.178.0`
+
+## New features {#new-features}
+
+- **Keep-awake setting** - A new setting keeps your machine awake during agent runs so long tasks aren't interrupted by sleep (app)
+
+## Improvements {#improvements-2}
+
+- **System certificate trust** - The CLI and desktop now trust your system's certificates at startup, improving connectivity in environments with custom certificate authorities
+
+## Bug fixes {#bug-fixes-2}
+
+- **MCP confirmations** - Autonomy upgrades now apply correctly to MCP tool confirmations
+- **MCP OAuth** - Signing in to MCP servers over OAuth is now more reliable
+- **Hook display** - Hook metadata now stays on a single row
+- **Verified domains on invite** - Invitations now respect your organization's verified domains (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 21</span></div>
+
+`v0.177.0`
+
+## New features {#new-features-2}
+
+- **Open artifacts externally** - Artifact preview cards can now open in your default app (app)
+
+## Improvements {#improvements-3}
+
+- **Code block font** - Code blocks now render in Geist Mono for clearer monospaced text (app)
+- **Attachment-only messages** - You can now send chat messages that contain only attachments (app)
+
+## Bug fixes {#bug-fixes-3}
+
+- **Approval details toggle** - Option+E dead-key accents no longer interfere with toggling approval details
+- **Transcript repaint** - The transcript now repaints correctly after viewing plan details
+- **Computer removal** - Removing a computer no longer shows a spurious session-archiving warning
+- **Mission interrupts** - Missions now pause correctly when the orchestrator is interrupted
+- **Agent browser cleanup** - Orphaned browser automation processes are now cleaned up reliably
+- **Unavailable sessions** - Sessions that can't be loaded now show a clear unavailable state (app)
+- **Skill colors** - Loaded skills now display with the correct colors (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 20</span></div>
+
+`v0.176.0`
+
+## New features {#new-features-3}
+
+- **Disable builtin skills** - New `--disable-builtin-skills` flag turns off Factory-provided skills while keeping your own skill sources
+- **Windows ARM64 desktop** - The desktop app now ships a native Windows ARM64 build (app)
+- **Usage cap alert emails** - Admins now receive email alerts as usage approaches configured caps (app)
+
+## Bug fixes {#bug-fixes-4}
+
+- **Session recovery** - Cancelling a tool no longer corrupts session history, and existing corruption is repaired automatically
+- **Auto model retries** - Auto model turns now retry automatically when a model is unavailable
+- **Disconnected prompts** - Permission and input prompts are now suppressed while disconnected
+- **macOS sleep** - Notification sounds no longer prevent macOS from going to sleep (app)
+- **PDF generation** - PDF generation errors now surface immediately instead of hanging (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 17</span></div>
+
+`v0.175.0`
+
+## New features {#new-features-4}
+
+- **File previews** - Generated files now open in a preview automatically (app)
+
+## Improvements {#improvements-4}
+
+- **Task ID prefixes** - `TaskOutput` and `TaskStop` now accept task ID prefixes so you can reference background tasks more easily
+
+## Bug fixes {#bug-fixes-5}
+
+- **`/btw` mid-stream** - `/btw` now handles mid-stream forks correctly and submits follow-ups
+- **Model settings** - Spec and normal mode model settings now persist correctly
+- **Wiki shareable links** - Wiki runs can now generate shareable links
+- **Plugins overlay** - The plugins overlay now closes on Esc from any tab
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 15</span></div>
+
+`v0.173.0`
+
+## New features {#new-features-5}
+
+- **Skill controls** - You can now disable individual skills and see how skill settings resolve across scopes
+
+## Bug fixes {#bug-fixes-6}
+
+- **Repeated tool calls** - The agent now stops looping when it repeats the same tool call
+- **Plugin loading** - Enabled plugins now load correctly across all install scopes
+- **Hook execution** - Hooks now run exactly once per event
+- **Settings writes** - Concurrent settings updates are no longer overwritten by stale cached writes
+- **Mission Control** - The chat now repaints correctly when you close Mission Control (app)
+- **Sidebar update button** - Fixed alignment of the sidebar update button (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 14</span></div>
+
+`v0.172.0`
+
+## New features {#new-features-6}
+
+- **Mission side panel** - Added a unified Mission side panel for managing missions (app)
+- **Add project folder** - New button to add a local project folder, streamlining local project setup (app)
+
+## Improvements {#improvements-5}
+
+- **Consistent text editing** - Text-editing keys now behave consistently across all input fields
+
+## Bug fixes {#bug-fixes-7}
+
+- **`/clear` preserves model** - `/clear` now keeps your current model and autonomy settings
+- **Password-protected PDFs** - Password-protected PDFs no longer lock up the session
+- **MCP authentication** - MCP sign-ins now refresh tokens silently and avoid duplicate authentication prompts
+- **Markdown line breaks** - Soft line breaks in markdown now render correctly
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 13</span></div>
+
+`v0.171.0`
+
+## Improvements {#improvements-6}
+
+- **Context usage on resume** - Context usage now displays immediately when you resume a session
+- **Windows installer architecture** - The CLI installer now detects the native Windows architecture
+
+## Bug fixes {#bug-fixes-8}
+
+- **MCP connection timeout** - stdio MCP servers now time out on connect instead of hanging
+- **Grep and Glob timeouts** - Grep and Glob timeouts now surface as actionable errors
+- **Theme detection over SSH** - Fixed theme auto-detection over remote terminal sessions
+- **Todo status colors** - Todo status colors now render correctly
+- **Completion notification** - The turn-completion notification now fires before the CLI exits
+- **Subagent reports** - The end-of-turn todo reminder no longer swallows subagent reports
+- **Mission settings** - Fixed updating mission settings in the desktop app (app)
+- **Mission notifications** - Mission mode now fires audio and badge notifications (app)
+- **Model defaults** - Model defaults now persist correctly (app)
+- **Reasoning tooltip** - The reasoning tooltip now dismisses when you start typing (app)
+- **Local storage failures** - The app no longer breaks when local storage is unavailable (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 10</span></div>
+
+`v0.170.0`
+
+## Improvements {#improvements-7}
+
+- **Browser panel suggestions** - Local suggestions in the browser panel are now deduplicated and better ranked (app)
+- **Prompt history recall** - Refined recall of previous prompts in the composer (app)
+
+## Bug fixes {#bug-fixes-9}
+
+- **Legacy file encodings** - File tools now preserve legacy text encodings such as ISO-8859-2 and CP1250 instead of converting them
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 9</span></div>
+
+`v0.169.0`
+
+## New features {#new-features-7}
+
+- **macOS command sandbox** - Added whole-process sandbox support on macOS for safer command execution
+
+## Improvements {#improvements-8}
+
+- **Clearer send button** - The composer now explains why the send button is disabled (app)
+- **Safer web tools** - WebSearch and FetchUrl now require at least low autonomy before they run
+
+## Bug fixes {#bug-fixes-10}
+
+- **Image-only messages** - Fixed sending messages that contain only an image
+- **Plan todos** - Plan todo lists are now bounded and the full todo displays correctly
+- **Wide tables** - Wide markdown tables now scroll horizontally
+- **MCP footer** - The MCP status footer now appears immediately
+- **MCP session notices** - MCP status and auth notices now stay scoped to their session instead of leaking into untouched sessions
+- **Spec rendering** - Spec contents now render in the approval details screen, and the spec body shows when the plan heading matches the title
+- **Update rollback** - Hardened the update rollback flow (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 8</span></div>
+
+`v0.168.0`
+
+## New features {#new-features-8}
+
+- **Pin local sessions** - You can now pin local sessions that aren't synced to the cloud (app)
+- **Working directory in desktop** - The desktop app now brings your current working directory into the session (app)
+
+## Improvements {#improvements-9}
+
+- **Slash command search** - Improved slash command search results
+- **Skills count** - The header now shows an accurate skills count
+- **Wiki permalinks** - Added repository permalink support in wikis
+
+## Bug fixes {#bug-fixes-11}
+
+- **Session token usage** - Session token usage is now counted only on successful turns
+- **Unread sessions** - Unrelated unread sessions are preserved when a window regains focus (app)
+- **Notification hook** - The `idle_prompt` Notification hook now fires on cancelled turns
+- **Reasoning effort** - `set-default` now preserves your session reasoning effort
+- **Bash mode** - Pressing backspace on empty input now exits bash mode
+- **Spec proposals** - Empty spec proposal bodies are now rejected
+- **Ghostty Open In** - Fixed launching Ghostty from the Open In deeplink (app)
+- **Window close warning** - The app now only warns on window close when it will actually quit the app (app)
+- **MCP OAuth screen** - Aligned the MCP OAuth callback screen
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 7</span></div>
+
+`v0.167.0`
+
+## New features {#new-features-9}
+
+- **Port-forward for droid computers** - New `droid computer port-forward` command to forward ports from a droid computer to your local machine
+
+## Improvements {#improvements-10}
+
+- **Faster app startup** - Startup boot phases now run in parallel, reducing time to a usable window (app)
+- **Faster session search** - Session search is quicker and returns better-ranked results
+- **Full-screen help** - Help now opens as a full-screen overlay you can dismiss with `?` or `Esc`
+- **Slash menu filtering** - Filtered slash menu results are flattened with a clearer category block
+- **Cleaner model names** - Model names display more clearly across the app (app)
+- **Cleaner chat transcript** - Internal tool lookups no longer clutter the chat transcript (app)
+- **Update rollback** - The app can now roll back to a previous version when needed (app)
+
+## Bug fixes {#bug-fixes-12}
+
+- **Image paste on Windows** - Fixed pasting images into the composer on Windows
+- **Safe exit during updates** - You can now exit safely while a background update is in progress
+- **SessionStart hooks** - A hung `SessionStart` hook no longer blocks session initialization
+- **Completion sound** - Restored the completion sound
+- **Windows home directory** - Fixed resolving the home directory for non-ASCII Windows usernames
+- **Draft attachments** - Draft attachments are now preserved when the screen repaints
+- **Sandboxed hooks** - Fixed hook command execution under the sandbox
+- **Detailed transcript freeze** - Capped detailed transcript tool results to stop `Ctrl+O` from freezing
+- **New session shortcut** - The new-session shortcut now ignores Shift (app)
+- **Truncated sessions** - Fixed context handling in truncated sessions
+- **Linux clipboard** - Text clipboard is now Wayland-first on Linux
+- **Special characters** - Typing `å`, `Å`, or `´` is no longer treated as an Option shortcut
+- **Unavailable tools** - Calls to unavailable tools are now clearly marked as errors
+- **Highlighted code** - Highlighted code text is now preserved (app)
+- **Airgap mode** - Improved the reliability of airgap mode (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">July 2</span></div>
+
+`v0.164.0`
+
+## New features {#new-features-10}
+
+- **Grouped slash commands** - Slash commands are now organized by category for easier browsing
+- **Cloud sync control** - New setting to control whether your data syncs to the cloud (app)
+
+## Improvements {#improvements-11}
+
+- **Linear model picker** - Model names now display cleanly in the Linear delegation picker (app)
+- **Computer provisioning wizard** - Clarified copy in the droid computer provisioning wizard (app)
+
+## Bug fixes {#bug-fixes-13}
+
+- **MCP tool names** - Tool names containing dots are now accepted per the MCP specification
+- **MCP authentication** - Restored sign-in to MCP servers that reject certain OAuth client registration
+- **Background processes in droid exec** - Agent-spawned background processes now keep running after `droid exec` exits
+- **Editor for allow/deny lists** - The CLI now honors `$EDITOR` when editing allow and deny lists on headless hosts
+- **Gemini reasoning** - Fixed handling of invalid Gemini reasoning blocks
+- **Droid computer SSH** - Fixed connecting to a droid computer by its exact name
+- **Cross-org login** - Fixed login issues when working across multiple organizations (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 30</span></div>
+
+`v0.162.0`
+
+## New features {#new-features-11}
+
+- **Cloned repos in projects** - Cloned repositories now appear in the new-session projects dropdown (app)
+
+## Improvements {#improvements-12}
+
+- **Lower memory usage** - Reduced memory use during long and idle sessions
+- **Word-wise navigation** - Option+Left/Right now jumps between words in secondary text inputs
+
+## Bug fixes {#bug-fixes-14}
+
+- **Resumed hooks** - Hook rows now render correctly after you resume a session
+- **File encoding** - Edited files now keep their original encoding instead of always saving as UTF-8
+- **MCP authentication** - Restored basic auth fallback when signing in to MCP servers over OAuth
+- **Org switching** - Fixed selecting the active organization when switching organizations, including in the EU (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 29</span></div>
+
+`v0.161.0`
+
+## New features {#new-features-12}
+
+- **Hooks manager overhaul** - Redesigned the hooks manager for viewing and configuring your hooks
+- **WezTerm setup** - Added terminal setup support for WezTerm
+- **Chat transcript search** - Search within a chat transcript (app)
+
+## Improvements {#improvements-13}
+
+- **Faster searches** - Avoided unnecessary search cache rebuilds
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 25</span></div>
+
+`v0.159.0`
+
+## New features {#new-features-13}
+
+- **Archive projects** - Archive projects you're no longer working on to keep your project list tidy (app)
+
+## Improvements {#improvements-14}
+
+- **Clearer MCP auth guidance** - When an MCP server fails to authenticate, the CLI now explains how to resolve it
+
+## Bug fixes {#bug-fixes-15}
+
+- **MCP config errors** - MCP configuration parse errors are now surfaced clearly instead of failing silently
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 24</span></div>
+
+`v0.158.0`
+
+## New features {#new-features-14}
+
+- **Enable and disable plugins** - Turn individual plugins on or off with a new toggle
+
+## Improvements {#improvements-15}
+
+- **Tab to complete slash commands** - Press Tab to complete slash commands
+- **MCP authentication** - Improved handling of MCP authentication responses and desktop redirects
+- **Account credit checkout** - Subscribe to or upgrade your plan using account credit
+
+## Bug fixes {#bug-fixes-16}
+
+- **Invalid API key login** - The CLI now exits with an error on an invalid `FACTORY_API_KEY` instead of stalling at login
+- **Cancel AskUser prompts** - Cancelling an AskUser prompt now interrupts the agent instead of letting it continue
+- **Duplicate tool approvals** - Approval-gated tool executions now render only once
+- **Windows background processes** - Fixed cleanup of background processes on exit on Windows
+- **Document skills location** - Document skills are now written to your current working directory
+- **Dark mode toggles** - Dark mode toggles are now visible and loading spinners animate correctly (app)
+- **Editable composer** - The composer stays editable during session blockers (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 24</span></div>
+
+`v0.157.2`
+
+## Bug fixes {#bug-fixes-17}
+
+- **Slack follow-up prompt** - Fixed a duplicate "tag to follow up" prompt that could appear in Slack threads
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 23</span></div>
+
+`v0.157.0`
+
+## New features {#new-features-15}
+
+- **Edit prompts externally** - Open and edit your prompt in an external editor for composing longer messages
+
+## Bug fixes {#bug-fixes-18}
+
+- **Caps-lock cursor keys** - Fixed cursor key handling when caps lock is on
+- **Onboarding crash** - Fixed a crash that could occur when connecting before onboarding finished (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 22</span></div>
+
+`v0.156.2`
+
+## New features {#new-features-16}
+
+- **Rewind conversation** - The new `/rewind-conversation` command rewinds the chat and restores your files to an earlier point (app)
+- **Org hooks governance** - Organizations can now centrally control hooks settings across their members
+
+## Improvements {#improvements-16}
+
+- **Clickable message links** - URLs in your messages are now clickable
+- **Light terminal colors** - Improved white rendering in the light terminal theme
+
+## Bug fixes {#bug-fixes-19}
+
+- **Reasoning indicator** - Non-thinking models no longer show a reasoning indicator
+- **Execute step shimmer** - Fixed a stale loading shimmer left on completed execute steps
+- **Windows hooks** - Preserved command quoting for hooks on Windows
+- **MCP server logos** - MCP server logos now keep their original colors
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 18</span></div>
+
+`v0.152.0`
+
+## New features {#new-features-17}
+
+- **Autonomy flag** - Set Droid's autonomy level straight from the command line with `droid --auto high`
+- **Org MCP and marketplace controls** - Organizations can centrally govern MCP server and plugin marketplace access
+- **In-app membership controls** - Manage organization members directly in the app (app)
+
+## Improvements {#improvements-17}
+
+- **Private npm registry plugins** - Plugin sources can now authenticate to private npm registries using an auth token environment variable
+- **Onboarding copy** - Clearer guidance during Droid setup onboarding (app)
+
+## Bug fixes {#bug-fixes-20}
+
+- **Status after interrupt** - Droid's status now clears correctly after you interrupt it
+- **Event hooks** - Multiple hooks configured for the same event are now combined correctly
+- **Summaries across directories** - Fixed conversation summaries when your working directory changes
+- **Streaming placeholder** - Fixed a stale placeholder that could linger in the chat (app)
+- **Connection stability** - Reduced session UI flicker during brief connection drops (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 17</span></div>
+
+`v0.151.0`
+
+## New features {#new-features-18}
+
+- **Skill slash commands in editors** - Skill slash commands are now available when connecting from external editors
+
+## Improvements {#improvements-18}
+
+- **macOS installer branding** - The macOS DMG installer is now branded (app)
+- **MCP results as markdown** - MCP tool results returned as JSON now render as formatted markdown
+
+## Bug fixes {#bug-fixes-21}
+
+- **Session reconnection** - Sessions now stay rendered and reconnect instead of redirecting to a Session Unavailable page (app)
+- **Org switcher** - The desktop organization switcher now shows the currently selected organization (app)
+- **Desktop MCP sign-in** - Improved desktop MCP authentication callback handling (app)
+- **Composer actions layout** - Composer actions now stay on a single line (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 16</span></div>
+
+`v0.150.0`
+
+## New features {#new-features-19}
+
+- **npm plugin sources** - Plugin marketplace definitions can now reference plugins published as npm packages
+- **Quit confirmation** - Desktop now asks for confirmation before quitting or closing would interrupt an active Droid session (app)
+
+## Improvements {#improvements-19}
+
+- **Long session performance** - Improved chat performance in long sessions (app)
+- **MCP authentication page** - Polished the MCP authentication success page
+- **Overdue invoice banner** - Billing settings now show a banner when an invoice is overdue (app)
+
+## Bug fixes {#bug-fixes-22}
+
+- **Rate limit reset display** - Fixed the rate limit reset time shown for sub-hour resets
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 15</span></div>
+
+`v0.149.0`
+
+## Bug fixes {#bug-fixes-23}
+
+- **Canva MCP authentication** - Added a fallback so connecting the Canva MCP server works more reliably
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 14</span></div>
+
+`v0.148.0`
+
+## New features {#new-features-20}
+
+- **MCP connection status** - `droid mcp list` and your session now show each MCP server's connection and authentication status
+- **Org-wide auto-update control** - Organizations can turn off CLI auto-updates with a new `disableAutoUpdate` setting
+
+## Improvements {#improvements-20}
+
+- **Log rotation** - The CLI now rotates its log files to avoid filling up disk space
+- **Faster MCP loading in editors** - MCP servers load without blocking when connecting from external editors
+- **Streamlined desktop sign-up** - Signing up on desktop now takes you straight to login (app)
+- **Clearer unsaved changes banner** - The unsaved changes banner is now easier to spot (app)
+
+## Bug fixes {#bug-fixes-24}
+
+- **Duplicate BYOK models** - Removed duplicate models from the bring-your-own-key model selector
+- **BYOK custom endpoints** - Fixed compatibility with custom bring-your-own-key model endpoints
+- **Duplicate transcript** - Fixed a duplicate transcript appearing in the session view
+- **Plugins slash command** - The `/plugins` command now appears before a session finishes initializing (app)
+- **Wiki reader dragging** - Restored window dragging in the wiki reader (app)
+- **MCP authentication notices** - Improved how MCP authentication prompts are shown
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 12</span></div>
+
+`v0.147.0`
+
+## New features {#new-features-21}
+
+- **Command blocklist** - The new `commandBlocklist` setting hard-stops specified commands so they can never run, even under full autonomy or skipped approvals
+- **Welcome screen sign-in** - Added log-in and sign-up CTAs to the welcome screen (app)
+
+## Improvements {#improvements-21}
+
+- **MCP OAuth** - MCP servers can now authenticate using Client ID Metadata Documents (CIMD), with improved compatibility for servers that require a resource indicator
+- **Updated tooltips** - Refreshed tooltips for clearer guidance
+
+## Bug fixes {#bug-fixes-25}
+
+- **Ctrl+Enter tooltip** - Fixed the Ctrl+Enter tooltip
+- **Desktop MCP OAuth banner** - The MCP OAuth banner now points at the MCP button (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 12</span></div>
+
+`v0.146.0`
+
+## New features {#new-features-22}
+
+- **Browser-based desktop onboarding** - Desktop onboarding now opens in your browser for a smoother first-run setup (app)
+
+## Improvements {#improvements-22}
+
+- **Queue message shortcut** - Queue a message with Ctrl+Enter
+- **Earlier session titles** - Droid now names your session earlier in the conversation
+
+## Bug fixes {#bug-fixes-26}
+
+- **Chat cursor on resize** - The chat input now keeps your cursor position when the terminal is resized
+- **Context summarization hangs** - Fixed a rare hang that could occur while summarizing long conversations
+- **Content filtering** - Responses blocked by a content filter are now surfaced as a clear moderation error
+- **Desktop MCP OAuth** - Desktop MCP OAuth now flows through the hosted callback (app)
+- **Desktop onboarding top bar** - The top bar can now be dragged on desktop onboarding screens (app)
+- **Data retention dialog** - The data retention dialog no longer interferes with desktop navigation (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 10</span></div>
+
+`v0.144.2`
+
+## Bug fixes {#bug-fixes-27}
+
+- **MCP authentication** - Improved MCP sign-in reliability for servers that advertise no scopes
+- **Desktop MCP OAuth banner** - The MCP OAuth banner no longer overlaps the top bar (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 9</span></div>
+
+`v0.144.1`
+
+## Bug fixes {#bug-fixes-28}
+
+- **Context summarization fallback** - When a model declines to summarize your conversation, Droid now falls back gracefully instead of retrying repeatedly
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 9</span></div>
+
+`v0.144.0`
+
+## New features {#new-features-23}
+
+- **Session file suggestions** - The new session page now suggests relevant files as you get started (app)
+
+## Improvements {#improvements-23}
+
+- **Safer command risk handling** - Commands that could destroy your working tree are now treated as high risk
+- **tmux key support** - Improved keyboard handling when running inside tmux
+
+## Bug fixes {#bug-fixes-29}
+
+- **MCP reliability** - Improved reliability of MCP authentication and connectors
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 9</span></div>
+
+`v0.143.1`
+
+## Improvements {#improvements-24}
+
+- **Maintenance and stability** - Routine maintenance and reliability updates under the hood
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 8</span></div>
+
+`v0.143.0`
+
+## New features {#new-features-24}
+
+- **Self-serve organization deactivation** - Deactivate your organization yourself, with subscription cancellation now available in billing settings (app)
+
+## Improvements {#improvements-25}
+
+- **Richer Jira details** - Fetching a Jira issue now includes more fields, comments, and linked-issue URLs
+- **Quieter hooks** - Hooks can hide their output block in the TUI by setting `suppressOutput`
+
+## Bug fixes {#bug-fixes-30}
+
+- **Windows home directory** - Fixed home directory resolution on Windows to avoid username corruption (app)
+- **Session integrity** - Fixed an issue that could overwrite an existing session
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 5</span></div>
+
+`v0.142.0`
+
+## Improvements {#improvements-26}
+
+- **GitLab code review setup** - The install-code-review skill now configures review pipelines using a GitLab CI Component
+
+## Bug fixes {#bug-fixes-31}
+
+- **Duplicate chat messages** - Fixed duplicate messages appearing in chat
+- **Diff viewer counts** - The diff viewer now refreshes its change counts correctly (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 4</span></div>
+
+`v0.141.0`
+
+## Improvements {#improvements-27}
+
+- **Large command output** - Command execution now handles very large outputs more reliably
+
+## Bug fixes {#bug-fixes-32}
+
+- **Input hint placement** - The running hint now stays below your typed input
+- **Guidelines in non-git projects** - Droid no longer looks for guideline files in parent directories when you're not inside a git repository
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 4</span></div>
+
+`v0.140.1`
+
+## Improvements {#improvements-28}
+
+- **Maintenance and stability** - Routine maintenance and reliability updates under the hood
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 3</span></div>
+
+`v0.140.0`
+
+## New features {#new-features-25}
+
+- **Claude Opus 4.8** - Added support for Claude Opus 4.8, including a faster Fast Mode variant
+- **Gemini 3.5 Flash** - Added support for Gemini 3.5 Flash
+- **MCP tool search** - Droid can now search and load MCP tools on demand, keeping large MCP setups fast and context-efficient
+- **Incident response** - Droid can automatically investigate production alerts posted to a configured Slack channel and work toward a root-cause analysis
+
+## Improvements {#improvements-29}
+
+- **Accurate status banners** - Spinner status banners now reflect the true state of the current turn
+- **Context menu text actions** - Added text actions to the right-click context menu (app)
+
+## Bug fixes {#bug-fixes-33}
+
+- **Terminal write errors** - The CLI no longer crashes when the terminal rejects output writes
+- **Paste handling** - Fixed a crash on certain pasted input and corrected handling of split bracketed pastes
+- **Agent loop stalls** - The agent loop no longer runs unbounded when turns produce no output
+- **Empty chat placeholder** - Restored the placeholder shown in empty chats (app)
+- **Machine connection crash** - Fixed a crash when loading sessions with older machine connection types (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 2</span></div>
+
+`v0.139.0`
+
+## New features {#new-features-26}
+
+- **Custom commands and skills in the slash menu** - Your custom commands and skills now appear directly in the slash menu
+
+## Bug fixes {#bug-fixes-34}
+
+- **MCP schema compatibility** - Improved handling of MCP servers with incompatible tool schemas
+- **Clearing MCP server fields** - You can now clear fields when editing an MCP server
+- **Local session labels** - Local sessions are now labeled "Local" instead of "Ephemeral" (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">June 1</span></div>
+
+`v0.138.0`
+
+## New features {#new-features-27}
+
+- **Interactive MCP management** - Add, remove, and list MCP servers interactively
+- **MCP credential variables** - MCP server configs can now expand credential variables at runtime
+- **Configurable MCP call timeout** - Set a custom timeout for MCP tool calls
+- **`mcp off` shortcut** - Quickly disable MCP servers with a new shortcut
+- **MCP servers for custom droids** - Choose which MCP servers are available to custom droids
+- **Per-server MCP risk** - Configure command risk levels for each MCP server
+- **Mermaid export** - Export Mermaid diagrams from chat (app)
+
+## Improvements {#improvements-30}
+
+- **Highlighted new models** - New models now appear highlighted at the top of `/models`
+- **MCP embedded resources** - MCP servers' embedded resources are now surfaced in chat
+- **Composer loading state** - The message composer now shows a loading state (app)
+- **Session archiving** - Unified the session archive flow across the app and desktop (app)
+- **Pinned messages** - Clicking a pinned message now scrolls to its source (app)
+
+## Bug fixes {#bug-fixes-35}
+
+- **Turn cancellation** - Canceling a turn now takes effect immediately
+- **Session rename** - Renamed session titles are now trimmed of extra whitespace (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 29</span></div>
+
+`v0.137.0`
+
+## Bug fixes {#bug-fixes-36}
+
+- **Duplicate thinking output** - Thinking output no longer renders twice
+- **MCP permission persistence** - MCP permissions now persist across all confirmation paths
+- **Context usage meter** - Fixed alignment of the context usage meter
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 28</span></div>
+
+`v0.136.0`
+
+## New features {#new-features-28}
+
+- **Deep review skill** - New `/deep-review` skill for a more thorough, multi-pass code review
+- **Side questions in the app** - The `/btw` side questions panel is now available in the app (app)
+- **Auto-compression toggle** - Turn automatic session compression on or off to manage long sessions
+- **Configurable compression model** - Choose which model handles automatic session compression
+
+## Improvements {#improvements-31}
+
+- **Org details in `/status`** - The `/status` command now shows your organization details
+- **Standardized hooks config path** - Hooks configuration now uses a standardized file path with automatic migration
+- **Faster large pastes** - Sped up pasting large amounts of text
+- **Tool summary hover affordance** - Tool summaries now show a hover affordance for available actions (app)
+
+## Bug fixes {#bug-fixes-37}
+
+- **Autoscroll fixes** - Fixed several autoscroll issues in the session view (app)
+- **Reasoning-only turns** - Fixed sessions stalling when the assistant returned only reasoning
+- **DeepSeek tool calls** - Improved reliability of multi-step tool calls when using DeepSeek models
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 27</span></div>
+
+`v0.135.0`
+
+## New features {#new-features-29}
+
+- **Adaptive terminal theme** - The CLI now auto-detects your terminal background and picks a matching theme
+
+## Improvements {#improvements-32}
+
+- **Agent-browser update** - Updated the bundled `agent-browser` skill to a newer release with better automation reliability
+- **Subagent type badges** - Subagent type badges in `TaskOutput` now render in PascalCase for easier reading
+
+## Bug fixes {#bug-fixes-38}
+
+- **Message draft attachments** - Message draft attachments are now preserved when switching contexts (app)
+- **Session activity indicator** - Improved the activity indicator in the session panel (app)
+- **Enterprise Controls forms** - Empty arrays and records are no longer written when saving Enterprise Controls (app)
+- **Enterprise Controls layout** - Aligned control heights across Enterprise Controls forms (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 26</span></div>
+
+`v0.134.0`
+
+## Improvements {#improvements-33}
+
+- **Figma helper skill** - The built-in Figma skill has been renamed from `figma-mcp-promotion` to `figma-mcp-helper`
+- **System-managed settings** - System-managed settings are now loaded from standard platform paths
+
+## Bug fixes {#bug-fixes-39}
+
+- **File tool rendering** - File tool inputs now wait for streaming to complete before rendering to avoid showing partial data
+- **Slash command suggestions** - Slash command suggestion rows now keep a consistent height
+- **Pending command approvals** - Capped the number of pending command approvals shown at once
+- **New session sidebar animation** - Smoothed the animation when starting a new session from the sidebar (app)
+- **Session titles in sidebar** - Session titles are now preserved correctly in the sidebar (app)
+- **AskUser question labels** - Question labels now pluralize correctly when multiple questions are asked
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 25</span></div>
+
+`v0.133.1`
+
+## New features {#new-features-30}
+
+- **Context window** - New `/context` slash command and modal for inspecting the current session's context usage
+- **Audio cues** - Optional sounds when a session finishes or is awaiting your input (app)
+- **Sidebar session menu** - Right-click sessions in the sidebar for quick actions (app)
+
+## Bug fixes {#bug-fixes-40}
+
+- **Final output visibility** - The final output now stays visible above the input box
+- **New session draft cleared** - New session drafts now clear after submitting (app)
+- **Linear Computer setup link** - The "set up Computer" call to action in Linear now points to the correct settings page
+- **Desktop zoom stability** - Hardened desktop zoom handling against host zoom errors (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 22</span></div>
+
+`v0.132.0`
+
+## New features {#new-features-31}
+
+- **Deploy to Render** - New `/deploy-to-render` skill helps you deploy projects to Render
+
+## Improvements {#improvements-34}
+
+- **Security review scope confirmation** - The `/security-review` skill now confirms the scope and audit branch with you before running
+- **Faster EU connections** - Reduced connection latency for users in the EU region
+
+## Bug fixes {#bug-fixes-41}
+
+- **Disabled model selector rows** - Restored disabled rows in the model selector so all options are visible
+- **Missions across reconnects** - Active missions now keep running through network reconnects
+- **Mission computer in mission control** - The active mission computer now appears on the mission control page (app)
+- **Windows desktop setup** - Fixed setup and scripts for the Windows desktop app (app)
+- **Rich text autofocus** - Improved autofocus reliability for rich text inputs (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 21</span></div>
+
+`v0.131.0`
+
+  Maintenance release with under-the-hood improvements.
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 20</span></div>
+
+`v0.130.0`
+
+## New features {#new-features-32}
+
+- **Model favorites** - Mark and quickly access your preferred models from the model selector
+- **Spec save directory** - Configure where specs are saved with a new setting
+- **Expand pasted placeholders** - Press Alt+Shift+V (Opt+Shift+V on macOS) to expand truncated paste placeholders inline
+
+## Improvements {#improvements-35}
+
+- **Refined model selector** - Streamlined the model selector submenu
+- **BYOK model parity** - Brought the BYOK model experience in line with the rest of the model picker
+- **Clearer help output** - Improved formatting of the `help` command output
+
+## Bug fixes {#bug-fixes-42}
+
+- **Image paste on Linux** - Pasting images now works on Linux, with a graceful fallback when clipboard data is unavailable
+- **MCP OAuth clients** - Static MCP OAuth clients are now supported during authentication
+- **OAuth provider errors** - 4xx responses from connected OAuth providers are now surfaced as user-facing errors
+- **ApplyPatch new files** - New files in ApplyPatch results now render correctly as creates
+- **CLI update reliability** - Prevented restart races during CLI daemon updates
+- **PowerShell under `exec`** - PowerShell commands now run non-interactively in `exec` mode
+- **Slack first-mention indicator** - Slack now shows the typing indicator from the very first mention
+- **Daemon auth on reconnect** - Daemon auth tokens now refresh when reconnecting (app)
+- **Desktop paid onboarding** - The onboarding finish screen is now skipped on the desktop paid flow (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 18</span></div>
+
+`v0.129.0`
+
+## New features {#new-features-33}
+
+- **Streaming file hook events** - File hook execution events now stream so you can follow progress as hooks run
+
+## Improvements {#improvements-36}
+
+- **Faster large session rendering** - Large session transcripts now render faster by trimming at the cutoff before derivation
+
+## Bug fixes {#bug-fixes-43}
+
+- **Esc cancels tool activity** - Pressing Esc now reliably cancels in-progress tool activity
+- **MCP tools with complex schemas** - Listing MCP tools no longer fails when schemas contain unresolvable references
+- **Claude Code subagent import** - Subagent import is now skipped when there is no project root to import into
+- **Session load file snapshots** - File snapshots are now initialized when reloading a saved session
+- **ACP todo updates** - Hardened parsing of todo updates over ACP against missing fields
+- **Read-only badge layout** - Read-only badges no longer get compressed in narrow layouts (app)
+- **Pinned group new session action** - Removed an unintended new-session action on pinned groups (app)
+- **Desktop session recovery** - Desktop sessions now recover after a period of daemon inactivity (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 15</span></div>
+
+`v0.128.0`
+
+## Bug fixes {#bug-fixes-44}
+
+- **Stale Computer registrations** - Sessions now reconcile stale Droid Computer registrations automatically
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 14</span></div>
+
+`v0.126.0`
+
+## New features {#new-features-34}
+
+- **Bulk session archiving** - New settings page for managing and bulk-archiving sessions (app)
+- **EU data residency** - Sessions and LLM inference for EU customers now stay within an EU-only data plane
+- **Built-in security review** - The `/security-review` skill is now bundled with the CLI by default
+- **Copy bug report ID** - Added a copy button next to bug report IDs (app)
+
+## Improvements {#improvements-37}
+
+- **Faster Computer restarts** - Sped up restarting Droid Computers (app)
+- **Lighter CLI startup** - Reduced redundant requests during CLI startup
+- **Persistent desktop preferences** - Desktop preferences are now saved alongside other settings (app)
+- **Windows pending update cleanup** - Cleaned up stale pending updates on Windows
+
+## Bug fixes {#bug-fixes-45}
+
+- **Structured output validation** - Strengthened validation of structured tool output
+- **Task token count** - Removed an incorrect zero token count from Task tool results
+- **Windows installer packaging** - Repaired Windows installer packaging
+- **Limits reset on plan change** - Plan changes now correctly reset usage limits (app)
+- **MCP servers for running sessions** - MCP servers now load when reopening already-running sessions (app)
+- **Local daemon warning during setup** - Suppressed a spurious local daemon warning during initial setup (app)
+- **Session not found errors** - Fixed spurious session not found errors (app)
+- **Code block styling** - Aligned code block styling in chat (app)
+- **Cross-surface integrations** - Prevented integrations from sending duplicate postbacks across surfaces
+- **QA droid CLI auth** - QA droid CLI now pairs with the matching Factory API host
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 14</span></div>
+
+`v0.125.1`
+
+  Maintenance release with under-the-hood improvements.
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 13</span></div>
+
+`v0.125.0`
+
+## New features {#new-features-35}
+
+- **ACP config options** - The CLI now advertises configuration options to ACP clients and supports `session/set_config_option` for per-session overrides
+
+## Improvements {#improvements-38}
+
+- **Larger Task tool results** - Raised the truncation limit on Task tool results so more output is preserved
+
+## Bug fixes {#bug-fixes-46}
+
+- **Stale tool shimmer** - Tool calls no longer leave a stale shimmer behind in the transcript
+- **Stale Slack shimmer heartbeat** - Stopped a stale shimmer heartbeat from lingering in Slack threads
+- **Return to session on interaction prompt** - The CLI now returns to the session view when a user interaction box surfaces
+- **Gemini thinking signatures on replay** - Gemini thinking signatures are now preserved when sessions replay
+- **Title bar path on hover** - The title bar now shows the full working directory path on hover (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 12</span></div>
+
+`v0.124.0`
+
+## New features {#new-features-36}
+
+- **Deep and shallow security review modes** - `/security-review` now supports dedicated deep and shallow review modes
+- **Login redirect URIs** - The login flow now supports a redirect URI so you land where you started after signing in (app)
+
+## Improvements {#improvements-39}
+
+- **Sharper fuzzy search** - Refined fuzzy search behavior in the CLI
+- **Minimum context savings shown** - Context savings now display a clear minimum percent for easier interpretation
+- **Aligned MCP status indicators** - MCP server status indicators now line up consistently
+- **Faster setting updates** - Settings changes are applied in place, avoiding unnecessary MCP and skill refetches (app)
+- **Light mode polish** - Small component styling refinements in light mode
+
+## Bug fixes {#bug-fixes-47}
+
+- **Bounded resume history** - Resume now renders a bounded history so large sessions stay responsive
+- **Message send flash** - Fixed a visual flash when submitting a message (app)
+- **Desktop tutorial in desktop app** - The "install desktop" onboarding step is now skipped when you're already in the desktop app (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 12</span></div>
+
+`v0.123.1`
+
+  Maintenance release with under-the-hood improvements.
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 11</span></div>
+
+`v0.123.0`
+
+## New features {#new-features-37}
+
+- **Factory token usage in mission control** - Factory token usage is now persisted to session settings, with a toggle to show it in mission control
+- **Model deprecation notices** - Factory now surfaces notices when a model is scheduled for deprecation
+- **Optimistic message submit** - Messages can now be submitted before the session connection is ready (app)
+
+## Improvements {#improvements-40}
+
+- **Clearer parallel execute approvals** - Parallel execute approval prompts now make it clearer what's being approved
+- **Chat notice display** - Refreshed how chat notices render (app)
+
+## Bug fixes {#bug-fixes-48}
+
+- **Spec reasoning tab cycle** - Restored cycling through tabs in the spec reasoning view
+- **Duplicate spec rendering** - Specs no longer render twice
+- **Padded multiline status lines** - Multiline status lines now render with consistent padding
+- **Subagent tokens in mission control** - Mission control token counts now include subagent tokens
+- **Queued messages during /compress** - Messages typed while `/compress` is running are now queued instead of dropped
+- **Stale /missions prompt** - Fixed a stale `/missions` prompt lingering after dismissal
+- **Provider tool name handling** - Improved handling of tool names returned by model providers
+- **Stuck session loading** - Fixed sessions that could get stuck loading (app)
+- **Ghost update badge** - Fixed a spurious update-available badge caused by an update manifest mismatch (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 8</span></div>
+
+`v0.122.0`
+
+## Improvements {#improvements-41}
+
+- **Manager-only API key creation** - Organization API keys can now only be created by managers (app)
+- **Stricter Computer name validation** - Computer names are limited to lowercase letters, digits, and hyphens, with clearer error states (app)
+
+## Bug fixes {#bug-fixes-49}
+
+- **Working directory from computer wizard** - Working directory is now seeded correctly when navigating from the computer wizard to a new session (app)
+- **Duplicate collapsed groups** - Fixed duplicate collapsed groups in the CLI
+- **Droid header spacing** - Restored a missing trailing space in the Droid header
+- **Extra usage on subscription end** - Remaining extra usage is now transferred to your account balance when a subscription ends (app)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 7</span></div>
+
+`v0.121.0`
+
+## New features {#new-features-38}
+
+- **Thinking duration** - CLI and app now show how long a droid spent thinking
+- **Scroll to most recent prompt** - You can now scroll down directly to the most recent prompt in the CLI
+
+## Improvements {#improvements-42}
+
+- **Smoother transcript scrollback** - Cached static transcript markdown rendering for faster scrolling
+- **Better session titles** - Session titles are now well-formed, with redundant syncs deduplicated
+- **Tighter /sessions layout** - Column widths in `/sessions` are now distributed more evenly
+- **Faster setup failure feedback** - Setup now fails fast with a clearer error when the daemon can't connect
+
+## Bug fixes {#bug-fixes-50}
+
+- **Pasting long blocks** - Fixed issues when pasting large blocks of text into the CLI
+- **ACP tool call lifecycle** - Repaired the tool call lifecycle for ACP sessions
+- **Droid binary download** - Fixed an installation error when downloading the droid binary on some systems
+- **Droid Computer reconnection** - Droid Computers now reconnect automatically on activity (Factory App)
+- **Clearer daemon error messages** - Improved daemon error messaging in the Factory App
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 6</span></div>
+
+`v0.120.0`
+
+## New features {#new-features-39}
+
+- **Per-user Droid Computer controls** - Admins can now toggle managed and bring-your-own-machine (BYOM) Droid Computers on a per-user basis (Factory App)
+
+## Improvements {#improvements-43}
+
+- **Windows performance** - Sped up CLI responsiveness on Windows
+- **More reliable OpenAI file edits** - File edits now use the native patch tool for better reliability on OpenAI models
+
+## Bug fixes {#bug-fixes-51}
+
+- **Wrapped hyperlink targets** - Hyperlinks that wrap across lines now preserve the correct target
+- **Working directory after Droid Computer change** - The working directory is now restored when the selected Droid Computer changes (Factory App)
+- **Non-ASCII paths on Windows** - Native Windows tools now handle non-ASCII paths correctly
+- **Repeated context management notices** - Stopped showing the same context management notice multiple times in a row
+- **Windows daemon port retry** - Daemon now retries binding correctly when a port is already in use on Windows
+- **Plan cache after upgrade** - Organization cache now refreshes after plan changes so the new plan appears immediately (Factory App)
+- **Droid Shield reliability** - Additional fixes to Droid Shield
+- **Applying patch header** - Removed a redundant "applying patch" header
+- **Droid message crash** - Fixed a rare crash when rendering droid messages (Factory App)
+- **Payment methods for new organizations** - Organizations without a billing profile now see an empty payment method list instead of an error (Factory App)
+- **Outdated thinking settings hint** - Removed a stale hint related to thinking settings
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 6</span></div>
+
+`v0.119.0`
+
+## New features {#new-features-40}
+
+- **Windows setup script** - New setup script simplifies installing the Droid CLI on Windows
+- **MCP menu revamp** - Redesigned MCP menu for clearer server and tool management
+- **Sticky user messages** - User messages stay anchored as you scroll, with a full-session view (Factory App)
+- **Delete Wiki Runs** - You can now delete Wiki Runs directly from the Factory App
+
+## Improvements {#improvements-44}
+
+- **Factory App auto-updater UX** - Overhauled the Factory App auto-updater experience for a clearer update flow
+- **Droid Computer wizard polish** - Streamlined the new Droid Computer wizard (Factory App)
+- **Cleaner ask-user prompts** - Polished the ask-user prompt UI in the CLI
+- **Refined Thinking/Exploring previews** - Tightened the look of Thinking and Exploring summary previews
+- **Light mode chat polish** - Improved chat styling in light mode
+- **Missions overage error clarity** - Distinguishes Missions overage network errors from generic failures
+
+## Bug fixes {#bug-fixes-52}
+
+- **Status line working directory** - Status line now uses the last known working directory instead of a stale path
+- **AutoWiki history dropdown** - AutoWiki history dropdown is no longer cut off by the surrounding layout (Factory App)
+- **BYOK reasoning effort range** - Full reasoning effort range now applies to custom BYOK models
+- **Stale custom provider routing** - Fixed stale routing persisting across custom BYOK provider switches
+- **Download Factory App banner on web** - "Download Factory App" banner no longer appears on the web
+- **Session switching flicker** - Fixed flickering when switching between sessions (Factory App)
+- **Hibernated Droid Computers for delegations** - Linear and Slack delegations now wake hibernated Droid Computers reliably
+- **Credits dashboard pricing** - Credits dashboard now works for accounts with multiple price intervals (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 5</span></div>
+
+`v0.118.1`
+
+## New features {#new-features-41}
+
+- **Custom working directory for sessions** - The public Sessions API now accepts an optional `cwd` field to start Droid Computer-backed sessions in a specific directory
+
+## Bug fixes {#bug-fixes-53}
+
+- **Clearer working directory errors** - Invalid working directories now fail fast with a structured error instead of silently falling back to the wrong directory
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 4</span></div>
+
+`v0.118.0`
+
+## New features {#new-features-42}
+
+- **Live streaming in the Factory App** - Factory App now streams partial text and thinking updates as a droid works
+- **Bulk Usage Limit updates** - Admins can update Usage Limits for multiple users at once (Factory App)
+
+## Improvements {#improvements-45}
+
+- **Smarter readiness hints** - Readiness hints now detect more cases where guidance helps before continuing
+- **Localized review findings** - Review findings now match your language instead of the source file's language
+- **Plus plan rename** - Pro Plus has been renamed to Plus throughout the product
+- **Directory-managed roles** - Role dropdown is now disabled for users managed by directory sync (Factory App)
+
+## Bug fixes {#bug-fixes-54}
+
+- **Paused response recovery** - Improved recovery from paused model responses
+- **System notification color** - Fixed color of system notification body copy
+- **Slack session link unfurls** - Session links no longer auto-unfurl in Slack threads
+- **Slack persona on replies** - Droid persona is now preserved on Slack replies
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 3</span></div>
+
+`v0.117.0`
+
+## Improvements {#improvements-46}
+
+- **Individual plans** - Self-serve plans are now grouped under Individual, with smoother loading states (Factory App)
+- **Sharper LLM error classification** - Overloaded and context-length errors now surface as their own error types
+
+## Bug fixes {#bug-fixes-55}
+
+- **Execute summary while streaming** - Execute tool summary is now hidden while a response is still streaming
+- **Chat log polish** - Minor visual fixes to the chat log
+- **/missions reminder in Mission Mode** - The /missions system reminder no longer shows when you're already in Mission Mode
+- **Empty template cloud session** - Submitting a cloud session with an empty template now works (Factory App)
+- **Thinking signature recovery** - Improved recovery from interrupted thinking signatures
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 2</span></div>
+
+`v0.116.0`
+
+## New features {#new-features-43}
+
+- **Runtime-aware Execute tool** - Execute tool descriptions now adapt to your runtime, with WSL-specific guidance and an expanded bashism detector
+- **No-report readiness hint** - CLI surfaces a dynamic hint when a report isn't needed
+- **Payment method in onboarding** - You can now add a payment method during the final onboarding step (Factory App)
+
+## Bug fixes {#bug-fixes-56}
+
+- **Lingering prompts after resume** - User prompts are now cleared correctly after a droid resumes
+- **Gemini turn handling** - Scoped Gemini reasoning signals to the active turn for more reliable continuations
+- **Billing error classification** - Payment-required responses now surface as billing errors instead of generic invalid-request errors
+- **Working directory persistence** - Validated working directory is now persisted and locked until the Droid Computer connects (Factory App)
+- **Droid Computer details on transient errors** - Droid Computer details now remain visible during transient query errors (Factory App)
+- **Factory App updater download** - Factory App updater now downloads the new version only after you click to install
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">May 1</span></div>
+
+`v0.115.0`
+
+## New features {#new-features-44}
+
+- **PDF support for Gemini 3.1 Pro** - Gemini 3.1 Pro now accepts PDF inputs
+- **GLM-5.1 reasoning** - Added reasoning support for GLM-5.1
+- **Bulk image drag-and-drop** - Drop multiple images into the CLI at once
+- **PDF uploads** - Upload PDF files directly in chat (Factory App)
+- **No Droid Computer state on new session** - The new session page now handles cases when no Droid Computers are available (Factory App)
+
+## Improvements {#improvements-47}
+
+- **Resilient session resume** - Resuming a session that references a retired model now triggers a clean model migration
+- **Cloud sync stability** - Hardened cloud sync against session race conditions
+
+## Bug fixes {#bug-fixes-57}
+
+- **Terminal tab title** - Terminal tab title now updates when the active session changes
+- **Phantom lines in narrow terminals** - Fixed phantom lines that could appear in narrow terminals
+- **Mermaid terminal rendering** - Guarded Mermaid diagram rendering in the terminal against crashes
+- **Clearer auth errors** - Improved authentication error messages
+- **ACP session cancellation** - You can now cancel ACP sessions, and the correct auth code is shown
+- **Spinner rendering** - Fixed a spinner rendering issue
+- **Linear delegation matching** - Relaxed matching in the Linear delegation picker (Factory App)
+- **Session timeout messages** - Cleaner timeout messages and fixed a working directory error (Factory App)
+- **Connection failure toasts** - Removed noisy connection failure toasts (Factory App)
+- **Free trial onboarding** - Fixed a free trial onboarding issue (Factory App)
+- **Subagent collapse** - Subagents now collapse correctly even when the parent is selected (Factory App)
+- **AutoWiki export validation** - Hardened filename validation when exporting Wikis (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 30</span></div>
+
+`v0.114.0`
+
+## New features {#new-features-45}
+
+- **BYOM admin toggle** - Organization admins can now enable or disable bring-your-own-machine (BYOM) Droid Computers from enterprise settings (Factory App)
+
+## Improvements {#improvements-48}
+
+- **Droid Shield push scan** - Push scanning now targets only commits not yet on any remote, reducing duplicate scans
+- **AutoWiki UI polish** - Visual refinements across the AutoWiki interface (Factory App)
+
+## Bug fixes {#bug-fixes-58}
+
+- **Agent loop continuation** - Agent loop now continues when a model response has no visible output
+- **Bash result spacing** - Removed an unwanted gap between bash commands and their results
+- **AskUser answer alignment** - Your own answer row in AskUser is now aligned with other rows
+- **Windows Python execution** - Python commands run on Windows now use a UTF-8 environment by default
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 29</span></div>
+
+`v0.113.0`
+
+## New features {#new-features-46}
+
+- **Mission Control shortcuts** - New `g`/`G` keyboard shortcuts to jump between workers and the features list in Mission Control
+- **Deny-list command explanations** - CLI now explains why a command was deny-listed when prompting for approval
+- **Force-kill occupied ports** - Reclaim a port that's already in use directly from the CLI
+- **Readiness hints** - CLI now surfaces occasional readiness hints to help guide your next step
+- **Draft messages** - Save and resume in-progress chat messages between sessions (Factory App)
+
+## Improvements {#improvements-49}
+
+- **Randomized Academy quiz options** - Quiz answer choices are now randomized per question (Factory App)
+- **Cloud Machines status label** - Renamed Cloud Machines status from "deprecated" to "superseded" (Factory App)
+- **Draggable window during startup** - Factory App window stays draggable while the app finishes loading
+
+## Bug fixes {#bug-fixes-59}
+
+- **Git AI attribution** - Git AI attribution now records commit authors correctly
+- **Mission skill validation** - Mission skills are now validated when starting a mission run
+- **Archived sessions** - CLI no longer pulls archived sessions
+- **Slack delegation formatting** - Slack-delegated sessions now respond using Slack-native formatting
+- **Fewer Git diff failures** - Reduced intermittent Git diff failures during sessions
+- **Invite seat limits** - Invite flow now consistently enforces organization seat limits (Factory App)
+- **Default model selection** - New sessions now validate the persisted model against available models (Factory App)
+- **Long repository URLs** - Avoided request errors when repository names made GET URLs too long (Factory App)
+- **Academy callouts** - Academy markdown callouts now render reliably (Factory App)
+- **Chat scrolling** - Fixed several scrolling issues in the chat area (Factory App)
+- **macOS Factory App updater** - Fixed the Factory App auto-updater on macOS
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 28</span></div>
+
+`v0.112.0`
+
+## New features {#new-features-47}
+
+- **DeepSeek V4 Pro** - Added support for the DeepSeek V4 Pro model
+- **Resume MCP elicitations** - Elicitation prompts from MCP tools can now be resumed after interruption
+- **Extra-usage payment status** - Failed and succeeded extra-usage payment statuses are now surfaced in the payment modal (Factory App)
+
+## Improvements {#improvements-50}
+
+- **Security review on by default** - The security-review skill is now enabled by default
+- **Non-retryable 4xx responses** - 4xx responses (other than 429) are no longer retried, so failures surface faster
+- **Persistent Slack loading status** - Slack loading indicators now stay visible past status updates for clearer progress feedback (Factory App)
+
+## Bug fixes {#bug-fixes-60}
+
+- **ApplyPatch absolute paths** - Absolute paths are now honored verbatim in the ApplyPatch tool
+- **Working directory redraw** - Fixed working directory redraw and fork `cwd` overrides
+- **Missions model settings** - Missions model settings are now snapshotted at launch so they don't drift mid-run
+- **Custom statusline** - Custom statusline now uses session-scoped data instead of leaking across sessions
+- **Model-switch tool history** - Tool history is now sanitized when switching models to prevent rendering issues
+- **Context window error detection** - Recognize additional context-window error phrasings so recovery is more reliable
+- **Spec approval comments** - Spec approval comments now align with conversation messages
+- **Factory App local default** - Factory App now consistently defaults to local connections
+- **Onboarding loading state** - Fixed a stuck loading state during onboarding (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 28</span></div>
+
+`v0.111.0`
+
+## New features {#new-features-48}
+
+- **Italian translations** - The Droid CLI is now available in Italian
+- **`interval` loop command** - New CLI command for running tasks on an interval
+- **Refreshed hooks UI** - Updated UI for managing hooks
+- **Custom commands in Task prompts** - Task tool prompts now expand resolved custom slash commands
+- **Chat transcript scroll keybinds** - New keyboard shortcuts to jump between turns in the chat view
+- **Missions Rate Limits** - Missions now handle Rate Limit responses gracefully
+- **Missions entry overage gating** - Missions entry now respects your organization's overage preference
+- **Per-run automation viewer** - New visual viewer to inspect each automation run (Factory App)
+- **Model access table** - New UI for managing organization-level model access (Factory App)
+- **Factory Academy certification tiers** - Detect certification tiers and expanded quizzes to 30 questions (Factory App)
+
+## Improvements {#improvements-51}
+
+- **Faster Grep tool** - Grep tool now uses a hybrid ripgrep engine for better performance
+- **Stronger secret scrubbing** - Expanded secret scrubber patterns and applied scrubbing to Read tool output
+- **Faster `/new` and `/clear`** - Daemon session is now eagerly initialized on `/new` and `/clear`
+- **Centered settings on wide screens** - Settings content is now capped at 1024px and centered on wide displays (Factory App)
+- **Clearer schedule timezones** - Automation schedule timezone and run history timestamps are clearer (Factory App)
+- **Devtools shortcut in Factory App** - Re-enabled the devtools keyboard shortcut in production builds
+- **Clearer seat-limit errors** - Clearer error message when inviting members beyond your seat limit (Factory App)
+- **Native Slack loading status** - Slack now uses native loading status indicators (Factory App)
+
+## Bug fixes {#bug-fixes-61}
+
+- **Subagents during silent tools** - Task subagents are now kept alive during silent execution
+- **Execute preview rendering** - Bounded Execute tool preview rendering to prevent layout issues
+- **Execute approval rendering** - Stabilized rendering during Execute tool approvals
+- **Image paste on Linux/SSH** - Fixed image paste in Ghostty on Linux and over SSH
+- **Skill and droid preview scroll** - Skill and droid previews now scroll with arrow keys
+- **Chat Esc sequence** - Codified Esc key behavior in chat
+- **Spec mode editor flow** - Unblocked the spec edit flow when the editor opens via the system default
+- **Terminal indicator on Windows** - Hidden the terminal indicator on Windows in the footer
+- **Spec confirmation status** - Spec confirmation status is now gated on tool confirmation state
+- **Missions wake-lock leaks on Linux** - Prevented wake-lock leaks during Missions runs on Linux
+- **Skills rendering** - Fixed a parsing issue when rendering skills
+- **Subagent nesting** - Fixed nesting of subagents in the UI (Factory App)
+- **Cloud-synced Droid Computer sessions** - Cloud-synced Droid Computer sessions now display correctly (Factory App)
+- **Login screen error toast** - Suppressed an `/auth/me` error toast on the login screen (Factory App)
+- **Slack thread replies** - Slack now only forwards thread replies via `app_mention` (Factory App)
+- **Empty GitHub repos** - Added support for empty GitHub repositories (Factory App)
+- **Daemon directory paths** - Directory paths are now normalized in the daemon and render properly in the frontend (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 26</span></div>
+
+`v0.109.3`
+
+## New features {#new-features-49}
+
+- **Auto-fallback to Droid Core** - Sessions that hit Rate Limits now automatically fall back to Droid Core when your overage preference is set to Droid Core
+- **Per-tool MCP autonomy overrides** - New `mcpAutonomyOverrides` setting lets you configure autonomy levels for individual MCP tools
+- **System theming** - Factory App now follows your system theme
+- **New Factory App updater** - Improved auto-update flow for the Factory App
+- **Per-channel Slack auto-run model** - Choose which model is used for each Slack auto-run channel (Factory App)
+
+## Improvements {#improvements-52}
+
+- **Larger Droid Shield buffer** - Increased Droid Shield max buffer from 20MB to 64MB to handle larger outputs
+- **Faster hibernation detection** - Droid Computer hibernation is now detected more quickly
+- **Sorted model list** - CLI model list is now sorted by release date, newest first
+- **Cleaner MCP tool parameters** - MCP tool parameters show truncated JSON instead of `[object Object]`
+
+## Bug fixes {#bug-fixes-62}
+
+- **Lost subagent output** - Fixed an issue where subagent output could be lost
+- **MCP tool selection refresh** - Tool selection now refreshes after MCP updates
+- **Slash command initialization** - Slash commands now wait for initialization to finish before running
+- **Spec mode approval comments** - Spec approval comments now work in both live and resumed sessions
+- **`--auto` level in exec runs** - `--auto` level is now applied in exec runs even when the session inherits spec mode
+- **Tool confirmation state** - Restored correct tool execution state after a tool-confirmation approval
+- **Settings theme control alignment** - Fixed alignment of the settings theme control
+- **Stray hover glyphs** - Removed unintended active hover glyphs
+- **Windows worker reliability** - Added retries for Windows Job Object spawn failures
+- **Settings folder watcher** - Switched to native recursive watching for the settings folder
+- **Cron schedules in UTC** - Scheduled Missions runs now evaluate cron expressions in UTC
+- **Clearer paywall errors on Droid Computer routes** - Droid Computer routes now return a clear error when accessed from a non-paying organization
+- **Slack multi-turn delegation** - Fixed multi-turn delegation when running from Slack
+- **Factory App auth timeout fallback** - Fixed an auth timeout fallback in the Factory App
+- **App UI polish** - Fixed various spacing, color, and chevron issues (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 23</span></div>
+
+`v0.109.1`
+
+## New features {#new-features-50}
+
+- **Fast-mode toggle** - Single opt-in toggle to enable fast-mode model variants
+- **Droid Computer registration improvements** - Smoother register/remove flow with better handling of duplicate Droid Computer names
+- **Missions artifact validation** - Missions artifacts are now schema-validated on create, edit, and apply-patch
+
+## Improvements {#improvements-53}
+
+- **Faster Windows worker startup** - Reduced worker startup latency on Windows
+- **Cleaner Ctrl+O transcripts** - Verbose transcript bodies are now hidden for easier reading
+- **Quieter CLI logs** - Reduced noisy log volume during normal use
+- **Mermaid rendering** - Various improvements to Mermaid diagram rendering
+
+## Bug fixes {#bug-fixes-63}
+
+- **Spec mode approval flow** - Stabilized the approval flow in spec mode
+- **IDE diagnostics on disconnect** - Guarded against errors when the IDE client is disconnected
+- **Background process cleanup** - Background processes are now cleaned up when the CLI exits
+- **Sessions during silent tools** - Sessions are kept alive during silent tool execution
+- **Session tool IDs** - Session `enabledToolIds` are now treated as additive
+- **Secret scanner on large diffs** - Improved secret scanner reliability on large diffs
+- **`/rename` persistence** - `/rename` now persists across daemon sync and refreshes the cloud title (Factory App)
+- **Auto-allow-new toggle** - Toggling auto-allow-new no longer clears every model (Factory App)
+- **Integration modal** - Stabilized the Integration Management modal's height and scrolling (Factory App)
+- **On-demand pagination** - Replaced "Load All" with proper on-demand pagination (Factory App)
+- **GitLab integration reliability** - Fixed an out-of-memory issue in the GitLab integration (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 22</span></div>
+
+`v0.108.0`
+
+## New features {#new-features-51}
+
+- **Consolidated Missions files** - Files related to Missions now live together under `~/.factory` for easier discoverability
+- **Compute usage on billing pages** - Billing and usage pages now surface compute usage alongside other usage data (Factory App)
+
+## Bug fixes {#bug-fixes-64}
+
+- **Missions wake-lock on Linux** - Missions wake-lock now also blocks idle and lid-switch suspend so long-running Missions runs aren't interrupted
+- **Terminal focus feedback loop** - Fixed a terminal focus-in feedback loop in the TUI
+- **JSON-RPC error handling** - Improved error handling for JSON-RPC communication
+- **Subagents in sidebar** - Restored subagents in the sidebar (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 21</span></div>
+
+`v0.106.0`
+
+## New features {#new-features-52}
+
+- **`/btw` command** - New `/btw` slash command for sending side messages to the current session
+- **Upgraded `/copy` selector** - Improved selector UI for the `/copy` command
+- **Full-project security audit** - New full-project audit mode in the security-review skill
+- **`/copy` slash command** - `/copy` slash command and user message hover actions are now available in the app (Factory App)
+- **Search by session ID** - Search sessions directly by session ID (Factory App)
+- **Member role filter** - Filter the organization members list by role (Factory App)
+
+## Improvements {#improvements-54}
+
+- **Timeout error handling** - Improved handling of timeout errors with longer retry delays
+- **Corporate network error detection** - Corporate firewall, DNS, and TLS errors are now treated as non-retryable
+- **Context limit classification** - Requests exceeding a model's context window are now classified as context-limit errors with clearer messaging
+
+## Bug fixes {#bug-fixes-65}
+
+- **Subagent permission requests** - Subagent permission requests are now auto-rejected instead of crashing the session
+- **Auto suggestions after command** - Auto suggestions no longer appear after a command is accepted
+- **Auth error retries** - 401 and 403 authentication errors are no longer retried
+- **Default model preserved** - The user's configured default model is no longer rewritten on reads
+- **Dismissed handoff items** - Dismissed handoff items are now preserved during validation
+- **Bug report fallback** - Bug reports now fall back to local submission when the background daemon is unavailable
+- **Factory API key scoping** - The Factory API key list is now scoped to your current organization (Factory App)
+- **Slack session owner across pages** - The saved Slack Session Owner is now correctly shown across paginated org member lists (Factory App)
+- **Single pinned session** - Fixed an issue that allowed multiple pinned sessions in the sidebar (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 21</span></div>
+
+`v0.105.1`
+
+## Improvements {#improvements-55}
+
+- **Spec mode option selection** - Simplified the flow for choosing between multiple proposal options in spec mode
+- **`droid computer list` output** - Hides the default "active" status column for cleaner output
+
+## Bug fixes {#bug-fixes-66}
+
+- **Kimi tool call handling** - Fixed an issue with Kimi tool calls that could cause stream errors
+- **Auto-update on exit** - CLI now waits for in-flight auto-updates to finish before exiting to avoid interrupted installs
+- **Droid Computer connection reliability** - Better detection and recovery when a Droid Computer connection stalls
+- **Droid Computer connection warning** - Suppressed a spurious "Failed to get computer connection state" warning (Factory App)
+- **Onboarding wizard display** - Fixed display issues in the onboarding wizard (Factory App)
+- **Send button when disconnected** - Send button is now properly disabled in disconnected sessions (Factory App)
+- **Banner import error** - Fixed a banner import error (Factory App)
+- **Sidebar grouping collapse** - Fixed unrelated groups collapsing together in the sidebar (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 20</span></div>
+
+`v0.105.0`
+
+## New features {#new-features-53}
+
+- **Kimi K2.6 support** - Added support for the Kimi K2.6 model
+- **Simplify built-in skill** - Simplify is now a built-in skill, no installation required
+- **AutoWiki / GitHub Wiki sync** - Wikis generated by AutoWiki can now sync to GitHub Wiki, with additional Wiki reader fixes
+- **Managed Droid Computer enterprise control** - New managed Droid Computer toggle in enterprise controls (Factory App)
+- **Missions access policy** - Enterprise admins can now control access to Missions
+- **Session title in browser tab** - Factory App sessions now use the session title as the page title
+- **Revamped Droid Computer creation** - Redesigned flow for creating Droid Computers (Factory App)
+- **Nested sidebar** - Sidebar now supports nesting along with other polish improvements (Factory App)
+- **Droid Computer connection status** - Machine selector now shows the connection status for each Droid Computer (Factory App)
+
+## Improvements {#improvements-56}
+
+- **Compaction model for BYOK** - Compaction now defaults to your current model and is used for BYOK
+- **PowerShell syntax warning** - Execute tool now detects PowerShell and warns when Bash syntax is used
+- **Windows path normalization** - Glob tool now returns normalized backslash paths on Windows
+
+## Bug fixes {#bug-fixes-67}
+
+- **Spec option selection** - Fixed the user-selected spec option not being passed to the model
+- **Execute tool header** - Fixed the last character being clipped in the Execute tool header
+- **Invalid JSON rendering** - JSON renderer now hides output when the JSON is invalid
+- **Review guidelines skill** - CLI now handles a missing review-guidelines skill gracefully
+- **Tool cancel interrupts** - Follow-up prompts now wait for tool-cancel interrupts to settle
+- **TUI daemon session switching** - Previous TUI daemon session now closes only after the next one loads
+- **Session title updates** - Daemon session title updates now reflect in the terminal tab
+- **Missions worker permissions** - Missions worker permission requests are now auto-denied
+- **Thinking traces in web chat** - Thinking traces now appear in session chat on the web
+- **Ripgrep startup** - Fixed intermittent startup errors when initializing the bundled ripgrep binary
+- **Truncated stream handling** - Improved error handling when model response streams are truncated
+- **Stuck "Show more"** - Fixed a stuck "Show more" button after creating a session on a new Droid Computer (Factory App)
+- **Slack session-owner picker** - Picker now uses server-side search with infinite scroll (Factory App)
+- **Sidebar hover and selection** - Fixed hover states and highlighting in the sidebar (Factory App)
+- **401 errors when logged out** - Suppressed 401 errors after logging out (Factory App)
+- **Stuck loading state** - Fixed a stuck loading state in the app (Factory App)
+- **Add Project modal directory** - Modal now picks up the current directory from the native browse dialog (Factory App)
+- **Local machine option** - Hidden outside of the Factory App
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 17</span></div>
+
+`v0.104.0`
+
+## New features {#new-features-54}
+
+- **Custom ripgrep path** - New environment variable to point Factory at a custom ripgrep binary
+- **BYOK config in bug reports** - Bug reports now include resolved BYOK configuration to make troubleshooting easier
+
+## Improvements {#improvements-57}
+
+- **Full Execute command in approval** - The approval dialog now shows the full command that will run
+- **Selected confirmation option visibility** - The selected option in tool confirmation prompts is now bolded for better visibility
+- **Hidden daemon log output** - Background daemon output no longer appears in the session
+
+## Bug fixes {#bug-fixes-68}
+
+- **Spec edits in confirmation flow** - Fixed spec edits being dropped during the confirmation flow
+- **Manual spec edits respected** - Fixed manual edits to specs not being preserved during handoff
+- **Image upload compression** - Fixed image upload compression issues
+- **Assistant active timer** - Fixed the assistant active timer not persisting across unmounts
+- **Daemon connection and bug reports** - Fixed daemon connection issues and bug report errors (Factory App)
+- **Local reconnect on machine change** - Local machine reconnect now works reliably when switching connections, with a clearer warning when not connected (Factory App)
+- **Tool rendering parity** - Improved DefaultTool and TaskTool rendering to match the CLI (Factory App)
+- **ApplyPatch diff rendering** - Fixed ApplyPatch tool diff rendering for the CLI input format (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 16</span></div>
+
+`v0.103.0`
+
+## New features {#new-features-55}
+
+- **Sessions page redesign** - The sessions page has been refreshed with a new layout and design (Factory App)
+
+## Improvements {#improvements-58}
+
+- **Denied command confirmation** - Redesigned the confirmation UI when running blocked or risky commands
+- **Dead code detection in reviews** - Code review now detects dead and unused code
+- **QA report formatting** - QA skill now includes structured report format sections
+
+## Bug fixes {#bug-fixes-69}
+
+- **File overwriting** - File creation and patch tools can now properly overwrite existing files
+- **Model selection after spec approval** - Fixed the session model not being restored after approving a spec
+- **Inactive session reload** - Fixed inactive TUI sessions not reloading on demand
+- **Parallel tool calls in spec mode** - Fixed tool calls running in parallel incorrectly during spec approval
+- **Skill details refresh** - Fixed selected skill details not updating when the skills list changes (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 15</span></div>
+
+`v0.102.0`
+
+## New features {#new-features-56}
+
+- **Security review checks** - Code review now includes security checks for OWASP Top 10 vulnerabilities, LLM-specific risks, and supply chain issues
+- **AutoWiki images** - AutoWiki pages now support and display embedded images
+
+## Improvements {#improvements-59}
+
+- **Max autonomy enforcement** - App now properly enforces max autonomy settings (Factory App)
+- **Large PR review support** - CLI now gracefully handles large PR diffs by using local git diff as a fallback
+
+## Bug fixes {#bug-fixes-70}
+
+- **Spec approval comments** - Fixed spec approval comments not being preserved during handoff
+- **Tool result spacing** - Fixed excessive margin between tool header and result in the CLI
+- **Mermaid diagram rendering** - Fixed rendering issues with mermaid diagrams on the web
+- **Personal integrations visibility** - Fixed personal integrations not showing for regular users (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 14</span></div>
+
+`v0.101.0`
+
+## New features {#new-features-57}
+
+- **`/install-slack-app` command** - New `/install-slack-app` command to set up the Slack app integration for your workspace
+
+## Improvements {#improvements-60}
+
+- **CLI spinner redesign** - Updated CLI spinner animation for a refreshed look
+- **Usage Limit warning** - Warning banner now shown when setting a global Usage Limit (Factory App)
+- **Droid Computer source control warning** - Warning displayed when creating a Droid Computer without source control configured (Factory App)
+- **Usage Limits clarity** - Usage Limits now clearly display values in millions of Factory Standard Credits (Factory App)
+
+## Bug fixes {#bug-fixes-71}
+
+- **File tool accuracy** - File tools now use the actual filesystem state for more reliable results
+- **File edit previews** - Fixed structured previews not displaying correctly for file edit results
+- **Duplicate spec sessions** - Fixed duplicate sessions being created during spec handoff
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 13</span></div>
+
+`v0.100.0`
+
+## Improvements {#improvements-61}
+
+- **API key creation for all members** - All organization members can now create API keys, previously limited to managers and owners (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 10</span></div>
+
+`v0.99.0`
+
+## New features {#new-features-58}
+
+- **Incremental AutoWiki refreshes** - AutoWiki refreshes now only update changed pages for faster updates
+- **Themed mermaid diagram colors** - Mermaid diagrams now render with per-element colors that match your current theme
+- **AutoWiki search and exports** - AutoWiki now supports keyword search, skill browsing, and page exports (Factory App)
+
+## Bug fixes {#bug-fixes-72}
+
+- **Theme background override** - Fixed terminal theme background being overridden unexpectedly
+- **BYOK base URL switching** - Fixed client connections not being refreshed after switching custom API base URLs
+- **Context model inheritance** - Fixed context management not using the current session model
+- **Spec editor terminal handoff** - Fixed spec editor not properly completing terminal handoff
+- **MCP auth cancellation** - Fixed pending MCP authentication not being cancelled when closing the MCP panel
+- **Tool result display** - Fixed a crash when tool results contain non-string values
+- **Custom model stability** - Fixed custom model IDs changing unexpectedly between sessions
+- **Directory not found error** - Directory not found errors now appear immediately when confirming a directory (Factory App)
+- **BYOK Rate Limits** - BYOK users can now continue chatting when platform Rate Limits are reached (Factory App)
+- **Ghost tool calls** - Fixed phantom tool calls appearing during message processing
+- **Chat input** - Fixed various chat input issues (Factory App)
+- **Droid Computer terminal** - Fixed terminal display issues when using Droid Computers (Factory App)
+- **Machine config modal** - Fixed machine configuration modal not displaying correctly (Factory App)
+- **Reasoning and model selection** - Fixed reasoning level and model selection issues (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 9</span></div>
+
+`v0.98.0`
+
+## New features {#new-features-59}
+
+- **Install code review skill** - New built-in skill for setting up automated code review in your project
+- **Session renaming** - Rename sessions directly from the app (Factory App)
+- **macOS Spotlight discoverability** - Factory App is now easier to find via macOS Spotlight search
+
+## Improvements {#improvements-62}
+
+- **Install QA skill upgrade** - The install-qa skill now learns from test failures to improve over time
+- **Faster AutoWiki loading** - Optimized AutoWiki page loading for reduced latency (Factory App)
+
+## Bug fixes {#bug-fixes-73}
+
+- **Terminal palette override** - Fixed terminal color palette being overridden unexpectedly
+- **Droid Shield SSH key detection** - Fixed Droid Shield incorrectly flagging SSH public keys as secrets
+- **Droid Computer sessions display** - Fixed sessions not appearing when run on Droid Computers without a local directory (Factory App)
+- **Droid Computer SSH** - Fixed SSH connectivity issues with Droid Computers
+- **Tool status text** - Restored the "invoking tools" status indicator during tool execution
+- **Escape key after spec handoff** - Fixed Escape key cancellation not working after spec approval handoff
+- **Session sidebar** - Fixed various sidebar display issues (Factory App)
+- **Certificate loading** - Fixed certificate loading issues that could affect connectivity
+- **Chat and tool results** - Fixed display issues with chat messages and tool results (Factory App)
+- **Local machine connection toggle** - Fixed the local machine connection toggle not being respected when turned off (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 8</span></div>
+
+`v0.97.0`
+
+## New features {#new-features-60}
+
+- **`/cwd` command** - New `/cwd` command and `--cwd` startup flag to set or change the working directory for your session
+- **GLM-5.1 model support** - Added GLM-5.1 as an available model option
+- **Diff viewer for Droid Computers** - Added diff viewer support for viewing file changes in Droid Computers (Factory App)
+
+## Improvements {#improvements-63}
+
+- **Execute approval display** - Pending Execute approvals are now truncated for readability while preserving the full view via Ctrl+O
+
+## Bug fixes {#bug-fixes-74}
+
+- **AskUser layout** - Fixed alignment and spacing issues in the AskUser prompt (Factory App)
+- **Theme consistency on startup** - Fixed terminal theme overrides not being applied consistently on startup
+- **Kitty terminal over SSH** - Fixed Ctrl+D handling in Kitty terminal when connected over SSH
+- **Session settings** - Fixed settings not being applied correctly when creating a new session
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 7</span></div>
+
+`v0.96.0`
+
+## New features {#new-features-61}
+
+- **`/install-qa` command** - New `/install-qa` command to generate automated QA skills for your project
+- **`design.md` support** - CLI now supports `design.md` files alongside `agents.md` for providing design guidelines to your droid
+- **Cmd+N for new session** - Use Cmd+N keyboard shortcut to quickly start a new session (Factory App)
+- **Session disambiguation** - Sessions with the same name now display the full path in a tooltip for easier identification (Factory App)
+- **Pre-session bug reports** - Submit bug reports from the Factory App even when no session is active
+
+## Improvements {#improvements-64}
+
+- **Bash mode output redesign** - Bash mode output now matches the execute tool display for a more consistent look
+- **MCP tool confirmation display** - Restyled MCP tool display in the confirmation popup for better readability
+- **Light mode colors** - Improved color consistency in light mode by migrating hardcoded colors to the theme system
+- **Archived session access** - Archived sessions can now be viewed in read-only mode and restored when accessed directly (Factory App)
+- **Consistent hover states** - All option items now have consistent hover state styling (Factory App)
+- **Factory App UI polish** - Various visual refinements across the Factory App
+
+## Bug fixes {#bug-fixes-75}
+
+- **Duplicate tool call messages** - Fixed duplicate tool call messages and missing updates during tool execution
+- **Missions feature counts** - Fixed incorrect feature counts in `/missions`
+- **Escape key handling** - Fixed prompt handling issues after pressing Escape
+- **Terminal input security** - Hardened terminal input capture for improved security
+- **Session creation** - Fixed an issue where sessions could be created with an empty working directory (Factory App)
+- **Profile dropdown styling** - Refined profile dropdown and menu item styling (Factory App)
+- **Font size consistency** - Fixed font size mismatch in the Droid Computers section (Factory App)
+- **Sidebar layout** - Fixed session group header to span the full sidebar width (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 6</span></div>
+
+`v0.95.0`
+
+## New features {#new-features-62}
+
+- **Redesigned help menu** - The help menu has been completely revamped with improved layout and organization
+- **Green progress bars** - Progress bars now display in green while commands are running
+
+## Improvements {#improvements-65}
+
+- **Faster session reload** - Sessions reload significantly faster for a smoother experience
+- **CLI performance** - General performance improvements for faster CLI responsiveness
+- **Light mode color refinements** - Improved color palette and theme refinements for light mode (Factory App)
+- **Scrollable session view** - The entire session view is now scrollable for easier navigation (Factory App)
+- **Theme-aware menu colors** - Selection colors in slash command menus now adapt to the current theme
+- **Keyboard shortcut footer** - Improved keyboard shortcut display in slash command menus
+- **Back navigation** - Secondary pages now show a cleaner "Back to App" navigation button (Factory App)
+
+## Bug fixes {#bug-fixes-76}
+
+- **Execute tool name display** - Fixed "Execute" tool name being truncated to "Execut" in pending state
+- **Session freeze prevention** - Fixed session freezes caused by interactive commands in Bash Mode and Execute
+- **Tool execution after interrupts** - Tools no longer continue executing after being interrupted
+- **Subagent working directory** - Fixed subagents not inheriting the correct working directory
+- **ANSI escape handling** - Fixed ANSI escape sequences leaking into the input prompt
+- **Todo list display** - Fixed visual issues in the todo list display
+- **Custom model validation** - Fixed validation errors when using custom models in Missions workers
+- **Mission Control model selector** - Fixed the model selector in Mission Control
+- **Exec mode reasoning output** - Reasoning events now properly appear in stream-json exec output
+- **Sidebar collapse on Windows** - Fixed sidebar collapse button location on Windows (Factory App)
+- **Loading spinner** - Fixed loading spinner display issues (Factory App)
+- **Chat layout spacing** - Fixed left margin alignment in chat composer and content area (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 3</span></div>
+
+`v0.94.0`
+
+## New features {#new-features-63}
+
+- **/limits usage panel** - New `/limits` command shows an interactive credit usage breakdown with bucket views
+- **Credits Balance countdown** - Live countdown timer shows remaining Credits in real time (Factory App)
+- **Model selector expansion** - Model selector now includes a "show more" option to browse additional models (Factory App)
+
+## Improvements {#improvements-66}
+
+- **Queued message redesign** - Queued messages now display with a cleaner, user-message-style layout
+- **/plugins and /skills menu refresh** - `/plugins` and `/skills` menus now match the updated `/sessions` and `/model` UI style
+- **Droid Shield placeholder detection** - Droid Shield now detects additional placeholder value patterns to better protect against accidental secret exposure
+
+## Bug fixes {#bug-fixes-77}
+
+- **Worker hang fix** - Fixed a regression where blocked workers could cause the CLI to hang
+- **Custom model streaming** - Fixed streaming errors when using custom models
+- **Long prompt handling** - Fixed an issue where long prompts could fail when passed to subagents
+- **Autonomy level cycling** - Fixed Ctrl+L not correctly cycling through autonomy levels
+- **Kitty terminal fix** - Fixed additional input handling issues in Kitty terminal
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 2</span></div>
+
+`v0.93.0`
+
+## New features {#new-features-64}
+
+- **GPT-5.3-Codex fast mode** - Added GPT-5.3-Codex as a fast mode model option for faster code generation
+- **Markdown link rendering** - Markdown links now render as clickable links in the CLI
+- **Automatic agents.md detection** - CLI now automatically detects and loads agents.md files in your project
+- **Session retention policies** - Configure auto-deletion policies for sessions to manage storage (Factory App)
+
+## Improvements {#improvements-67}
+
+- **Plan update indicator** - A subtle "Plan updated" notification now appears when the plan changes
+- **JSON rendering in chat** - JSON data now renders with improved formatting in web and Factory App chat
+- **Commands near autonomy requests** - Suggested commands now appear closer to autonomy requests for easier access (Factory App)
+
+## Bug fixes {#bug-fixes-78}
+
+- **Review shows LGTM** - The review command now shows "LGTM" when no issues are found
+- **Long output truncation** - Long output lines in Execute tool previews are now truncated to fit terminal width
+- **Message ghosting** - Fixed ghost messages appearing when sending queued messages
+- **Improved error messages** - Model streaming errors now display user-friendly messages instead of raw errors
+- **Session loading** - Fixed various issues with loading and resuming sessions
+- **Onboarding link** - Fixed a broken link in the onboarding flow (Factory App)
+- **Mission Mode input** - Fixed input field behavior in Mission Mode (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">April 2</span></div>
+
+`v0.92.0`
+
+## New features {#new-features-65}
+
+- **Unified /missions menu** - Redesigned the `/missions` command with model tabs and improved navigation
+- **/settings redesign** - Refreshed `/settings` menu with an updated layout
+- **CLI footer redesign** - Redesigned CLI footer with a cleaner layout
+- **Per-worker token breakdown** - Mission Control now shows token usage breakdown per worker
+- **Session forking** - New `--fork` flag to create a new session by forking an existing one
+- **TUI chart rendering** - Charts and graphs now render directly in the terminal
+- **Exec mode system prompt flags** - New `--append-system-prompt` and `--append-system-prompt-file` flags for customizing system prompts in exec mode
+- **Cloud-synced read-only sessions** - Cloud-synced sessions are now viewable in read-only mode (Factory App)
+- **Configurable per-model context limits** - New setting to configure context token limits on a per-model basis
+
+## Improvements {#improvements-68}
+
+- **Session loading performance** - Optimized session loading for faster startup and reduced load times
+- **Faster session search** - Session search is now significantly faster (Factory App)
+- **Faster Factory App session loading** - Sessions load directly from disk in the Factory App for improved speed
+- **Tool routing warnings** - Tool routing warnings now suggest model-specific alternatives
+- **Default model indicator** - `/model` command now highlights which model is the default
+- **SKILL.md support** - Built-in skills can now be loaded from SKILL.md files
+- **Sidebar polish** - Modernized sidebar user profile and dropdown animations (Factory App)
+
+## Bug fixes {#bug-fixes-79}
+
+- **Clipboard copy over SSH** - Clipboard copy now works reliably over SSH connections
+- **VS Code multiline input** - Fixed multiline input handling in VS Code terminal
+- **MCP authentication** - Restored MCP OAuth authentication flows
+- **PDF page limit error** - Added a clear error message when exceeding the 100-page PDF limit
+- **Terminal cleanup on exit** - Fixed terminal escape sequences persisting after CLI exit
+- **Slash command settings** - Fixed `/fast`, `/enter-mission`, `/exit-mission`, and `/new` commands not applying settings correctly
+- **Parallel tool rendering** - Fixed rendering issues with parallel tool executions
+- **Ghostty and xterm input** - Fixed keyboard input handling in Ghostty and xterm terminals
+- **Terminal multiplexer display** - Fixed screen clearing in terminal multiplexers like tmux and screen
+- **Terminal focus recovery** - Fixed terminal focus not being recovered after window switching
+- **AGENTS.md session loading** - AGENTS.md guidelines now load correctly when resuming existing sessions
+- **Task tool background panel** - Fixed streaming and display issues in Task tool background panels
+- **Fullscreen sidebar layout** - Fixed sidebar layout in fullscreen mode on macOS (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 30</span></div>
+
+`v0.90.1`
+
+## Bug fixes {#bug-fixes-80}
+
+- **Light theme readability** - Fixed user message colors and help bar shortcuts in the light theme for improved contrast and readability
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 27</span></div>
+
+`v0.89.0`
+
+## New features {#new-features-66}
+
+- **Missions worker view** - New view for monitoring individual Missions worker progress and output
+
+## Improvements {#improvements-69}
+
+- **Spec mode redesign** - Redesigned spec mode with a refreshed layout and improved workflow
+- **Fuzzy search in model selector** - Model selector now supports fuzzy search for easier model filtering
+- **Cleaner tool output** - Grep and Glob tool calls now display with the same clean formatting as Read tool calls
+- **Plan display polish** - Improved plan display formatting and cleaner worker output
+- **Changelog dismissal** - Changelog now auto-hides after first view and can be manually dismissed
+- **Billable Tokens renamed to Factory Standard Credits** - "Billable Tokens" renamed to "Factory Standard Credits" throughout the UI
+- **Auto-updating plugins** - Installed plugins now auto-update on CLI startup
+
+## Bug fixes {#bug-fixes-81}
+
+- **Missions worker stability** - Permission blocks in Missions workers no longer terminate the session
+- **/exit-mission autocomplete** - `/exit-mission` autocomplete now only appears when actively in a mission
+- **Empty message handling** - Fixed empty messages appearing in sessions
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 26</span></div>
+
+`v0.87.0`
+
+## New features {#new-features-67}
+
+- **Spec approval handoff** - Spec approvals can now be handed off to a new session, letting you continue work separately after approving a spec
+
+## Improvements {#improvements-70}
+
+- **Shimmer animation for tool headers** - Tool call headers now display a shimmer animation for improved visual feedback
+
+## Bug fixes {#bug-fixes-82}
+
+- **Session storage reliability** - Fixed duplicate save errors and added automatic recovery from permission issues in session storage
+- **Sidebar navigation** - Fixed missing back arrow in sidebar menu titles (Factory App)
+- **Missions worker startup** - Improved Missions worker startup reliability with extended timeout
+- **Missions connection stability** - Increased socket connection timeout for more reliable Missions connections
+- **Droid Computer session creation** - Fixed errors when creating sessions while the Droid Computer is temporarily unavailable (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 25</span></div>
+
+`v0.86.0`
+
+## New features {#new-features-68}
+
+- **/context slash command** - New `/context` command shows a breakdown of token usage in your current session
+- **OS-level sandboxing** - Added OS-level sandboxing for enhanced security when running CLI tools
+
+## Improvements {#improvements-71}
+
+- **Ask question tool redesign** - Redesigned the Ask Question tool with improved text wrapping and layout
+
+## Bug fixes {#bug-fixes-83}
+
+- **Kitty terminal keypad keys** - Fixed keypad keys not working correctly in Kitty terminal
+- **Slack DM reliability** - Fixed bot message feedback loops in Slack DMs
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 24</span></div>
+
+`v0.85.0`
+
+## New features {#new-features-69}
+
+- **Session settings override** - Project and folder-level settings can now override organization session defaults
+- **SSE support for remote MCP servers** - Remote MCP servers now support Server-Sent Events (SSE) transport
+
+## Improvements {#improvements-72}
+
+- **Session group animations** - Session groups now animate smoothly when collapsing and expanding (Factory App)
+- **AutoWiki sidebar polish** - Improved AutoWiki sidebar design with smoother pan transitions (Factory App)
+- **Skills browser scrolling** - Improved scrollbar styling in the Skills browser (Factory App)
+- **Managed settings error messages** - Clearer error messages when loading managed settings
+
+## Bug fixes {#bug-fixes-84}
+
+- **Session titles** - Fixed session titles intermittently displaying incorrectly (Factory App)
+- **Missions worker BYOK settings** - Fixed Missions worker settings not persisting correctly when using custom API keys
+- **Session ID display** - Fixed session IDs being truncated (Factory App)
+- **Background process reliability** - Hardened background process and task store against data corruption
+- **Spec mode file edits** - Fixed file edits to .factory/specs being blocked during spec mode
+- **Chat message alignment** - Fixed user message text not aligning with droid answers
+- **Directory selector stability** - Fixed directory selector jiggling when switching directories (Factory App)
+- **Keyboard shortcuts** - Restored keyboard shortcuts in the app (Factory App)
+- **Session list display** - Fixed session list not showing enough sessions
+- **Droid Computer connection reliability** - Improved timeouts for initial Droid Computer connections (Factory App)
+- **Unknown model handling** - Fixed handling of unknown model IDs
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 23</span></div>
+
+`v0.84.0`
+
+## New features {#new-features-70}
+
+- **Header redesign** - Refreshed CLI header with an updated layout for improved readability
+- **Execute tool syntax highlighting** - Execute tool calls now display with syntax highlighting for better readability
+- **Session type tags** - Sessions now display type tags for Missions and subagents for easier identification
+- **Usage Limits settings UI** - New interface for viewing and managing Usage Limits settings (Factory App)
+
+## Improvements {#improvements-73}
+
+- **Create tool display** - Improved text wrapping and syntax highlighting for Create tool results
+- **CLI onboarding** - Improved onboarding flow for new CLI users
+
+## Bug fixes {#bug-fixes-85}
+
+- **Semantic diff rendering** - Fixed a random character appearing at the top of semantic diffs
+- **Skill execution** - Fixed skills not executing properly after being loaded
+- **Gemini BYOK thinking** - Fixed thinking signature preservation for Gemini models with custom API keys
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 20</span></div>
+
+`v0.83.0`
+
+## New features {#new-features-71}
+
+- **Redesigned model selector and session list** - Overhauled model selector and session list with improved navigation and layout
+- **Active tool call spinner** - A spinner now displays during active tool calls for better visibility into CLI activity
+- **Configurable subagent inactivity timeout** - New `subagentInactivityTimeout` setting to customize how long subagents wait before timing out due to inactivity
+
+## Bug fixes {#bug-fixes-86}
+
+- **Diff syntax highlighting** - Fixed syntax highlighting issues in diff display
+- **Skill slash command arguments** - Fixed user arguments not being passed to skills invoked via slash commands
+- **CLI status orb display** - Fixed random display issues with the CLI status orb
+- **Double loader on new session** - Fixed a duplicate loading indicator appearing when creating a new session (Factory App)
+- **Sidebar button accessibility** - Fixed sidebar buttons being covered by the draggable region (Factory App)
+- **Whitespace in working directory input** - Input for working directory now correctly trims whitespace (Factory App)
+- **Daemon connectivity** - Fixed daemon connection issues that could occur on some systems
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 19</span></div>
+
+`v0.82.0`
+
+## New features {#new-features-72}
+
+- **Syntax highlighting for diffs** - Diffs displayed by the CLI now include syntax highlighting for improved readability
+- **Theme engine** - New customizable theme engine for personalizing CLI colors
+- **File upload support** - Upload CSV, Excel, and DOCX files directly in conversations (Factory App)
+- **MCP and skills controls in new sessions** - MCP servers and skills can now be configured when creating new sessions
+- **Sidebar redesign** - Revamped sidebar with improved navigation and layout (Factory App)
+- **Droid Computer info in session tooltip** - Session tooltips now display connected Droid Computer details (Factory App)
+
+## Bug fixes {#bug-fixes-87}
+
+- **Session settings preserved on fork** - Forking a session now preserves your session settings instead of resetting to global defaults
+- **Mission Control stability** - Fixed a memory leak in Mission Control
+- **Auto-update rollback** - Fixed rollback failures during CLI auto-updates
+- **Mission Control resize** - Fixed Mission Control display issues when resizing the terminal
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 18</span></div>
+
+`v0.80.0`
+
+## New features {#new-features-73}
+
+- **Couchbase MCP server** - Added Couchbase to the MCP server registry for database integration
+- **AutoWiki dashboard link** - The Droid CLI now shows a direct link to the dashboard after AutoWiki uploads complete
+- **Touch device controls** - Submit and cancel buttons now appear on touch devices for easier interaction (Factory App)
+- **Droid Computer install commands** - The Connect to Droid Computer modal now shows curl and Windows install commands (Factory App)
+- **Dynamic loading status setting** - New setting to disable dynamic loading status messages (Factory App)
+
+## Improvements {#improvements-74}
+
+- **SSH error messages** - Improved error messages for the SSH command
+- **BYO Droid Computer setup guidance** - Better user guidance for BYO Droid Computer setup commands
+- **Simplified Droid Computer setup** - Streamlined the Droid Computer setup flow
+
+## Bug fixes {#bug-fixes-88}
+
+- **Sub-agent spawning** - Fixed sub-agents failing to spawn correctly
+- **Esc key during tool execution** - Fixed Esc key during tool execution incorrectly interrupting the next user message
+- **Model error notifications** - Model API errors are now shown as user notifications instead of being hidden
+- **Daemon startup reliability** - Fixed daemon startup failures caused by insufficient timeout on slower connections
+- **Usage Limits display** - Fixed Usage Limits not displaying correctly for users (Factory App)
+- **Droid Computer card navigation** - Fixed click navigation on Droid Computer name cards (Factory App)
+- **Debug mode logging** - Fixed debug logs not appearing when running with the --debug flag
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 17</span></div>
+
+`v0.77.0`
+
+## New features {#new-features-74}
+
+- **GPT-5.4 Mini model** - New GPT-5.4 Mini model available in the model selector
+
+## Improvements {#improvements-75}
+
+- **Faster @ search indexing** - File indexing for @ mentions now runs in a background worker for improved responsiveness
+- **Faster session listing** - The `/sessions` command is now optimized with an index for quicker loading
+- **Faster first prompt** - System info is now prefetched before the first prompt for quicker startup
+- **Sub-agent reliability** - Redesigned sub-agent architecture for improved task delegation reliability
+- **Skills preserved after compaction** - Skills invoked during a session are now preserved when context is compacted
+- **Droid Computer selection UI** - Improved visual design for the Droid Computer selection interface (Factory App)
+
+## Bug fixes {#bug-fixes-89}
+
+- **Slash command arguments** - Fixed slash command arguments being lost when submitting via the suggestion menu
+- **Missions model selection** - Missions now correctly uses the session model instead of the global settings model
+- **Worktree error messages** - Worktree setup failures now show descriptive error messages instead of generic errors
+- **Stale Missions warnings** - Fixed stale Missions runs incorrectly triggering concurrent run warnings
+- **Mode preservation on /new** - Fixed session mode being reset when creating a new session with `/new`
+- **Permission settings persistence** - Permission settings are now preserved across session respawns
+- **Chat composer undo** - Fixed undo not working after pasting text in the chat composer (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 16</span></div>
+
+`v0.76.0`
+
+## New features {#new-features-75}
+
+- **Configurable LLM timeout** - LLM API timeout is now configurable via settings.json for customizing request timeout behavior
+- **MCP server allowlist** - Enterprise admins can now restrict which MCP servers are allowed via a new allowlist policy in Enterprise Controls (Factory App)
+- **Granola MCP server** - Added Granola to the MCP server registry for meeting notes integration
+
+## Improvements {#improvements-76}
+
+- **Mission Control shortcut** - Mission Control now toggles with Ctrl+T for quicker access
+- **Rate Limit display** - Improved UI for Rate Limit notifications
+- **Droid Computer error messages** - Clearer error messages for Droid Computer commands
+- **Mission Control performance** - Reduced memory usage and latency in Mission Control
+- **Session ID tooltip** - Session ID now visible in the session tooltip for easier reference (Factory App)
+
+## Bug fixes {#bug-fixes-90}
+
+- **Custom model lookup** - Fixed BYOK custom model lookup failing after settings changes
+- **Model selection text color** - Fixed incorrect text color in the model selection dropdown (Factory App)
+- **Enterprise model defaults** - Cloud sessions now correctly respect enterprise model defaults (Factory App)
+- **Model policy overrides modal** - Fixed display issues in the model policy overrides modal (Factory App)
+- **Automations page layout** - Fixed automations page height in the Factory App
+- **MCP OAuth connection** - Improved retry handling for MCP OAuth callback connections
+- **Organization settings refresh** - Organization-managed settings now correctly refresh after login
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 13</span></div>
+
+`v0.75.0`
+
+## Bug fixes {#bug-fixes-91}
+
+- **Bug report performance** - Fixed bug reports hanging when processing large Missions runs
+- **Disappearing CLI line** - Fixed a line occasionally disappearing from CLI output
+- **Connection stability** - Improved handling of disconnection errors for more stable sessions
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 12</span></div>
+
+`v0.74.0`
+
+## New features {#new-features-76}
+
+- **Configurable worktree directory** - New setting to customize the directory used for git worktree operations
+
+## Improvements {#improvements-77}
+
+- **Grep multiline auto-detection** - Grep tool now automatically enables multiline mode when search patterns contain newlines
+- **npm installation guidance** - CLI now provides clear instructions to add droid to your PATH after npm installation
+- **Retry reliability** - Improved retry handling for transient provider errors with automatic rotation
+- **System info truncation** - Large directory listings and git status output are now truncated to prevent system info overflow
+
+## Bug fixes {#bug-fixes-92}
+
+- **Thinking block preservation** - Invalid thinking blocks are now preserved as text instead of being silently dropped
+- **Git subdir plugin support** - Fixed support for git subdirectory plugins in project configurations
+- **Mission Control UX** - Fixed various Mission Control UI and interaction issues
+- **Spec mode subagents** - Subagents now correctly use read-only mode when the parent session is in spec mode
+- **MCP OAuth compatibility** - Improved MCP OAuth compatibility across servers
+- **Playwright MCP permissions** - Improved permission handling when using the Playwright MCP server
+- **Terminal tab title on resume** - Terminal tab title now correctly updates when resuming a session
+- **Concurrent session handling** - Improved detection and handling of concurrent CLI instances
+- **Code server connection** - Fixed code server connection issues in the Factory App
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 11</span></div>
+
+`v0.73.0`
+
+## New features {#new-features-77}
+
+- **Additional Emacs keybindings** - Added more Emacs-style keyboard shortcuts for text editing in the CLI
+- **`--remote-access` flag** - Remote session access now requires the explicit `--remote-access` flag for improved security
+
+## Improvements {#improvements-78}
+
+- **Faster time to first token** - Reduced time to first response by ~8% through lazy loading and caching optimizations
+- **Session reconnection reliability** - Pending requests are now preserved and replayed when reconnecting after a disconnection (Factory App)
+
+## Bug fixes {#bug-fixes-93}
+
+- **Spec mode model handling** - Fixed spec mode using the wrong model for thinking block processing
+- **Auto-update reliability** - Fixed auto-update failures on read-only directories and Windows updates getting stuck in a pending state
+- **Mission Control layout** - Fixed layout stability issues in Mission Control
+- **Tool confirmation double-click** - Fixed tool confirmation buttons firing twice on a single click
+- **Tool format tolerance** - Improved tolerance for format variations in AskUser and TodoWrite tool responses
+- **Unicode character handling** - Fixed crashes caused by broken Unicode characters in messages
+- **MCP OAuth security** - Improved OAuth state verification for MCP server connections
+- **Multiple CLI instance isolation** - Fixed interference between multiple concurrent CLI instances
+- **Tool filtering in exec mode** - Fixed incorrect tool filtering when running in exec mode
+- **Model provider switching** - Fixed issues when switching between model providers mid-conversation
+- **Worktree branch handling** - Fixed error when using worktrees with an already checked-out branch
+- **Droid Computer connect modal** - Fixed VS Code config display in the Droid Computer connect modal (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 10</span></div>
+
+`v0.72.0`
+
+## New features {#new-features-78}
+
+- **GPT-5.4 Fast model** - New GPT-5.4 Fast model available with a `/fast` slash command for quick model switching
+- **MCP OAuth in remote sessions** - MCP servers requiring OAuth authentication now work in remote Droid Computer sessions
+- **Chat UI refresh** - Refreshed chat interface with improved tool display, user message styling, and interrupt indicators
+- **Mission subagent streaming** - Real-time streaming updates from subagents in mission control
+
+## Improvements {#improvements-79}
+
+- **Incremental rendering** - Enabled incremental rendering for smoother and more responsive CLI output
+- **Faster Droid Computer sessions** - Optimistic preconnection reduces wait time when starting Droid Computer sessions (Factory App)
+- **Working directory validation** - Droid Computer sessions now validate working directory configuration before starting (Factory App)
+
+## Bug fixes {#bug-fixes-94}
+
+- **Grep tool overflow** - Fixed Grep tool crashing on very large search results by returning partial results with an increased buffer
+- **Thinking indicator spacing** - Fixed spacing below the thinking indicator display
+- **Timeout warnings** - Fixed spurious timeout warnings appearing during normal operation
+- **Sentry integration reliability** - Improved reliability of the Sentry integration connection
+- **Slack integration reliability** - Improved error handling for Slack integration connections
+- **Mission Mode reasoning** - Fixed reasoning issues in Mission Mode
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 9</span></div>
+
+`v0.71.0`
+
+## New features {#new-features-79}
+
+- **Autofix PR button** - Automatically fix issues found in pull requests directly from the app (Factory App)
+- **MCP OAuth configuration** - Added OAuth configuration support for customizable fields in MCP server settings
+
+## Improvements {#improvements-80}
+
+- **Worktree naming** - The `--worktree` flag now accepts an optional name argument; the `--branch` flag has been removed
+- **Create tool syntax highlighting** - Create tool results now display with syntax highlighting instead of diff format
+
+## Bug fixes {#bug-fixes-95}
+
+- **Semantic diff rendering** - Fixed diff rendering in semantic diff view
+- **@ search prewarming** - Fixed @ search prewarming for improved file suggestion performance
+- **Factory App download button** - Fixed download Factory App button incorrectly showing in the Factory App
+- **Terminal creation flash** - Fixed "(exited)" text briefly flashing when creating new terminals (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 6</span></div>
+
+`v0.70.0`
+
+## New features {#new-features-80}
+
+- **Git worktree support** - New `--worktree` flag enables native git worktree support for working across multiple branches simultaneously
+- **Native PDF support** - The Read tool now natively supports reading PDF files across all model providers
+- **Runtime settings overlay** - New `--settings` flag allows applying settings at runtime with organization-precedence merge
+- **Skills UI for remote sessions** - Skills UI is now available in Droid Computer sessions (Factory App)
+
+## Improvements {#improvements-81}
+
+- **Mission Control redesign** - Refreshed Mission Control interface with a cleaner layout
+
+## Bug fixes {#bug-fixes-96}
+
+- **Option+Arrow word jumping** - Restored Option+Arrow word jumping in ESC-prefix terminals
+- **Background process isolation** - Background process tracking is now isolated per CLI instance to prevent cross-instance interference
+- **@ search indexing** - Fixed file indexing in @ search suggestions
+- **Shell environment in daemon** - Daemon now correctly inherits shell environment variables
+- **Terminal compatibility** - Fixed Kitty keyboard protocol detection that could cause issues in certain terminals
+- **Streaming cancellation** - Improved reliability when cancelling streaming responses
+- **Daemon auto-updates** - Fixed an issue where daemon auto-updates could be incorrectly skipped
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 5</span></div>
+
+`v0.69.0`
+
+## New features {#new-features-81}
+
+- **CJK internationalization** - Full internationalization support for Japanese, Chinese, and Korean languages in the CLI
+- **GPT-5.4 model updates** - GPT-5.4 is now a default model option with expanded context limits
+- **`--mission` flag for droid exec** - New `--mission` flag enables non-interactive Missions orchestration via `droid exec`
+- **Personal analytics page** - View your personal usage analytics directly in the app (Factory App)
+- **Settings audit trail** - Track changes to settings values with a full audit trail (Factory App)
+- **Version history for Enterprise Controls** - View configuration change history in Enterprise Controls (Factory App)
+- **Combined billing summary** - Billing summary now available in both personal and organization settings views (Factory App)
+
+## Improvements {#improvements-82}
+
+- **Git config updates** - Git configuration can now be updated when you explicitly request it
+- **BYOK Anthropic thinking** - Improved adaptive thinking support for custom Anthropic models
+- **Smarter retry handling** - Improved retry delays for provider capacity errors
+- **LLM timeout errors** - Clearer user-facing error messages when model requests time out
+- **MCP tool rendering** - Improved MCP tool result display in the Factory App
+
+## Bug fixes {#bug-fixes-97}
+
+- **VSCode keyboard shortcuts** - Fixed support for Cmd + key combinations in VSCode terminal
+- **Anthropic streaming stability** - Improved streaming reliability for Anthropic models
+- **Empty model responses** - Empty model responses are now handled gracefully instead of causing errors
+- **Thinking recovery** - Auto-recovery from thinking signature validation errors during reasoning
+- **Spec mode navigation** - Fixed back navigation from autonomy menu in spec mode
+- **Mission session cleanup** - Fresh session now starts correctly when exiting a proposed mission
+- **Gemini error handling** - Improved error handling for authentication and payment errors with Gemini models
+- **Profile display** - Fixed user profile parsing for accounts with incomplete name fields
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 5</span></div>
+
+`v0.68.1`
+
+## New features {#new-features-82}
+
+- **VSCode Kitty protocol support** - Added Kitty keyboard protocol support for VSCode terminal integration
+
+## Bug fixes {#bug-fixes-98}
+
+- **Authentication issues on login** - Fixed authentication issues that could occur during login
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 4</span></div>
+
+`v0.68.0`
+
+## New features {#new-features-83}
+
+- **Subagent inactivity timer** - Subagents now automatically stop after 3 minutes of inactivity to prevent idle resource usage
+- **Usage Limits settings** - Configure and view Usage Limits directly within sessions and settings (Factory App)
+
+## Bug fixes {#bug-fixes-99}
+
+- **VS Code auto-installation** - Fixed embedded VS Code auto-installation in the Factory App
+- **Factory App stability** - Fixed daemon restart issues in the Factory App
+- **Session resume** - Fixed reliability issues when resuming previous sessions
+- **Streaming stability** - Fixed a crash that could occur during streaming retries
+- **BYOK error handling** - Improved error messages for payment and authentication errors with custom API keys
+- **Context management** - Improved handling when conversations exceed context limits
+- **Image handling for text-only models** - Images are now properly handled when using text-only models
+- **GLM-4.7 error handling** - Fixed error handling for GLM-4.7 model errors
+- **MCP tool compatibility** - Improved MCP tool schema sanitization for better compatibility across model providers
+- **Custom model streaming** - Fixed streaming issues with custom models
+- **Reasoning level display** - Fixed reasoning level not displaying correctly after using /model in spec mode
+- **Authentication reliability** - Reliability improvements to authentication mechanisms
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 3</span></div>
+
+`v0.67.0`
+
+## New features {#new-features-84}
+
+- **CLI banners** - Display customizable banners in the CLI for quick access to important information
+- **`/stats` command** - The `/wrapped` command has been renamed to `/stats` with date range filtering support
+- **Skills search bar** - Added search bar to the skills menu for quickly finding skills
+- **Configurable image compression** - New `image_quality` parameter in the Read tool for controlling image compression quality
+- **Electron app automation** - The agent-browser skill now supports automating Electron desktop applications
+
+## Improvements {#improvements-83}
+
+- **Automation detail view** - Redesigned automation detail view to align with session UI patterns (Factory App)
+- **Windows ARM64 and Zed extension** - CLI distribution now includes Windows ARM64 builds and Zed editor extension
+
+## Bug fixes {#bug-fixes-100}
+
+- **Certificate loading order** - Fixed system certificate loading that could cause authentication failures on startup
+- **Gemini schema compatibility** - Fixed schema compatibility issues with Gemini models
+- **Payment redirect in Factory App** - Fixed payment page redirect handling in the Factory App
+- **Character encoding** - Fixed display of malformed UTF characters in messages
+- **Missions list formatting** - Fixed formatting of feature and worker list descriptions in Missions
+- **BYOK error handling** - Improved error messages for custom model (BYOK) configurations
+- **MCP server reconnection** - Fixed potential deadlock when MCP servers fail to reload during disconnection
+- **Execute tool file actions** - Fixed file operations not being applied correctly during command execution
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">March 2</span></div>
+
+`v0.66.0`
+
+## New features {#new-features-85}
+
+- **`/copy` slash command** - Copy content to your clipboard directly from the CLI
+- **Marketplace management** - New UI for managing marketplace plugins under the Plugins section in enterprise controls (Factory App)
+- **Factory App version display** - Factory App now shows the current version number
+- **Grouped exec sessions** - Droid exec sessions are now grouped under a dedicated tab for cleaner organization (Factory App)
+
+## Improvements {#improvements-84}
+
+- **Missions worker reliability** - Hardened Missions worker lifecycle with improved pause and resume handling
+
+## Bug fixes {#bug-fixes-101}
+
+- **Subagent model and permissions** - Fixed subagent model inheritance and permissions level
+- **BYOK compaction errors** - Upstream error details are now surfaced in BYOK compaction failures
+- **Cross-provider messages** - Fixed message conversion for OpenAI Responses API across providers
+- **Spec model display** - Corrected spec model display in `/model` selector and prevented global fallback on clear
+- **Session archiving** - Fixed session archive confirmation flow in the app
+- **Chat scrolling** - Fixed scroll-to-last-message behavior in session chat (Factory App)
+- **User Usage Limits modal** - Fixed scroll bug in the Individual User Usage Limits modal (Factory App)
+- **Diff generation** - Fixed potential crash with non-string inputs in diff generation
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 27</span></div>
+
+`v0.65.0`
+
+## New features {#new-features-86}
+
+- **/diagnostics command** - New `/diagnostics` command with overlay menu and footer status for troubleshooting CLI issues
+- **Unstaged changes in diff viewer** - View and manage unstaged changes directly in the diff viewer panel (Factory App)
+- **GitHub comments in diff viewer** - View GitHub PR comments alongside code changes in the diff viewer (Factory App)
+- **Session deep linking** - Share and navigate directly to specific sessions via deep links (Factory App)
+- **Diff preview for enterprise controls** - Preview configuration diffs when managing enterprise control settings (Factory App)
+
+## Bug fixes {#bug-fixes-102}
+
+- **Mission Mode model selection** - Fixed model selection issues when using Mission Mode
+- **Mission Mode validation** - Validation contracts now update correctly when Mission requirements change
+- **Bug report smart trimming** - Bug reports now smart-trim large files instead of failing
+- **Plugin auto-install** - Fixed duplicate core plugin auto-install failures being surfaced to users
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 26</span></div>
+
+`v0.64.0`
+
+## New features {#new-features-87}
+
+- **Session archiving** - Archive sessions from the CLI to keep your session list clean
+- **Inline session rename** - Rename sessions inline with cloud sync support
+- **Custom model reasoning effort** - Added reasoning effort support for custom models
+- **Concurrent Missions warnings** - Warns on Missions entry and confirms concurrent Missions runs
+- **Dry-run validation** - New dry-run validation approach during Missions planning
+- **/model scope clarity** - Clarified `/model` command scope and added set-as-default action
+
+## Bug fixes {#bug-fixes-103}
+
+- **Mission Mode commands** - Split Mission Mode enter and exit into separate commands for improved reliability
+- **Context management** - Fixed context management triggering too frequently for OpenAI models
+- **OpenAI reasoning effort** - Fixed maximum reasoning effort setting for OpenAI models
+- **Gemini rate limiting** - Improved Gemini 429 error handling with throttle-aware retry
+- **Bedrock reasoning effort** - Fixed reasoning effort settings for Bedrock models
+- **Empty end_turn responses** - No longer treats empty end_turn responses as errors
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 25</span></div>
+
+`v0.63.0`
+
+## New features {#new-features-88}
+
+- **Top 5 model selector** - Model selector now shows top 5 models with a "show more" option for cleaner UI
+- **Session default settings** - All session default settings (model, autonomy, reasoning) now exposed in `/settings` menu
+
+## Bug fixes {#bug-fixes-104}
+
+- **Droid Shield false positives** - Reduced false positives on example files and placeholders
+- **Glob tool patterns** - Fixed handling of non-array patterns input in Glob tool
+- **BYOK auth in exec mode** - Fixed authentication validation for BYOK custom models in exec mode
+- **Session model auth** - Check effective session model for BYOK auth skip, not just CLI flag
+- **Session loading** - Fixed session loading issues with long conversation histories
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 24</span></div>
+
+`v0.62.0`
+
+## New features {#new-features-89}
+
+- **Bedrock/Vertex support** - Added Bedrock and Vertex support for Claude Sonnet 4.6 and Opus 4.6
+- **Session-scoped settings** - Model, autonomy, and reasoning settings are now session-scoped instead of global
+- **`/readiness-fix` command** - New slash command to automatically fix issues found in readiness reports
+- **Rate Limits UI** - Added UI handling for Rate Limit notifications
+- **README requirement for Missions** - Missions now require README updates before completion
+
+## Bug fixes {#bug-fixes-105}
+
+- **MCP reload prevention** - Avoided unnecessary MCP reloads on non-MCP settings changes
+- **Custom model migration** - Prevented no-op custom model migration writes
+- **Autonomy persistence** - Preserved autonomy level when spec sessions persist
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 23</span></div>
+
+`v0.61.0`
+
+## New features {#new-features-90}
+
+- **Vertex/Bedrock Opus support** - All latest Opus models now available via Vertex and Bedrock
+- **Online research in Missions** - Added online research and environment setup during Missions planning
+- **Recent local directories** - Quick access to recently used local directories
+
+## Bug fixes {#bug-fixes-106}
+
+- **Mission Control polish** - Visual improvements to Mission Control UI
+- **Interactive command prevention** - Prevent interactive command execution that could block the agent
+- **Missions latency** - Reduced `/enter-mission` latency and improved daemon error UX
+- **Spec/autonomy decoupling** - Decoupled spec and autonomy settings and permission outcomes
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 20</span></div>
+
+`v0.60.0`
+
+## New features {#new-features-91}
+
+- **Missions model selector** - Choose specific models for Missions workers
+- **Prevent idle sleep** - CLI now prevents system idle sleep during Missions execution
+
+## Improvements {#improvements-85}
+
+- **Faster search** - Sped up search functionality in large repositories with fuzzy search support
+
+## Bug fixes {#bug-fixes-107}
+
+- **Missions validation overhaul** - Complete overhaul of Missions validation for improved reliability
+- **Missions worker timeouts** - Improved Missions worker timeout handling
+- **Subagent model inheritance** - Fixed model inheritance for subagents
+- **Diff word highlights** - Fixed incorrect line wrapping in diff word-level highlights
+- **Gemini tool usage** - Improved Gemini tool usage reliability
+- **Readiness report sanitization** - Improved sanitization of sensitive data in readiness reports
+- **TUI daemon shutdown** - Fixed stopping TUI-spawned daemon on shutdown
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 19</span></div>
+
+`v0.58.0`
+
+## New features {#new-features-92}
+
+- **Local settings override** - New `settings.local.json` for local project/folder-level settings overrides
+- **Environment variable references** - Custom model API keys now support environment variable references
+- **Gemini 3.1 Pro model** - Added Gemini 3.1 Pro model support
+- **Missions planning pausing** - Allow pausing during planning phases with in-context resume in Mission Control view
+
+## Bug fixes {#bug-fixes-108}
+
+- **Anthropic provider reset** - Fixed stale Anthropic provider state on model switch
+- **MCP toggle effects** - MCP toggle changes now apply immediately without restart
+- **Browser MCP isolation** - Stopped auto-adding `--isolated` flag for browser MCP servers
+- **Windows PowerShell** - Fixed PowerShell execution issues on Windows
+- **GLM 4.7 routing** - Fixed GLM 4.7 model routing issues
+- **Ctrl+G spam prevention** - Blocked Ctrl+G while the agent is streaming to prevent notification spam
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 17</span></div>
+
+`v0.57.16`
+
+## New features {#new-features-93}
+
+- **Claude Sonnet 4.6** - Added Claude Sonnet 4.6 model support
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 16</span></div>
+
+`v0.57.15`
+
+## Improvements {#improvements-86}
+
+- **Opus 4.6 Fast Mode pricing** - Removed promotional pricing for Opus 4.6 Fast Mode
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 13</span></div>
+
+`v0.57.14`
+
+## New features {#new-features-94}
+
+- **Session tags** - Categorize sessions with custom tags using the new `--tag` CLI flag for better organization
+- **Word-level diff highlighting** - GitHub diff mode now highlights only changed words within lines instead of entire lines
+- **GPT-5.3-Codex model** - Added GPT-5.3-Codex model with multi-turn phase support
+- **GLM-5 model** - Added GLM-5 model via Fireworks
+- **MiniMax M2.5 model** - Added MiniMax M2.5, replacing M2.1
+- **Create-PR skill** - New built-in skill for guided pull request creation with local verification checklist
+- **Worker droid** - Basic worker droid now ships as a built-in droid for task delegation
+- **PR linking** - Sessions now display a status indicator showing linked PRs from git operations
+
+## Bug fixes {#bug-fixes-109}
+
+- **Stdin character corruption** - Replaced text input component to eliminate character corruption and broken special keys
+- **NODE_ENV injection** - Stopped injecting `NODE_ENV=production` into shell environment, fixing `npm` devDependencies issues
+- **MCP SDK alignment** - Updated to MCP SDK 1.26 with proper schema validation
+- **File watcher limits** - More granular file watching to avoid "too many open file descriptors" errors
+- **Factory App connection race** - Fixed daemon connection race condition in the Factory App with polling retry logic
+- **Sidebar sessions** - Fixed sessions disappearing from sidebar (Factory App)
+- **Open in editor** - Fixed "open in editor" functionality in the Factory App
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 11</span></div>
+
+`v0.57.12`
+
+## New features {#new-features-95}
+
+- **Spec approval with comment** - Added a "Proceed with comment" option to spec approval, letting you approve a spec and attach a guiding comment in one action
+
+## Bug fixes {#bug-fixes-110}
+
+- **Fast model switching** - Fixed edge cases when switching models mid-conversation, including proper conversation state management
+- **Invalid MCP output schemas** - Tolerates invalid MCP tool output schemas instead of crashing
+- **Opus 4.5 max tokens** - Corrected incorrect Opus 4.5 max output tokens in model registry
+- **Ctrl+O during AskUser** - Allows Ctrl+O (open in editor) during the AskUser tool flow
+- **AskUser context** - Ensures context is clear when using the AskUser tool
+- **Session file table overflow** - Limits concurrency when fetching sessions in daemon to avoid "file table overflow" errors
+- **Duplicate plan steps** - Fixed duplicate plan steps in web UI when multiple TodoWrite calls share the same title (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 10</span></div>
+
+`v0.57.11`
+
+## Bug fixes {#bug-fixes-111}
+
+- **Subagent prompting** - Fixed subagent tool prompting and description handling
+- **AskUser tool** - Handles edge cases preventing stuck states when sessions are interrupted or messages arrive out of order (Factory App)
+- **Sidebar staleness** - Fixed missing last message and stale status indicators on the session sidebar (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 9</span></div>
+
+`v0.57.10`
+
+## New features {#new-features-96}
+
+- **`/skills` UX overhaul** - Tabbed layout with pagination and a dedicated detail view for browsing and importing skills
+- **Terminal tab titles** - Terminal tab now displays the session name so you can identify Droid sessions across multiple tabs
+- **`droid update` command** - New command to manually update the CLI, plus ability to disable autoupdate via `/settings`
+- **Session end hooks** - Hooks now fire when running `/clear` or `/new`, enabling custom cleanup workflows
+- **Factory App notifications** - Native macOS and Windows notifications when sessions complete, with configurable preferences
+- **Factory App native view redesign** - Refreshed sidebar layout with smooth animations, new terminal editor icons, and keyboard shortcut formatting
+- **Mobile experience** - Overhauled mobile and responsive layout with touch-friendly settings and onboarding flows (Factory App)
+
+## Bug fixes {#bug-fixes-112}
+
+- **`/bug` command memory** - Optimized log loading with streaming I/O to prevent out-of-memory on large log files
+- **Session persistence** - Thinking and reasoning fields now preserved correctly when saving sessions
+- **MCP settings UI** - Filled toggle style, clickable tool rows, and capitalized server names (Factory App)
+- **Git timeout** - Increased git timeout to 60 seconds to prevent failures on slow connections or large repos
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 7</span></div>
+
+`v0.57.9`
+
+## Improvements {#improvements-87}
+
+- **Opus 4.6 Fast Mode** - Renamed from "Opus 4.6 Fast" to "Opus 4.6 Fast Mode" for clarity
+- **Opus 4.6 Fast Mode promo pricing** - Updated Model Multiplier from 12x to 6x promotional rate
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 6</span></div>
+
+`v0.57.7`
+
+## New features {#new-features-97}
+
+- **Claude Opus 4.6 Fast** - Added Opus 4.6 Fast as a new model option in the model selector
+- **`/fork` command** - Duplicate your current session with all messages preserved into a new session
+- **Org-managed settings** - Local settings that are set by your organization are now locked from editing
+- **Session archiving** - Archive sessions from the web app to keep your sidebar clean (Factory App)
+
+## Bug fixes {#bug-fixes-113}
+
+- **Shell environment loading** - Shell environment now loads consistently across Factory App, sandbox, and computer platforms
+- **Orphaned browser processes** - Agent-browser daemon processes are now cleaned up properly
+- **Task tool output** - Progress updates from Task tool are now truncated to prevent UI overflow
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 5</span></div>
+
+`v0.57.5`
+
+## New features {#new-features-98}
+
+- **Claude Opus 4.6** - Added Claude Opus 4.6 model support
+- **Semantic structured diffs** - Code change diffs now use semantic structure-aware rendering for better readability
+- **Plugin hooks** - Added support for plugin hooks with Claude hooks format compatibility
+- **npm package** - CLI is now installable via npm: `npm install -g droid`
+- **User-invocable skills as slash commands** - Custom skills marked as user-invocable are now registered as slash commands
+- **`FACTORY_LOG_FILE` and `FACTORY_DISABLE_KEYRING` env vars** - New environment variables for log file output and keyring control
+- **Enterprise Controls** - New settings page for managing agent behavior, command policy, model access, and security (Factory App)
+- **Skills UI** - Skills button and modal added to the chat input for easy skill access (Factory App)
+- **Ask User tool** - Ask User tool now available in the web and Factory App surfaces
+
+## Improvements {#improvements-88}
+
+- **Startup latency** - Optimized CLI startup with sub-metric tracking for faster launch times
+
+## Bug fixes {#bug-fixes-114}
+
+- **Unicode crash** - Fixed CLI crash when sessions contain certain unicode characters
+- **Marketplace auto-update** - Auto-update now only runs in interactive mode, not during `droid exec`
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">February 3</span></div>
+
+`v0.57.3`
+
+## New features {#new-features-99}
+
+- **Task tool live streaming** - Real-time subagent tool progress display and Execute tool output streaming in web and Factory App surfaces
+- **Image pasting** - Paste images directly into the chat composer (Factory App)
+- **`.agent` skills folders** - Skills can now be loaded from `.agent` folders in your project for custom skill support
+
+## Improvements {#improvements-89}
+
+- **Skills filtering** - Skills are now filtered by model invocability so only relevant skills appear in the Skill tool
+
+## Bug fixes {#bug-fixes-115}
+
+- **File suggestion UX** - Trailing space now added after file suggestion selection for smoother typing
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 30</span></div>
+
+`v0.57.2`
+
+## New features {#new-features-100}
+
+- **Full text search** - Search across your session history and codebase directly in the CLI
+- **MiniMax M2.1** - Added MiniMax M2.1 model support
+
+## Bug fixes {#bug-fixes-116}
+
+- **AskUser tool** - Improved questionnaire parsing and interaction reliability
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 29</span></div>
+
+`v0.57.0`
+
+## New features {#new-features-101}
+
+- **ASCII mermaid diagrams** - Mermaid diagrams now render as ASCII art directly in the terminal
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 28</span></div>
+
+`v0.56.1`
+
+## Improvements {#improvements-90}
+
+- **MCP tool management** - Improved MCP tool status tracking to prevent cross-contamination between servers
+
+## Bug fixes {#bug-fixes-117}
+
+- **Read tool images** - Fixed image support in the Read tool, along with rate limit retry and reasoning fixes
+- **Cache block limits** - Ensured no more than 3 cache blocks are sent to the LLM to prevent context issues
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 27</span></div>
+
+`v0.56.0`
+
+## New features {#new-features-102}
+
+- **ACP daemon mode** - New daemon mode for Agent Control Protocol enabling persistent background sessions with improved session loading
+- **Lazy session loading** - Sessions now load messages lazily for faster startup when resuming large sessions
+- **Dynamic default settings** - Settings now support dynamic defaults for better configuration flexibility
+
+## Improvements {#improvements-91}
+
+- **Parallel context gathering** - Missions workers now encouraged to read all context files in parallel for faster startup
+
+## Bug fixes {#bug-fixes-118}
+
+- **MCP tool schema isolation** - Broken tool schemas in one MCP server no longer affect other MCP servers
+- **Symlinked skill directories** - Fixed discovery of symlinked skill directories in `.factory/skills`
+- **Windows spec mode UI** - Fixed spec mode UI and autonomy mode text rendering on Windows
+- **AskUser parallel tool calling** - Fixed parallel tool calling with AskUser tool
+- **Skills menu rendering** - Fixed skills menu to always render correctly
+- **OpenAI custom model routing** - Fixed routing bug for OpenAI custom models
+- **Linear remote delegation** - Fixed Linear remote delegation issues
+- **Authentication atomic writes** - Auth writes now use atomic operations to prevent corruption
+- **ACP session loading** - Fixed multiple issues with ACP session loading
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 23</span></div>
+
+`v0.55.2`
+
+## New features {#new-features-103}
+
+- **Marketplace auto-updates** - New management UI with auto-update setting and silent auto-installation of missing marketplaces on startup
+- **`--allow-background-processes` flag** - Added flag support for interactive and resumed sessions
+
+## Bug fixes {#bug-fixes-119}
+
+- **AskUser tool parsing** - Improved parsing logic for questionnaire formatting
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 22</span></div>
+
+`v0.55.1`
+
+## New features {#new-features-104}
+
+- **OpenTelemetry tracing** - Implemented OTEL tracing for the CLI to improve observability and debugging
+- **Mandatory bug report titles** - Added title requirement for `/bug` reporting to ensure clearer issue tracking
+
+## Bug fixes {#bug-fixes-120}
+
+- **`/review` default branch** - Fixed the `/review` command to correctly identify and use the repository's default branch
+- **Authentication** - Fixed several issues around authentication persistence and stability
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 21</span></div>
+
+`v0.55.0`
+
+## New features {#new-features-105}
+
+- **Autonomy mode reskin** - Refreshed UI for autonomy mode indicators and transitions for better clarity
+- **Agent-browser integration** - CLI now uses the `agent-browser` CLI for browser automations, providing more reliable and token-efficient interactions
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 20</span></div>
+
+`v0.54.0`
+
+## New features {#new-features-106}
+
+- **OTEL metrics for hooks and slash commands** - Customer metrics for `droid.hook.invocations` and `droid.slash_command.invocations`
+- **Optional `/readiness-report` model switching** - Users can now continue with their current model while seeing a recommendation, instead of being forced to switch
+
+## Improvements {#improvements-92}
+
+- **Autonomy indicator format** - Updated format to show `Spec | Auto (X)` when spec mode is active; `Medium` shortened to `Med`
+
+## Bug fixes {#bug-fixes-121}
+
+- **AskUser tool improvements** - Questionnaire parsing now supports bullets/`1)` numbering, ignores headers/code fences, normalizes multi-word topics. AskUser can now run alongside TodoWrite with other tools deferred properly. Fixed TUI input handling via `KeypressProvider` subscription
+- **Windows UI** - Improved autonomy/spec mode status text rendering on Windows terminals
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 16</span></div>
+
+`v0.53.0`
+
+## New features {#new-features-107}
+
+- **`/readiness-report` in exec mode** - Support for `/readiness-report` slash command in droid exec mode with optional custom instructions
+
+## Bug fixes {#bug-fixes-122}
+
+- **Settings.json corruption prevention** - Settings file now uses atomic writes to prevent corruption
+- **Terminal info disabled** - Disabled getTerminalInfo to prevent issues
+- **Authentication stability** - Bundled keychain dependency in packaged builds to reduce flaky sign-in setups
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 15</span></div>
+
+`v0.52.0`
+
+## New features {#new-features-108}
+
+- **`/share` command** - Share your current session with organization members, copies share URL to clipboard
+
+## Improvements {#improvements-93}
+
+- **Ctrl+Z suspend** - Handle ctrl+z suspend like other TUIs
+- **Decoupled modes and autonomy** - Modes and autonomy levels are now independent settings in the TUI
+
+## Bug fixes {#bug-fixes-123}
+
+- **Task tool view** - Fixed Ctrl+O view for Task tool
+- **Settings file writes** - Avoid unnecessary file writes when updating unrelated settings
+- **Unified tool display** - Fixed tool result pending display issue
+- **Subagent version** - Fixed subagent spawning to use correct droid version
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 14</span></div>
+
+`v0.49.0`
+
+## New features {#new-features-109}
+
+- **CLI Axiom skill** - New skill for querying CLI metrics and logs with relevant datasets and fields
+
+## Improvements {#improvements-94}
+
+- **Custom model requests** - Custom models now properly map to equivalent built-in models for correct request formatting
+
+## Bug fixes {#bug-fixes-124}
+
+- **iTerm scrollback clearing** - Fixed scrollback clearing for iTerm users with "Disable E3 scrollback clearing" preference enabled
+- **Memory leak fix** - Fixed memory leak by cleaning up Performance API entries and hinting Bun GC
+- **Session title generation** - Fixed session title generation for empty strings
+- **Warmup requests** - Warmup requests no longer consume unnecessary tokens by disabling thinking budget
+- **Light mode submenus** - Fixed light mode display issues for submenus
+- **Linux autoupdate** - Fixed autoupdate issues on Linux
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 13</span></div>
+
+`v0.48.0`
+
+## Improvements {#improvements-95}
+
+- **Windows autoupdate** - Updates now work correctly on Windows using a deferred update strategy, applied on next startup
+- **Model selector** - Removed GLM 4.6 from the model selector
+
+## Bug fixes {#bug-fixes-125}
+
+- **Tool result rendering** - Internal placeholder markers no longer displayed in CLI output
+- **Session loading** - Fixed "Failed to load session" errors on cloud sessions
+- **Droid startup timeout** - Increased timeout for start droid to prevent timeouts
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 12</span></div>
+
+`v0.47.0`
+
+## Bug fixes {#bug-fixes-126}
+
+- **Read tool infinite loop** - Fixed infinite loop when Read tool returns empty string
+- **Session title generation** - Fixed race condition causing "Session must have at least 1 message" error
+- **Windows sound paths** - Fixed Bun virtual FS sound path extraction on Windows
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 9</span></div>
+
+`v0.46.0`
+
+## New features {#new-features-110}
+
+- **`/create-skill` command** - Create custom skills directly from the CLI with guided flow
+- **Skills in exec mode** - Skill tool now enabled when running `droid exec`
+- **`/rename` command** - Rename sessions with a new slash command, plus auto-generated session names based on conversation content
+
+## Improvements {#improvements-96}
+
+- **PR overview in FetchUrl** - GitHub PR fetch results now include an overview section with files changed, comment counts, and table of contents
+- **Create-skill UX** - Improved create-skill flow with better guidance and examples
+- **Review branch fetch** - Git review now fetches current branch when opening instead of on mount
+
+## Bug fixes {#bug-fixes-127}
+
+- **Background process output** - Output from background processes now properly piped to droid
+- **Cloud sync settings** - Fixed settings cloud sync with droid status tracking
+- **ESC cancel duplication** - Fixed queued messages being duplicated when pressing ESC to cancel
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 8</span></div>
+
+`v0.45.0`
+
+## Bug fixes {#bug-fixes-128}
+
+- **Ctrl+O detailed view** - Now shows full accumulated command output instead of truncated view
+- **File autocomplete** - Menu now closes properly on Ctrl+C
+- **MCP modal** - Fixed modal and status notification display issues
+- **Autonomy level** - Fixed autonomy level not being applied correctly
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 7</span></div>
+
+`v0.44.0`
+
+## New features {#new-features-111}
+
+- **`/statusline` command** - Configure custom status line, can import PS1 from shell config
+- **Bulk MCP tool management** - Manage multiple MCP tools at once via ToolsOverviewView
+- **Auto-include Skill tool** - Custom droids (subagents) now automatically include the Skill tool
+
+## Improvements {#improvements-97}
+
+- **Expand diffs with Ctrl+O** - Tool confirmation prompts now support Ctrl+O to expand diffs
+
+## Bug fixes {#bug-fixes-129}
+
+- **Session resume system info** - Session resume now shows correct/up-to-date system info and local date
+- **Model display alignment** - Fixed model display alignment in UI
+- **MCP project server config** - MCP tool modifications now work correctly for project-defined servers
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 6</span></div>
+
+`v0.43.0`
+
+## Bug fixes {#bug-fixes-130}
+
+- **Terminal panel display** - Fixed terminal being cut off when plan panel is shown
+- **Chat input width** - Chat input now extends to full terminal width
+- **Spec mode transitions** - `droid exec --use-spec` correctly exits spec mode after `ExitSpecMode`
+- **Default session settings** - Session defaults properly loaded from settings.json on each new session
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">January 5</span></div>
+
+`v0.42.2`
+
+## Improvements {#improvements-98}
+
+- **GLM 4.7 support** - Updated GLM model deployments
+- **Gemini SDK upgrade** - Improved Gemini support
+- **Expandable tool results** - Tool results can now be expanded to show full details in web and Factory App surfaces
+
+## Bug fixes {#bug-fixes-131}
+
+- Fixed light mode color themes in expanded mode
+- Fixed memory leak from unbounded tool executions
+- Fixed GitHub app installation OAuth flow
+- Fixed dotenv loading order with settings
+- Fixed token usage not preserved across manual compaction
+- Fixed onboarding error when user has existing org (Factory App)
+- Fixed users getting stuck in onboarding due to stage issues (Factory App)
+- Fixed mobile onboarding layout (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 30</span></div>
+
+`v0.41.0`
+
+## New features {#new-features-112}
+
+- **`/wrapped` command** - Year-in-review stats showing your Droid usage, badges earned, model preferences, and session metrics (cli)
+- **Fast model switching** - Faster provider/model switches without LLM compaction (cli)
+- **Batched tool permissions** - Parallel tool calls now show single permission prompt (cli)
+- **Custom BYOK models** - Custom models now appear in model selector (cli)
+- **Auto-sync repos** - GitHub/GitLab repos sync when opening template modal (Factory App)
+
+## Improvements {#improvements-99}
+
+- **PDF & text file uploads** - Attach PDFs and text files to chat in web and Factory App surfaces
+- **Send button** - Visual send button in session chat input (Factory App)
+- **ASCII startup animation** - Animated Droid logo on CLI startup (configurable) (cli)
+- **Model Multiplier display** - Shows Factory model multipliers in model descriptions (cli)
+
+## Bug fixes {#bug-fixes-132}
+
+- Fixed users getting stuck in broken onboarding state (Factory App)
+- Fixed CLI onboarding redirect for terminal-only users
+- Fixed missing repos in GitHub org management modal (Factory App)
+- Fixed multi-option spec mode selection (cli)
+- Fixed catch-22 bug preventing subscription start (Factory App)
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 23</span></div>
+
+`v0.40.0`
+
+## New features {#new-features-113}
+
+- **Custom models from settings** - Load custom models directly from settings.json
+- **Parallel tool confirmations** - Single permission request for parallel tool calls instead of individual prompts
+- **Multi-option spec mode** - Spec mode can now present multiple implementation options for user selection
+- **Settings file watching** - Settings automatically reload when the settings file changes
+- **Token usage in exec mode** - Token usage is now displayed in exec streaming output
+- **Stop hook improvements** - Decision and reason support for Stop hook to match Claude code spec
+
+## Bug fixes {#bug-fixes-133}
+
+- **Opus 4.5 model fix** - Fixed Opus 4.5 to work as an effort model with thinking guard improvements
+- **Tool completion fix** - Fixed issue where tools weren't properly completed on new assistant messages
+- **Web search date fix** - Web search tool now includes dynamic date for more accurate results
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 19</span></div>
+
+`v0.39.0`
+
+## New features {#new-features-114}
+
+- **Context utilization setting** - New setting to display token usage indicator in the status bar
+- **Custom Droids enabled by default** - Custom Droids feature is now available to all users without requiring opt-in
+
+## Bug fixes {#bug-fixes-134}
+
+- **Grep tool fix** - Fixed pattern argument handling in the Grep tool
+- **BYOK Grok fix** - Fixed crash when using Grok models with thinking/reasoning streams
+- **Warmup improvements** - Added option to disable warmup requests and skip warmup for slash commands
+- **Non-git directory support** - Use current working directory as project directory when not in a git repository
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 18</span></div>
+
+`v0.38.0`
+
+## Bug fixes {#bug-fixes-135}
+
+- **GPT-5.2 improvements** - Fixed request parameters and reasoning effort options for better model performance
+- **Prevent .env auto-loading** - CLI no longer automatically loads `.env` files from the working directory in standalone builds, making behavior more predictable
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 17</span></div>
+
+`v0.37.0`
+
+## Improvements {#improvements-100}
+
+- **Todo tool improvements** - Simplified todo format and refreshed UI for better reliability
+- **Chrome DevTools MCP server** - Added Chrome DevTools Protocol to the MCP registry
+- **Model cleanup** - Removed obsolete models
+
+## Bug fixes {#bug-fixes-136}
+
+- Fixed API request handling for Codex models
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 17</span></div>
+
+`v0.36.6`
+
+## New features {#new-features-115}
+
+- **Gemini 3 Flash model** - Added support for Gemini 3 Flash
+
+## Improvements {#improvements-101}
+
+- **Agent readiness signals** - Expanded agent readiness signals in readiness reports
+
+## Bug fixes {#bug-fixes-137}
+
+- Fixed overly strict filtering by allowing common read-only `git` commands
+- Fixed copy/paste issues on WSL
+- Fixed repository deduplication in `/readiness` reports
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 13</span></div>
+
+`v0.36.2`
+
+## New features {#new-features-116}
+
+- **GPT-5.2 model** - Added support for GPT-5.2 model
+- **MCP tool enable/disable** - Add ability to enable/disable individual MCP tools per server
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 10</span></div>
+
+`v0.36.0`
+
+## New features {#new-features-117}
+
+- **MCP tools in droid creation** - MCP tools are now displayed during custom droid creation and edit flows
+
+## Bug fixes {#bug-fixes-138}
+
+- Fixed droid deletion when filename doesn't match metadata name
+- Standardized help text position and format in droid creation/edit flows
+- Add reasoning_effort to stream-json system init event
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 8</span></div>
+
+`v0.33.0`
+
+## Bug fixes {#bug-fixes-139}
+
+- Fixed autonomy mode not being properly set on tool confirmations
+- Improved @-tagged file truncation by character count to prevent context overflow
+- Updated Opus 4.5 pricing with dismissable notice
+- Restored Figma MCP server to the registry
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 5</span></div>
+
+`v0.32.0`
+
+## Bug fixes {#bug-fixes-140}
+
+- Press ESC to close the expanded tool result view
+- Improved input box cursor up/down movement with wrapped lines
+- Fixed Windows pasting issues
+- Fixed `npm run format` conflict with legacy Windows format command in denylist
+- Fixed auth issues with Microsoft MCP servers
+- `/readiness` command is now enabled by default
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 4</span></div>
+
+`v0.31.0`
+
+## New features {#new-features-118}
+
+- **GPT-5.1-Codex-Max model** - Added support for GPT-5.1-Codex-Max model
+- **Image compression** - Images are now compressed before upload to reduce bandwidth
+- **IDE auto-connect setting** - Added setting to automatically connect to IDE from external terminals
+- **Disable hooks flag** - Added `--no-hooks` flag to disable hooks execution
+
+## Bug fixes {#bug-fixes-141}
+
+- Improved Droid docs search
+- Long Execute tool commands now truncated in the UI header
+- Fixed on-disk images not being cleared after upload
+- Fixed thinking level changing mid-conversation by locking it per agent turn
+- Fixed review preset items using incorrect color for non-selected items
+- Fixed input box handling of multi-width characters like CJK and emoji
+- Fixed left/right arrow key navigation when @ suggestion menu is open
+- Bundled code-signed ripgrep binary for improved security and reliability
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 3</span></div>
+
+`v0.30.0`
+
+## New features {#new-features-119}
+
+- **Search hidden files** - Grep and Glob tools now include hidden files in search results
+- **Session search** - Added search functionality to the session selector for quickly finding sessions
+- **Image indicator** - User messages now display an image indicator when images are attached
+
+## Bug fixes {#bug-fixes-142}
+
+- Fixed EPERM permission errors on certain file operations - Windows file rename retry logic
+- Fixed ESC key navigation in `/review` and `/bg-process` commands for Ghostty terminal
+- MCP registry updates
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 2</span></div>
+
+`v0.28.1`
+
+## Improvements {#improvements-102}
+
+- **Certificate caching** - Certificates are now cached on startup for faster loading
+- **Image upload limits** - Conversation images are now limited to prevent 413 errors when uploading large images
+- **MCP registry helper** - Added note for STDIO servers in MCP registry explaining installation requirements
+
+## Bug fixes {#bug-fixes-143}
+
+- Fixed invalid signature in thinking block after assistant message interrupt
+- Fixed settings menu not showing all options when loading asynchronously
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">December 1</span></div>
+
+`v0.28.0`
+
+## New features {#new-features-120}
+
+- **Show all sessions** - View and manage all your sessions across directories
+- **Windowed slash command navigation** - Improved navigation in the slash command menu with windowed scrolling
+- **Improved thinking display** - Refactored thinking block rendering for better clarity
+- **Figma MCP server** - Added support for Figma MCP server integration
+
+## Bug fixes {#bug-fixes-144}
+
+- Fixed detection of Cerebras-style context length exceeded errors
+- Fixed duplicate spec modes and double empty line above input
+- Added promo price label for Opus model
+- Fixed `/install-github-app` command issues
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 28</span></div>
+
+`v0.27.4`
+
+## New features {#new-features-121}
+
+- **Interleaved thinking support** - Display multiple thinking blocks during streaming, including redacted thinking blocks with safety messages
+- **Show thinking setting** - Show AI thinking/reasoning on the main view, turn on/off in `/settings`
+- **Hooks always enabled** - The hooks feature is now permanently enabled and available via the `/hooks` command
+
+## Bug fixes {#bug-fixes-145}
+
+- Fixed ESC/Q navigation in `/model` menus - pressing ESC or Q now properly navigates back to previous menu level instead of closing all menus
+- Fixed garbage characters appearing in prompt input caused by terminal response bytes leaking into stdin
+- Fixed reasoning effort display in spec mode to correctly reflect the actual reasoning effort being used
+- Fixed OpenAI chat completions streaming for tool calls
+- Improved Gemini's usage of the todo tool with better prompting
+- Fixed model warmup for GLM-4.6
+- Fixed `/install-github-app` command issues
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 25</span></div>
+
+`v0.27.2`
+
+## New features {#new-features-122}
+
+- **Project-level MCP configs** - Configure MCP servers at the project level using `.factory/mcp.json`
+- **`/ide` command** - New command to manage VS Code, Cursor, and Windsurf IDE integrations. Shows current extension version or prompts to install
+- **Extra args in custom models** - Pass additional arguments to custom model configurations e.g. service_tier, temperature, top_p, etc
+
+## Bug fixes {#bug-fixes-146}
+
+- Fixed task tool infinite wait when running subagents
+- Fixed expanding tilde (~) paths when loading sessions
+- Improved `@` search rankings - exact filename matches now appear at the top with VSCode-style two-column display
+- Removed automatic creation of `.factory/skills` folders
+- Show compacting state when triggered
+- Consolidate markdown rendering (fixes missing character in spec mode)
+- Parallelize loading certificates on Windows
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 24</span></div>
+
+`v0.27.1`
+
+## New features {#new-features-123}
+
+- **Improved rewind functionality** - new `/rewind` command, plus speed and UX improvements.
+- **`/install-github-app` command** - New command to install the Factory GitHub app directly from the CLI.
+- **Images in MCP tool responses** - MCP tools can now return images that are properly sent to the LLM.
+
+## Bug fixes {#bug-fixes-147}
+
+- Upgraded to bun 1.3.3
+- Safer mechanism to check if ripgrep is installed
+- Fixed gpt-5.1-codex reasoning
+- Shift+Backspace deletes single characters like Backspace
+- Fix GLM4.6 as a spec mode model
+- Fix exitSpecMode prompt
+- Fix custom models for subdroids
+- Prevent console logs during startup
+- Fix spec mode for Gemini
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 22</span></div>
+
+`v0.26.12`
+
+## New features {#new-features-124}
+
+- **`/review` command** that provides an interactive code review workflow. Review code changes in different ways: comparing against a base branch, reviewing specific commits, examining uncommitted changes, or providing custom review instructions.
+
+## Bug fixes {#bug-fixes-148}
+
+- Gemini 3 Pro now uses the updated 0.8× pricing multiplier - replacing introductory pricing
+- MCP navigator now fills the terminal
+- Update routing for /resume to filter correctly to /sessions
+- Position cursor at start when navigating history
+- Make all views in the mcp navigator full width
+- Fixed garbled character rendering on Windows
+- Unify LLM retry logic and do more retries in exec mode
+- Removed the deprecated Figma MCP server
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 21</span></div>
+
+`v0.26.10`
+
+## New features {#new-features-125}
+
+- **MCP Registry Expansion** - Added 30+ new MCP server integrations including development tools (Playwright, Braintrust, Honeycomb), databases (Supabase, MongoDB, Prisma, Neon), security scanning (Snyk, Semgrep), and more
+
+## Bug fixes {#bug-fixes-149}
+
+- Fixed race conditions where model changes mid-turn
+- Fixed bug report command
+- Fixed support for duplicate model IDs in custom model configurations
+- Fix PowerShell command execution on Windows
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 20</span></div>
+
+`v0.26.8`
+
+## New features {#new-features-126}
+
+- **Background Processes Support** - Added support for running and managing background processes in the CLI. Includes a new `bg-process` command to list, kill, and clean up processes, with persistent process state tracking.
+- **MCP Registry Search** - Added search functionality to the MCP registry list view (`/mcp`). Filter available MCP servers by typing directly in the list interface.
+
+## Bug fixes {#bug-fixes-150}
+
+- Fixed race conditions and rendering issues when suspending/resuming the TUI (e.g., when opening an external editor).
+- Fixed circular dependency issues in grep tool logging.
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 19</span></div>
+
+`v0.26.7`
+
+## New features {#new-features-127}
+
+- **Directory-Specific Sessions** - Sessions are now stored per directory and automatically switch to the correct working directory when loaded. The `/sessions` command shows only sessions created in your current directory plus favorited sessions
+- **MCP Image Support** - MCP tools can now return images that are sent to the LLM for analysis
+- **Custom Models for Subdroids** - Subdroids can now use custom models instead of inheriting from parent session
+
+## Bug fixes {#bug-fixes-151}
+
+- Fixed console output issues in exec mode
+- Fixed spec mode for Gemini models
+- Fixed exit spec mode prompt behavior
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 18</span></div>
+
+`v0.26.3`
+
+## New features {#new-features-128}
+
+- **Skills Enabled by Default** - Skills command now enabled for all users
+- **Claude Code Hooks Auto-Migration** - Automatically detects and imports hooks from Claude Code CLI with interactive prompts. Smart translation converts `bash_tool` to `Execute` and `CLAUDE_CWD` to `DROID_CWD`, preventing duplicates and tracking migration state
+- **@ Suggestions Improvements** - Now includes folders in addition to files with better UI and performance
+
+## Bug fixes {#bug-fixes-152}
+
+- Fixed GLM4.6 configuration issues preventing it from working in spec mode
+- Fixed warmup API calls
+- Shift+Backspace now deletes single character like Backspace
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 14</span></div>
+
+`v0.26.0`
+
+## New features {#new-features-129}
+
+- **Skills System** - Claude Code-compatible `.factory/skills` support for modular, prompt-based capabilities. Use the `/skills` command to manage skills and import from `.claude/skills` directories
+- **Session Favorites** - New `/favorite` command to pin/unpin sessions, keeping your active projects at the top of the session list
+- **Enhanced Bug Reporting** - The `/bug` command now zips session context, uploads it to Factory, and returns a shareable report ID automatically
+- **Cleaner Diff Viewer** - Improved UI with horizontal lines instead of borders
+
+## Bug fixes {#bug-fixes-153}
+
+- Always prompt to accept or reject generated specs and pass the correct labels to the UI flow
+- `droid spec` now writes files to the expected default path without manual overrides
+- Fixed autonomy handling so MCP tools respect the configured confirmation level in every session
+- Better error handling in pre-update logic
+- Added Axiom MCP server to the registry
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 13</span></div>
+
+`v0.25.0`
+
+## New features {#new-features-130}
+
+- **Enhanced Hooks System** - Added 7 new hook types for complete lifecycle control:
+  - UserPromptSubmit - Modify or validate prompts before they're sent to the agent
+  - Stop - Execute custom logic when the agent completes (e.g., metrics collection)
+  - SubagentStop - Track and log subagent task completion
+  - PreCompact - Run custom logic before conversation compaction (can block compaction if needed)
+  - SessionStart - Initialize sessions and inject environment variables
+  - SessionEnd - Cleanup tasks when sessions end (triggered on logout, quit, Ctrl+C)
+- **MCP Tool Autonomy Levels** - Granular control over MCP tool confirmations: low autonomy requires confirmation for read-only MCP tools, high autonomy requires confirmation for all MCP tool calls
+- **Execute Tool Streaming** - Long-running commands now display the last two non-empty lines of output in real-time. No more wondering if Droid is stuck or slow.
+
+## Bug fixes {#bug-fixes-154}
+
+- Fixed paste handling in hooks UI - no more escape sequence artifacts when pasting commands
+- Fixed message ID alignment after conversation compaction
+- Fixed unfinished tool uses being cleared when switching providers to retry
+- Fixed markdown prompt usage for GPT models
+- Fixed /mcp rendering for narrow terminal windows
+- Fixed bracketed paste handling when suspending TUI
+- Authentication errors now appear directly in the CLI with clear error messages
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 12</span></div>
+
+`v0.24.0`
+
+## New features {#new-features-131}
+
+- **Hooks** - Introduced a powerful hooks system allowing you to run custom scripts before/after tool executions with configurable exit codes for different behaviors (success, warning, block, abort) - [Experimental - turn on in /settings]
+- **Interactive Spec Editing** - Added ability to interactively edit specs before execution
+- **Prompt Cache Warmup** - Added prompt-cache warmup while you're typing for faster responses
+
+## Bug fixes {#bug-fixes-155}
+
+- Fixed model switching to correctly handle conversation compaction when needed
+- Fixed spec mode tab cycling for reasoning levels
+- Fixed bracketed paste when suspending TUI
+- Corrected line numbers in ApplyPatch tool diff display
+- Eliminated race condition in ripgrep path resolution
+- Various agent loop stability improvements
+- Tool execution now correctly respects autonomy mode
+- Applied workaround for Figma MCP server compatibility
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 10</span></div>
+
+`v0.23.0`
+
+## New features {#new-features-132}
+
+- **Markdown table rendering** - CLI now properly renders markdown tables for better display of structured data and documentation
+- **Pinned todo plans** - Pin important todo items to keep them visible and track tasks during long-running sessions
+- **MCP tool result formatting** - Improved formatting for MCP tool results with cleaner, more readable output
+
+## Bug fixes {#bug-fixes-156}
+
+- Fixed thinking block support for chat completion APIs to enable extended reasoning in compatible models
+- Fixed issue with baseline versions reverting back to non-baseline builds on update
+- Fixed autonomy mode handling in `droid exec` command for more reliable execution
+- Restored Ctrl+T keyboard shortcut functionality on Windows
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 7-8</span></div>
+
+`v0.22.14`
+
+## New features {#new-features-133}
+
+- **Tab to cycle reasoning levels** - Navigate through different reasoning levels using the Tab key for better control
+- **Expanded bash mode outputs** - Transcript view now expands and displays bash command outputs for better visibility
+
+## Bug fixes {#bug-fixes-157}
+
+- Fixed MCP tool discovery for droid exec so tools appear correctly in --list-tools and pass validation
+- Fixed diff view to line wrap for better readability of long lines
+- Fixed OAuth refresh for MCP servers
+- Fixed markdown rendering bug in transcript view
+- Fixed message cancellation handling in TUI
+- Fixed prompt cache key handling in completions
+- Brought back Ctrl+T keyboard shortcut on Windows
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 6</span></div>
+
+`v0.22.12`
+
+## New features {#new-features-134}
+
+- **Quit/exit aliases** - type 'quit' or 'exit' commands for exiting sessions
+
+## Bug fixes {#bug-fixes-158}
+
+- Collect all AGENTS.md and CLAUDE.md files for system reminders
+- Fixed MCP server argument parsing when adding servers through the UI
+- Improved system diagnostics utilities for better troubleshooting
+- Cleaning and dynamic rendering of the pending tools to make it clear Droid is not stuck
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 5</span></div>
+
+`v0.22.11`
+
+## New features {#new-features-135}
+
+- **Context7 MCP server** - Added Context7 MCP server to the MCP registry
+
+## Bug fixes {#bug-fixes-159}
+
+- Improved droid exec run type tracking
+- Improved MCP client info handling
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 4</span></div>
+
+`v0.22.10`
+
+## New features {#new-features-136}
+
+- **OAuth Discovery** - Automatically discover OAuth providers to streamline authentication setup for MCP
+- **OpenAI Reasoning Summaries** - Display OpenAI's extended reasoning summaries in expanded session view
+
+## Bug fixes {#bug-fixes-160}
+
+- Fixed copy-pasting behavior in terminal sessions
+- Improved timeout handling for more reliable operations
+- Enhanced Windows compatibility
+- Enable custom droids by default
+- Improved error logging and diagnostics
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">November 1</span></div>
+
+`v0.22.9`
+
+## New features {#new-features-137}
+
+- **MCP Registry** - Added a curated selection of MCP servers for easy discovery and setup
+
+  <img src="../images/mcp-registry-2.gif" alt="MCP Registry interface showing curated MCP servers" />
+
+- **Tool Permissions Support** - Implemented request tool permissions flow in stream-jsonrpc mode with support for multiple concurrent tool confirmations
+- **Session Resume** - Show resume command on exit (Ctrl+C or /quit) with new `-r, --resume` flag to continue sessions
+- **Thinking Traces Display** - Added UI component to show thinking blocks in expanded session view
+
+## Bug fixes {#bug-fixes-161}
+
+- Fixed CLI completion sounds by extracting embedded sound files to host filesystem, making them accessible to external shell commands
+- Fixed tool use in user message after tool cancellation
+- Added baseline builds for x64 CPUs (pre-2013) that don't support AVX2 SIMD instructions
+- Updated static split logic to use text messages as stable checkpoints, reducing flickering during rendering
+- Fixed storage and sending of Gemini thinking content from delta.extra_content.google
+- Removed MultiEdit tool due to low success rate (`~80%`)
+- Added recovery from malformed optional arguments using optimistic JSON parsing
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">October 31</span></div>
+
+`v0.22.7`
+
+## New features {#new-features-138}
+
+- **Reasoning field support in streaming responses** - Added support for displaying reasoning fields in chat completion streaming chunks for models that provide extended reasoning
+- **Import from Claude restored** - Re-enabled the "Import from Claude" option in the droids menu for easier conversation migration
+
+## Bug fixes {#bug-fixes-162}
+
+- Fixed MCP status indicator to only show when MCP servers are actually configured
+- Fixed message list flickering
+- Added support for custom headers when adding MCP servers
+- Fixed sound files not being included in SEA binary releases
+- Fixed Ctrl+C interruption messages to only display to users and not appear in logs for cleaner output
+- Resolved issue where tool use would incorrectly appear in user messages after tool cancellation
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">October 30</span></div>
+
+`v0.22.6`
+
+## New features {#new-features-139}
+
+- **MCP Revamp**: Complete overhaul of Model Context Protocol implementation ([[cli/configuration/mcp|docs updated]])
+
+## Bug fixes {#bug-fixes-163}
+
+- Fixed issue with OpenAI organization field
+- Restore Import (I) options in Droids (subagents) menu
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">October 29</span></div>
+
+`v0.22.5`
+
+## Bug fixes {#bug-fixes-164}
+
+- **Default Model Behavior**: Improved default model behavior
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">October 28</span></div>
+
+`v0.22.4`
+
+## Bug fixes {#bug-fixes-165}
+
+- **Restored Report Previews**: Re-enabled HTML preview for reliability reports so you can view them directly in the web
+- **Fixed --help text**: Running droid exec --help was previously giving incorrect info for using droid exec in streaming mode. This has now been updated to include the correct flag name with correct instructions.
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">October 21-25</span></div>
+
+`v0.22.3`
+
+## New features and enhancements {#new-features-and-enhancements}
+
+- **Detailed transcript view (Ctrl+O)**: Press Ctrl+O to view comprehensive tool execution details with complete breakdowns for all tool types including Execute, Edit, MultiEdit, Create, and more
+- **Customizable completion sounds**: Configure sound notifications when commands complete, with support for different sounds in focus mode and custom sound file paths
+- **Terminal setup support**: Added automated setup support for Warp, iTerm2, and macOS Terminal with automatic terminal indicators for improved integration
+- **PowerShell update**: Now uses `pwsh.exe` for better PowerShell compatibility and reliability on Windows systems
+- **Drag-and-drop image support**: Attach images to CLI sessions via drag-and-drop for easier multimodal interactions
+- **Custom models in subagents**: Added support for using custom models when executing subagents via Task tool
+- **Custom droid descriptions**: Moved custom droid descriptions to Task tool for better organization and usability
+- **`droid exec` custom model support**: Added support for custom models in droid exec sessions
+
+## Bug fixes and stability {#bug-fixes-and-stability}
+
+- Resolved issues with prompt caching to improve performance and reduce costs
+- Added model ID logging on CLI tool execution for better observability
+- Limited messages rendered in Ctrl+O view to improve performance with large transcripts
+- Fixed sound files not being included in SEA binary releases
+- Fixed readonly value change issues that caused unexpected behavior
+- Fixed ExitSpecMode flickering issues for smoother user experience
+- Removed duplicate custom models header in settings
+- Improved session persistence to legacy sessions to maintain backward compatibility
+- Fixed infinite render issues on Windows systems
+- Fixed 400 error handling and validation
+- Added model validation error messages for better debugging
+- Fixed certificate loading timing to occur after logging initialization
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">October 14-20</span></div>
+
+`v0.21.3`
+
+## New features and enhancements {#new-features-and-enhancements-2}
+
+- **MCP OAuth support**: Added OAuth authentication support for Model Context Protocol in TUI for secure server connections
+- **System certificates support**: Added support for loading system certificates on Windows and macOS, with additional Windows system certificates support
+- **Fuzzy search implementation**: New fuzzy search for improved CLI command and option discovery
+- **Rewind fork workflow**: Added ability to rewind and fork from previous points in conversation sessions
+- **Bug report enhancements**: Added version, OS, and shell information to bug reports for better troubleshooting
+- **Live updates for subagent tool**: Added real-time progress updates when using the Task tool
+- **Enhanced custom droid prompts**: Improved prompts to encourage more proactive usage of custom droids
+- **Droid Shield optional setting**: Made Droid Shield an optional configurable setting with toggle support
+
+## Bug fixes and stability {#bug-fixes-and-stability-2}
+
+- Added session_id to stream-json output format for better tracking and debugging
+- Enhanced authentication flow for smoother onboarding
+- Streamlined first-run experience by removing redundant onboarding steps
+- Fixed OAuth callback server port collision issues that prevented authentication
+- Fixed certificate loading timing issues causing TLS errors
+- Improved error metadata logging for better debugging
+- Fixed terminal setup issues across different shell environments
+- Better error messages when ripgrep (rg) isn't available in PATH
+- Improved handling of corrupted unicode normalization in file paths
+- Fixed impact level default value handling
+
+</div>
+
+
+
+
+
+<div class="factory-update">
+
+<div class="factory-update-header"><span class="factory-update-label">September 30 - October 13</span></div>
+
+`v0.19.8`
+
+## New features and enhancements {#new-features-and-enhancements-3}
+
+- **`droid exec` Slack integration**: Added `slack_post_message` tool to droid exec for posting updates to Slack channels
+- **`droid exec` streaming JSON input mode**: Added streaming JSON input mode for multi-turn exec sessions for better automation workflows
+- **`droid exec` tool configuration**: Added ability to enable/disable specific tools in droid exec sessions
+- **`droid exec` pre-created session IDs**: Added support for pre-created session IDs in droid exec for better session management
+- **Initial prompt support**: Added support for launching TUI with an initial prompt via command line
+- **GLM-4.6 support**: Added LLM proxy support for GLM-4.6 with Fireworks, Baseten, and DeepInfra providers
+- **Azure OpenAI for GPT-5**: Added Azure OpenAI support for GPT-5 Codex in TUI
+- **Custom droid generation**: Added auto-generation of custom droids using LLM for faster setup
+- **MCP streamable HTTP servers**: Added support for streamable HTTP MCP servers
+- **Model selector refresh**: Updated model selector UI with improved organization and image support warnings
+- **Tab key auto-complete**: Tab key now auto-completes custom commands without submitting for better UX
+
+## Bug fixes and stability {#bug-fixes-and-stability-3}
+
+- **`droid exec` session continuation fix**: Fixed droid exec to correctly continue an existing session instead of overwriting session data
+- Dynamic reasoning label for Codex models in UI
+- AGENTS.md source paths now shown in settings for better transparency
+- Better error messages when custom model JSON configuration is broken
+- Manual update instructions when auto-update isn't available
+- Fixed task subagents to properly terminate on abort
+- Fixed file rename retry logic on Windows systems
+- Fixed backslash rendering issues on Windows
+- Major improvements to custom subagents reliability
+- Fixed task tool subagents prompt for better execution
+- Don't stop agent on cancelled file edits in spec mode
+- Validated working directory exists before executing ripgrep
+- Fixed subagents to inherit model from TUI parent session
+- Truncated large MCP tool results to prevent context overflow
+- Fixed /cost command with Fireworks cached input
+- Added user-agent header to LLM requests for better tracking
+- Locked down file system permissions for better security
+- Fixed rendering for failed edit calls in spec mode
+- Fixed compaction logic and retry without tool results
+- Applied output transforms before compaction/caching
+- Persisted session usage for accurate cost tracking
+- Fixed /new command to reset timer and sessionId properly
+- Fixed compaction retry without tool results
+- Fixed screenshot reading with unicode normalization fallback
+
+</div>

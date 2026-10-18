@@ -1,0 +1,262 @@
+---
+id: jp/guides/droid-exec/github-actions
+title: "GitHubアクション"
+status: published
+summary: "droid execですぐに使えるGitHub Actionsワークフロー。"
+parent: jp/guides/droid-exec/index
+tags: [guides, github-actions, ci-cd, workflow, automation, pr-review, droid-exec]
+relations: [relates_to=guides/droid-exec/github-actions]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">GitHubアクション</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">droid execですぐに使えるGitHub Actionsワークフロー。</p>
+
+
+# GitHub Actions {#github-actions}
+
+**前提条件:** `FACTORY_API_KEY` をリポジトリシークレットに追加してください（Settings → Secrets → Actions）
+
+## 例1: 自動PR レビューと修正 {#example-1-automated-pr-review-and-fix}
+
+PR を自動的にレビューし、問題を修正して、詳細なフィードバックを投稿します。
+
+
+
+<Aside kind="info">
+より簡単に設定するには、ガイド付き手順でFactory GitHub Appを設定する[[jp/guides/droid-exec/code-review|/install-github-app]]コマンドを使用してください。
+</Aside>
+
+
+
+```yaml
+name: PR Assistant
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review-and-fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup droid CLI
+        run: |
+          curl -fsSL https://app.factory.ai/cli | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Analyze and fix code
+        env:
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+        run: |
+          # Get the diff
+          git diff origin/${{ github.base_ref }}...HEAD > pr_changes.diff
+
+          # Review and fix issues (pipe diff to stdin)
+          cat pr_changes.diff | droid exec --auto low "
+          Review this PR diff and:
+          1. Fix any obvious bugs, typos, or linting errors
+          2. Add missing error handling
+          3. Improve code comments where unclear
+          4. DO NOT commit or push changes
+          "
+
+          # Generate review report (needs --auto to write files)
+          droid exec --auto low "Analyze the changes again and write a detailed review to review.md with:
+          - Summary of automated fixes made
+          - Remaining issues that need human attention
+          - Security or performance concerns
+          - Test coverage recommendations"
+
+      - name: Commit fixes if any
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "fix: automated improvements for PR #${{ github.event.pull_request.number }}
+
+            Co-authored-by: factory-droid[bot] <138933559+factory-droid[bot]@users.noreply.github.com>"
+            git push
+          fi
+
+      - name: Post review comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let review = '## 🤖 Automated Review\n\n';
+
+            if (fs.existsSync('review.md')) {
+              review += fs.readFileSync('review.md', 'utf8');
+            } else {
+              review += 'Review completed successfully.';
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: review
+            });
+```
+
+## 例2: 日次ドキュメントとテストの更新 {#example-2-daily-documentation-and-test-updates}
+
+コードの変更に合わせて、ドキュメントとテストを自動的に同期させます。
+
+```yaml
+name: Daily Maintenance
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 3 AM UTC daily
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-docs-and-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup droid CLI
+        run: |
+          curl -fsSL https://app.factory.ai/cli | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Update documentation
+        env:
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+        run: |
+          droid exec --auto low "
+          Review all code files modified in the last 7 days and:
+          1. Update any outdated JSDoc/docstring comments
+          2. Update README.md if new features were added
+          3. Add missing documentation for public APIs
+          4. Update examples to match current implementation
+          Write a summary of changes to docs-updates.md
+          "
+
+      - name: Generate missing tests
+        env:
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+        run: |
+          droid exec --auto low "
+          Find functions and components without test coverage and:
+          1. Generate unit tests for utility functions
+          2. Create basic test cases for React components
+          3. Add edge case tests for error handling
+          4. Follow existing test patterns in the codebase
+          Write a summary to test-updates.md
+          "
+
+      - name: Create PR if changes exist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Note: gh CLI is pre-installed on GitHub-hosted runners
+          if [ -n "$(git status --porcelain)" ]; then
+            BRANCH="auto-updates-$(date +%Y%m%d)"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            git checkout -b $BRANCH
+            git add -A
+            git commit -m "chore: automated documentation and test updates
+
+            Co-authored-by: factory-droid[bot] <138933559+factory-droid[bot]@users.noreply.github.com>"
+            git push origin $BRANCH
+
+            # Combine summaries for PR body
+            PR_BODY="## Automated Updates\n\n"
+            [ -f docs-updates.md ] && PR_BODY="${PR_BODY}### ドキュメント\n$(cat docs-updates.md)\n\n"
+            [ -f test-updates.md ] && PR_BODY="${PR_BODY}### Tests\n$(cat test-updates.md)\n\n"
+
+            gh pr create \
+              --title "🤖 Daily automated updates" \
+              --body "$PR_BODY" \
+              --label "automated,documentation,tests"
+          fi
+```
+
+## 例3: セキュリティと依存関係スキャナー {#example-3-security-and-dependency-scanner}
+
+脆弱性と古い依存関係をスケジュールに従ってスキャンします。
+
+```yaml
+name: Security Scanner
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Mondays at 9 AM UTC
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup droid CLI
+        run: |
+          curl -fsSL https://app.factory.ai/cli | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Security audit
+        env:
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+        run: |
+          droid exec --auto medium "
+          Perform a comprehensive security audit:
+          1. Check package.json for known vulnerabilities
+          2. Update vulnerable dependencies to safe versions
+          3. Scan code for hardcoded secrets or API keys
+          4. Review authentication and authorization patterns
+          5. Check for SQL injection or XSS vulnerabilities
+          6. Generate security-report.md with all findings and fixes
+          "
+
+      - name: Create issue if vulnerabilities found
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Note: gh CLI is pre-installed on GitHub-hosted runners
+          if [ -f security-report.md ] && grep -q "vulnerability\|security\|risk" security-report.md; then
+            gh issue create \
+              --title "🔒 Security audit findings - $(date +%Y-%m-%d)" \
+              --body-file security-report.md \
+              --label "security,high-priority" \
+              --assignee "${{ github.repository_owner }}"
+          fi
+
+      - name: Create PR for fixes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Note: gh CLI is pre-installed on GitHub-hosted runners
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            git checkout -b security-fixes-$(date +%Y%m%d)
+            git add -A
+            git commit -m "fix: security updates and dependency patches
+
+            Co-authored-by: factory-droid[bot] <138933559+factory-droid[bot]@users.noreply.github.com>"
+            git push origin HEAD
+
+            gh pr create \
+              --title "🔒 Security fixes" \
+              --body-file security-report.md \
+              --label "security,dependencies" \
+              --assignee "${{ github.repository_owner }}"
+          fi
+```

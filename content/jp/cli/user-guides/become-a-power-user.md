@@ -1,0 +1,451 @@
+---
+id: jp/cli/user-guides/become-a-power-user
+title: "パワーユーザーになる"
+status: published
+summary: "IDE連携、スマートな計画、プロジェクト最適化でDroidの性能を最大化する。"
+parent: jp/cli/user-guides/index
+tags: [cli, power-user, advanced, tips, optimization, performance, productivity, efficiency]
+relations: [relates_to=cli/user-guides/become-a-power-user]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">パワーユーザーになる</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">IDE連携、スマートな計画、プロジェクト最適化でDroidの性能を最大化する。</p>
+
+
+Droidをより速く、より賢く、より少ない反復で動作させたいですか？このページで紹介するテクニックは、良い結果を卓越した結果に変換します。各テクニックはトークンを節約し、ツール呼び出しを減らし、より良いコードを提供します — まずは4つの基礎的な機能から始め、その後で下記のワークフローブースターを重ねていきましょう。
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**ツール呼び出しの削減**
+
+IDEプラグインはリアルタイムのコンテキストを提供し、Droidがあなたと同じものを見られるようにします
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**初回からより良い結果**
+
+仕様モードはコーディング前に調査し、無駄な着手を防ぎます
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**一貫した品質**
+
+AGENTS.mdは標準を一度記録し、常に適用します
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**自己修正するコード**
+
+リンターとテストにより、問題を見る前にDroidが修正できます
+
+</div>
+
+</div>
+
+
+
+## Factory IDE Plugin — リアルタイムコンテキスト認識 {#factory-ide-plugin-real-time-context-awareness}
+
+DroidにFactory IDE pluginをインストールするようにしてください。Factory IDE pluginはMCPサーバーとして機能し、Droidに開発環境の即座の認識を与えます。どのファイルを見ているかを説明したり、エラーメッセージをコピーしたりする必要がありません。Droidはあなたが見ているものを正確に見ることができます。
+
+**Droidが自動的に取得するもの：**
+- 開いているファイルと選択された行
+- VSCodeのエラーハイライトと診断情報
+- プロジェクト構造とアクティブなターミナル出力
+- あなたのカーソル位置と最近の編集
+
+**プラグインなしの場合：**
+```
+"Fix 'Property user does not exist on type AuthContext' error in auth.ts"
+```
+
+**プラグインありの場合：**
+```
+"Fix error"
+```
+
+プラグインは、やり取りのカテゴリ全体を排除します。Droidはコンテキストを知り、あなたが見るエラーを見て、最小限の入力からあなたの意図を理解します。
+
+
+
+<Aside kind="tip">
+**クイックセットアップ:** VSCode MarketplaceからFactory拡張機能をインストールします。
+</Aside>
+
+
+
+## Spec Mode — まず探索と計画、次にコーディング {#spec-mode-explore-and-plan-first-code-second}
+
+複雑な機能は実装前に探索が必要です。Spec Modeは、Droidがコードを1行も書く前にコードベースを徹底的に調査することで、コストのかかる失敗を防ぎます。
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">Spec Modeを有効化</div>
+
+複雑な作業を始めるときは**Shift+Tab**を押します
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">目標を説明</div>
+
+やりたいことを1〜2文で書くか、既存の詳細な技術仕様を提供します。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Droidが探索</div>
+
+関連ファイルを検索し、パターンを理解し、依存関係を特定します
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">計画を確認</div>
+
+変更前に実装手順を含む詳細な仕様を取得します
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">承認して実行</div>
+
+承認後にのみDroidが変更を開始します
+
+</div>
+
+</div>
+
+
+
+**以下に最適：**
+- 2つ以上のファイルに触れる機能
+- アーキテクチャの変更
+- 馴染みのないコードベース
+- セキュリティに敏感な作業
+
+Spec Modeなしでは、Droidは実装に早すぎるタイミングでジャンプし、あなたが望む正確な方法で作業を行わない可能性があります。Spec Modeがあれば、詳細な仕様を取得し、多くのトークンが無駄になる前にパスを修正する機会を得ます。
+
+
+
+<Aside kind="note">
+仕様モードは機能開発だけのものではありません。複雑なデバッグ、リファクタリング、実行前の理解が必要なあらゆるタスクに使用できます。
+</Aside>
+
+
+
+## AGENTS.md — あなたの設定、記憶される {#agentsmd-your-preferences-remembered}
+
+AGENTS.mdは、あなたのコーディング標準、プロジェクト規約、個人的な設定を1つの場所に集約します。Droidは全てのタスクに対してこれを自動的に読み込みます。
+
+**文書化すべき内容：**
+
+| カテゴリ | 例 |
+| --- | --- |
+| **コードスタイル** | "function宣言ではなくアロー関数を使用" <br/> "ネストした条件文よりもearly returnsを優先" |
+| **テスト** | "新しいエンドポイントには全て統合テストが必要" <br/> "テストデータにはfixtureではなくfactoryを使用" |
+| **アーキテクチャ** | "サービスは対応するインターフェースと共にsrc/servicesに配置" <br/> "全てのデータベースクエリはrepositoryパターンを使用" |
+| **ツール** | "タスク完了前に`npm run verify`を実行" <br/> "`scripts/deploy.sh`でデプロイ、手動コマンドは決して使わない" |
+| **避けるべき間違い** | ".envファイルは決してコミットしない" <br/> "any!型注釈を使用しない" |
+
+**シンプルに始めて、時間をかけて進化させる：**
+
+プロジェクトルートに`AGENTS.md`を作成：
+```markdown
+# Project Guidelines
+
+## Testing
+- Run `npm test` before completing any feature
+- New features need unit tests
+- API changes need integration tests
+
+## Code Style
+- Use TypeScript strict mode
+- Prefer composition over inheritance
+- Keep functions under 20 lines
+
+## Common Commands
+- Lint: `npm run lint:fix`
+- Test: `npm test`
+- Build: `npm run build`
+```
+
+Droidが間違いを繰り返したり、何かを2回説明したりするたびに、それをAGENTS.mdに追加してください。数週間以内に、あなたの作業方法を正確に知るパーソナライズされたアシスタントを手に入れることができます。
+
+
+
+<Aside kind="tip">
+**プロのヒント:** プロジェクト内の良いコード例を含めてください。"src/services/UserService.tsのパターンに従う"のように伝えると、Droidに具体的なテンプレートを提供できます。
+</Aside>
+
+
+
+## Agent Readiness — ツールに教育を任せる {#agent-readiness-let-your-tools-do-the-teaching}
+
+プロジェクトを自己修正可能にします。DroidがCI/CDパイプラインと同じ検証ツールを実行できるとき、あなたが指摘するのを待つ代わりに、問題を即座に修正します。
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**リンター**
+
+ESLintやPylintがスタイル問題を即座に検出します
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**型チェッカー**
+
+TypeScriptやmypyは実行前に型エラーを防ぎます
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**高速テスト**
+
+数秒で実行できるユニットテストは即時フィードバックを提供します
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**Pre-commitフック**
+
+Huskyやpre-commitはコミット前に一貫性を確保します
+
+</div>
+
+</div>
+
+
+
+
+
+<Aside kind="warning">
+**重要:** 検証を高速に保ってください。遅いテストはエンドツーエンドの作業を遅くします。
+</Aside>
+
+
+
+## キーボードショートカット — TUI をプロのように操る {#keyboard-shortcuts-navigate-the-tui-like-a-pro}
+
+TUI には、ほぼすべての一般的な操作のためのショートカットが用意されています。いくつか覚えるだけで、マウスに手を伸ばしたり延々とスクロールしたりする必要がなくなります。
+
+| ショートカット | アクション |
+| --- | --- |
+| `Ctrl+O` | 詳細トランスクリプト表示の切り替え（メッセージ詳細をすべて表示） |
+| `Ctrl+T` | Mission Control オーバーレイの切り替え（オーケストレーターセッション） |
+| `Ctrl+N` | 利用可能なモデルを順番に切り替え |
+| `Ctrl+L` | 自律レベルを順番に切り替え（low / medium / high） |
+| `Ctrl+Y` | `/btw` のサイド質問スクロールビューを切り替え |
+| `Ctrl+E` | 承認の詳細を切り替え |
+| `Tab` | 推論努力を順番に切り替え（`low` → `medium` → `high` → `off`） |
+| `Shift+Tab` | インタラクションモードを順番に切り替え（Auto → Spec → Mission） |
+| `@` | ファイルパスの自動補完 — `@` を入力するとファイルのあいまい検索が起動 |
+| `Up` / `Down` | 入力履歴を移動 — 過去に送信したメッセージを順に切り替え |
+| `Double Escape` | 2回目の押下で入力ドラフトをクリアし、3回目の Escape で巻き戻しメニューを開く |
+| `Ctrl+V` | クリップボードから画像を添付として貼り付け |
+| `?` | ヘルプポップアップを切り替え（入力が空のとき） |
+| `Ctrl+/` | ヘルプポップアップを切り替え（入力に内容があっても動作） |
+| `Ctrl+A` | カーソルを行頭に移動 |
+| `Ctrl+W` | カーソルの前の単語を削除 |
+| `Ctrl+K` | カーソルから行末まで削除 |
+| `Ctrl+U` | カーソルから行頭まで削除 |
+| `Ctrl+D` | 添付画像をクリアし、添付がない場合は次の文字を前方削除 |
+| `Ctrl+R` | ハイライト中のセッション名を変更（`/sessions` リストビュー内） |
+| `Ctrl+X` | ハイライト中のセッションをアーカイブ（`/sessions` リストビュー内） |
+| `Alt+Up` / `Alt+Down` | トランスクリプトをターン単位でスクロール |
+| `Alt+PageUp` / `Alt+PageDown` | ユーザーのターンのみをジャンプ |
+| `Shift+Enter` | プロンプト入力に改行を挿入 |
+| `Escape` | アクティブなオーバーレイやメニューを閉じる |
+| `!` | 入力が空のときに bash モードを切り替え |
+
+
+
+<Aside kind="tip">
+全リストは [[jp/reference/cli-reference#keyboard-shortcuts|CLI リファレンス]] を参照してください。
+</Aside>
+
+
+
+## Bash モード — TUI を離れずに素早くシェルへアクセス {#bash-mode-quick-shell-access-without-leaving-the-tui}
+
+入力が空の状態で `!` を押すと bash モードに入ります。入力した内容はあなたのシェルで実行され、出力はトランスクリプトに残るため、Droid は次のターンでそれを参照できます — コピー＆ペースト不要です。
+
+```
+! git status
+! npm test -- --watch=false
+```
+
+状態の確認、簡単なビルドの実行、Droid に反応してほしい出力の取得などに使えます。`Escape` を押すか、空のまま送信すると bash モードを抜けます。
+
+## ワークツリー — 同一リポジトリで並列セッションを実行 {#worktrees-run-parallel-sessions-on-the-same-repo}
+
+`--worktree` フラグを使うと、Droid を新しい git worktree 内で起動でき、複数のセッションが同じリポジトリを編集してもお互い干渉しません。`--worktree-dir`（または `worktreeDirectory` 設定）と組み合わせれば、すべての worktree を1か所にまとめられます。
+
+```bash
+droid --worktree feature-auth
+droid --worktree feature-billing
+```
+
+各セッションはそれぞれ独立したブランチで動くため、並列で実験を走らせ、最良の結果だけをマージできます。
+
+## セッション管理 — `/sessions`、`/fork`、`/compress` {#session-management-sessions-fork-compress}
+
+長時間の作業は1つのセッションに閉じ込める必要はありません。これらのコマンドで会話の移動、分岐、整理ができます：
+
+- `/sessions` — 過去のセッションを一覧表示し、再開する
+- `/fork` — 現在のセッションを分岐し、元の場所を失わずに別のアプローチを試す
+- `/compress` — コンテキスト上限が近づいたらトランスクリプトをコンパクト化する（`/compact` や `/handoff` でも利用可能）
+
+```
+/fork
+/compress focus on the failing migration
+```
+
+フォークは「もし〜だったら」の実験に特に強力です。分岐してリスクのあるリファクタリングを試し、うまくいかなければ元のセッションに戻れます。
+
+## 速度と反復 — `/fast` {#speed-and-iteration-fast}
+
+`/fast` は現在のモデルを高速バリアントに切り替えるので、小さな編集や調査を反復するときにテンポよく進みます。`/fast off` で元に戻せます。
+
+```
+/fast
+```
+
+## コンテキスト管理 — `/context` と `/btw` {#context-management-context-and-btw}
+
+`/context` は、コンテキストウィンドウの内訳をリアルタイムで表示します。システムプロンプト、ファイル、ツール結果、会話のそれぞれに何トークン使われているかが分かるので、コンパクション発動前に膨らみを見つけるのに役立ちます。
+
+`/btw` ではサイド質問ができます — Droid は別スクロールバッファ（`Ctrl+Y` で表示）で回答するため、メイントランスクリプトを汚さずに、タスクから集中を逸らさずに調べ物ができます。
+
+```
+/context
+/btw what does the @decorator pattern in src/auth.ts do?
+```
+
+両者を組み合わせると、メインセッションを集中状態に保ったまま、横で調査を進められます。
+
+## カスタムスラッシュコマンド — `/commands` {#custom-slash-commands-commands}
+
+よく使うプロンプトを再利用可能なショートカットとして保存しましょう。`/commands` を実行するとマネージャーが開き、プロジェクトレベルまたはユーザーレベルでカスタムスラッシュコマンドを作成・編集・スコープ設定できます。
+
+```
+/commands
+```
+
+リリースチェックリストを実行する `/ship`、新しいバグをスキャンする `/triage` など、よく入力する内容を何でもコマンド化できます。カスタムコマンドは引数を受け取れるので、他のワークフローとも組み合わせやすいです。
+
+## フック — ツール呼び出し前後の自動化 {#hooks-automate-around-tool-calls}
+
+`/hooks` を使うと、Droid がツールを実行する前や後に発火するライフサイクルスクリプトを登録できます — pre-commit チェック、監査ログ、自動フォーマッター、危険なシェルコマンドを拒否するガードレールなどに活用できます。
+
+```
+/hooks
+```
+
+フックは設定ファイルに保存され、すべてのセッションに適用されます。プロンプトで毎回繰り返さずにチームの規約を強制するのに最適です。
+
+## MCP 連携 — `/mcp` {#mcp-integrations-mcp}
+
+Model Context Protocol を使うと、Droid は標準インターフェースを通じて外部ツール（データベース、課題管理、デザインツール、社内サービスなど）と対話できます。サーバーは TUI の `/mcp`、もしくはコマンドラインの `droid mcp add/remove` で管理します。
+
+```bash
+droid mcp add linear https://mcp.linear.app/mcp --type http
+```
+
+接続後は、Droid がチケットを読んだり、データベースに問い合わせたり、サーバーが提供する任意の機能を呼び出したりできます — カスタム連携を組まずに済みます。
+
+## ミッション — 大規模なマルチエージェントプロジェクトの調整 {#missions-coordinate-large-multi-agent-projects}
+
+複数の機能やファイルにまたがる作業では、`/missions` でミッションに切り替えましょう。Droid が作業を計画し、専門のワーカーエージェントを生成し、各マイルストーンを検証します — 「チャットの中のエージェント」と「計画を実行するエージェントチーム」のギャップを埋める仕組みです。
+
+```
+/missions
+```
+
+`missionModelSettings` でワーカーと検証エージェントのモデルを設定し、`droid exec --mission` でヘッドレス実行できます。完全なガイドは[[jp/features/missions/overview|ミッション]]を参照してください。
+
+## カスタム Droid — 専門化されたエージェントを必要に応じて {#custom-droids-specialized-agents-on-demand}
+
+`/droids` は、独自のシステムプロンプト、ツールセット、モデルを持つサブエージェントのライブラリを管理します。専門知識を1つの Droid に閉じ込めることで（「フロントエンドレビュー担当」「SQL マイグレーション作成」「リリースノート」など）、任意のセッションから呼び出せるようになります。
+
+```
+/droids
+```
+
+自然言語による説明から新しい Droid を生成し、他の設定と同じように反復改善することもできます。詳細は[[jp/cli/configuration/custom-droids|カスタム Droid]] を参照してください。
+
+## カスタマイズ — サウンド、テーマ、ステータスライン {#customization-sounds-themes-and-statusline}
+
+TUI を自分の家のような場所にしましょう。`/themes` でカラースキームを切り替え、`/statusline` でカスタムステータスバーを設定でき、`completionSound`、`soundFocusMode`、`subagentSounds` などの設定で重要なイベント（完了、入力待ち、サブエージェントの活動）に音声キューを割り当てられます。
+
+```
+/themes
+/statusline
+```
+
+サウンド通知を長時間のミッションと組み合わせれば、状況把握を失わずにターミナルから離れることができます。
+
+## すべてを組み合わせる {#putting-it-all-together}
+
+これらの機能は相乗効果があります。IDE プラグインと AGENTS.md が Droid に必要なコンテキストと規約を与え、仕様モードと Agent Readiness が初回の試みを正しく保ち、キーボードショートカット、bash モード、`/btw` がキーボードから手を離さずに作業を続けさせ、`/fast`、ワークツリー、ミッション、カスタム Droid が作業そのものをスケールさせます。
+
+
+
+<Aside kind="note">
+**始めたばかりですか？** まずは IDE プラグインをインストールしてください — より良い結果への最短経路です。次にテストコマンドを含む AGENTS.md を追加し、3〜4個のショートカットを覚え、そこから少しずつ広げていきましょう。
+</Aside>

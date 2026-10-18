@@ -1,0 +1,346 @@
+---
+id: jp/cli/configuration/hooks-guide
+title: "フック"
+status: published
+summary: "シェルコマンドを登録してDroidの動作をカスタマイズ・拡張する方法を学ぶ"
+parent: jp/cli/configuration/index
+tags: [cli, hooks, lifecycle, automation, shell-commands, events, triggers, customize]
+relations: [relates_to=cli/configuration/hooks-guide]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">フック</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">シェルコマンドを登録してDroidの動作をカスタマイズ・拡張する方法を学ぶ</p>
+
+
+Droidフックは、Droidのライフサイクルの様々な段階で実行されるユーザー定義のシェルコマンドです。フックは、Droidの動作を決定論的に制御し、Droidが選択的に実行するのではなく、特定のアクションが常に実行されることを保証します。
+
+
+
+<Aside kind="tip">
+フックのリファレンスドキュメントは[[jp/reference/hooks-reference|フックリファレンス]]を参照してください。
+</Aside>
+
+
+
+フックの使用例には以下があります：
+
+* **通知**: Droidがユーザーの入力や実行許可を待機している際の通知方法をカスタマイズします。
+* **自動フォーマット**: ファイル編集後に.tsファイルに対して`prettier`を、.goファイルに対して`gofmt`を実行します。
+* **ログ記録**: コンプライアンスやデバッグのために、実行されたすべてのコマンドを追跡・カウントします。
+* **フィードバック**: Droidがコードベースの規約に従わないコードを生成した際に、自動フィードバックを提供します。
+* **カスタム権限**: 本番ファイルや機密ディレクトリへの変更をブロックします。
+
+これらのルールをプロンプト指示ではなくフックとしてエンコードすることで、提案を実行される度に毎回動作するアプリレベルのコードに変換できます。
+
+
+
+<Aside kind="warning">
+フックはDroidの実行中に現在の環境の認証情報で自動実行されるため、追加時にはセキュリティ上の影響を考慮する必要があります。
+  たとえば、悪意のあるフックコードはデータを外部に送信できます。登録前にフック実装を必ず確認してください。
+
+  セキュリティのベストプラクティス全体は、フックリファレンスの[[jp/reference/hooks-reference#security-considerations|セキュリティ上の考慮事項]]を参照してください。
+</Aside>
+
+
+
+
+
+<Aside kind="note">
+**重要**: フックコマンドでスクリプトを参照するときは、相対パスではなく**必ず絶対パス**を使用してください。
+  フックはDroidの現在の作業ディレクトリから実行されますが、それがプロジェクトルートとは限りません。
+  プロジェクト相対のスクリプトには`$FACTORY_PROJECT_DIR`を使用します（例: `"$FACTORY_PROJECT_DIR"/.factory/hooks/script.sh`）
+  グローバルスクリプトには完全パスを使用します（例: `/usr/local/bin/my-hook.sh`または`~/.factory/hooks/script.sh`）。
+</Aside>
+
+
+
+## フックイベント概要 {#hook-events-overview}
+
+Droidは、ワークフローの異なる段階で実行される複数のフックイベントを提供します：
+
+* **PreToolUse**: ツール呼び出し前に実行（ブロック可能）
+* **PostToolUse**: ツール呼び出し完了後に実行
+* **UserPromptSubmit**: ユーザーがプロンプトを送信し、Droidが処理する前に実行
+* **Notification**: Droid が通知を送信する際に実行
+* **Stop**: Droidが応答を終了する際に実行
+* **SubagentStop**: サブDroidタスクが完了する際に実行
+* **PreCompact**: Droidがコンパクト操作を実行しようとする前に実行
+* **SessionStart**: Droidが新しいセッションを開始するか、既存のセッションを再開する際に実行
+* **SessionEnd**: Droidセッションが終了する際に実行
+
+各イベントは異なるデータを受信し、Droidの動作を異なる方法で制御できます。
+
+## クイックスタート {#quickstart}
+
+このクイックスタートでは、Droidが実行するシェルコマンドをログ記録するフックを追加します。
+
+### 前提条件 {#prerequisites}
+
+コマンドラインでのJSON処理のために`jq`をインストールしてください。
+
+### ステップ1: フック設定を開く {#step-1-open-hooks-configuration}
+
+`/hooks` [[jp/cli/configuration/custom-slash-commands|スラッシュコマンド]]を実行し、`PreToolUse`フックイベントを選択します。
+
+`PreToolUse`フックはツール呼び出し前に実行され、異なる対応についてDroidにフィードバックを提供しながらツール呼び出しをブロックできます。
+
+### ステップ2: マッチャーを追加 {#step-2-add-a-matcher}
+
+`+ Add new matcher…`を選択して、Executeツール呼び出しのみでフックを実行します。
+
+マッチャーに`Execute`と入力します。
+
+
+
+<Aside kind="note">
+すべてのツールに一致させるには`*`を使用できます。
+</Aside>
+
+
+
+### ステップ3: フックを追加 {#step-3-add-the-hook}
+
+`+ Add new hook…`を選択し、以下のコマンドを入力します：
+
+```bash
+jq -r '.tool_input.command' >> ~/.factory/bash-command-log.txt
+```
+
+### ステップ4: 設定を保存 {#step-4-save-your-configuration}
+
+ストレージの場所については、ホームディレクトリにログ記録しているため`User settings`を選択します。これにより、フックは現在のプロジェクトだけでなく、すべてのプロジェクトに適用されます。
+
+その後、REPLに戻るまでEscを押します。フックが登録されました！
+
+### ステップ5: フックを確認 {#step-5-verify-your-hook}
+
+再度`/hooks`を実行するか、`~/.factory/hooks.json`を開いて設定を確認します：
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Execute",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command' >> ~/.factory/bash-command-log.txt"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### ステップ6: フックをテスト {#step-6-test-your-hook}
+
+Droidに`ls`のような簡単なコマンドを実行するよう依頼し、ログファイルを確認します：
+
+```bash
+cat ~/.factory/bash-command-log.txt
+```
+
+以下のようなエントリが表示されるはずです：
+
+```
+ls
+```
+
+## その他の例 {#more-examples}
+
+### コードフォーマットフック {#code-formatting-hook}
+
+編集後にTypeScriptファイルを自動フォーマット：
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Create|Edit|ApplyPatch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read file_path; if echo \"$file_path\" | grep -q '\\.ts'; then npx prettier --write \"$file_path\"; fi; }"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Markdownフォーマットフック {#markdown-formatting-hook}
+
+markdownファイルの言語タグの欠落やフォーマットの問題を自動修正：
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Create|Edit|ApplyPatch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$FACTORY_PROJECT_DIR\"/.factory/hooks/markdown_formatter.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+以下の内容で`.factory/hooks/markdown_formatter.py`を作成：
+
+```python
+#!/usr/bin/env python3
+"""
+Markdown formatter for Droid output.
+Fixes missing language tags and spacing issues while preserving code content.
+"""
+import json
+import sys
+import re
+import os
+
+def detect_language(code):
+    """Best-effort language detection from code content."""
+    s = code.strip()
+
+    # JSON detection
+    if re.search(r'^\s*[{\[]', s):
+        try:
+            json.loads(s)
+            return 'json'
+        except:
+            pass
+
+    # Python detection
+    if re.search(r'^\s*def\s+\w+\s*\(', s, re.M) or \
+       re.search(r'^\s*(import|from)\s+\w+', s, re.M):
+        return 'python'
+
+    # JavaScript detection
+    if re.search(r'\b(function\s+\w+\s*\(|const\s+\w+\s*=)', s) or \
+       re.search(r'=>|console\.(log|error)', s):
+        return 'javascript'
+
+    # Bash detection
+    if re.search(r'^#!.*\b(bash|sh)\b', s, re.M) or \
+       re.search(r'\b(if|then|fi|for|in|do|done)\b', s):
+        return 'bash'
+
+    # SQL detection
+    if re.search(r'\b(SELECT|INSERT|UPDATE|DELETE|CREATE)\s+', s, re.I):
+        return 'sql'
+
+    return 'text'
+
+def format_markdown(content):
+    """Format markdown content with language detection."""
+    # Fix unlabeled code fences
+    def add_lang_to_fence(match):
+        indent, info, body, closing = match.groups()
+        if not info.strip():
+            lang = detect_language(body)
+            return f"{indent}```{lang}\n{body}{closing}\n"
+        return match.group(0)
+
+    fence_pattern = r'(?ms)^([ \t]{0,3})```([^\n]*)\n(.*?)(\n\1```)\s*$'
+    content = re.sub(fence_pattern, add_lang_to_fence, content)
+
+    # Fix excessive blank lines (only outside code fences)
+    content = re.sub(r'\n{3,}', '\n\n', content)
+
+    return content.rstrip() + '\n'
+
+# Main execution
+try:
+    input_data = json.load(sys.stdin)
+    file_path = input_data.get('tool_input', {}).get('file_path', '')
+
+    if not file_path.endswith(('.md', '.mdx')):
+        sys.exit(0)  # Not a markdown file
+
+    if os.path.exists(file_path):
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        formatted = format_markdown(content)
+
+        if formatted != content:
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(formatted)
+            print(f"✓ Fixed markdown formatting in {file_path}")
+
+except Exception as e:
+    print(f"Error formatting markdown: {e}", file=sys.stderr)
+    sys.exit(1)
+```
+
+スクリプトを実行可能にします:
+
+```bash
+chmod +x .factory/hooks/markdown_formatter.py
+```
+
+このフックは自動的に:
+
+* ラベルなしコードブロックのプログラミング言語を検出します
+* シンタックスハイライト用に適切な言語タグを追加します
+* コード内容を保持しながら過剰な空行を修正します
+* Markdownファイル（`.md`、`.mdx`）のみを処理します
+
+### カスタム通知フック {#custom-notification-hook}
+
+Droidが入力を必要とするときにデスクトップ通知を受け取ります:
+
+```json
+{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send 'Droid' 'Awaiting your input'"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### ファイル保護フック {#file-protection-hook}
+
+機密ファイルへの編集をブロックします:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Create|Edit|ApplyPatch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json, sys; data=json.load(sys.stdin); path=data.get('tool_input',{}).get('file_path',''); sys.exit(2 if any(p in path for p in ['.env', 'package-lock.json', '.git/']) else 0)\""
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## 詳細情報 {#learn-more}
+
+* フックのリファレンスドキュメントについては、[[jp/reference/hooks-reference|フックリファレンス]]を参照してください。
+* 包括的なセキュリティのベストプラクティスと安全ガイドラインについては、フックリファレンスドキュメントの[[jp/reference/hooks-reference#security-considerations|セキュリティ上の考慮事項]]を参照してください。
+* トラブルシューティング手順とデバッグテクニックについては、フックリファレンスドキュメントの[[jp/reference/hooks-reference#debugging|デバッグ]]を参照してください。

@@ -1,0 +1,83 @@
+---
+id: jp/cli/features/droid-computers-byom
+title: "独自マシンの使用（BYOM）"
+status: published
+summary: "独自のマシンをDroid Computerとして有効化し、接続する。"
+parent: jp/cli/features/index
+tags: [cli, byom, bring-your-own-machine, droid-computers, remote-access, daemon, relay]
+relations: [relates_to=cli/features/droid-computers-byom]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">独自マシンの使用（BYOM）</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">独自のマシンをDroid Computerとして有効化し、接続する。</p>
+
+
+Bring Your Own Machine（BYOM）を使うと、独自のLinux、macOS、WindowsマシンをDroid Computerとして登録できます。VPS、クラウドVM、ワークステーション、オンプレミスサーバーなど、すでに管理している環境内でDroidを動作させたい場合に便利です。
+
+## 始める前に {#before-you-start}
+
+以下を用意してください：
+
+- **Linux**、**macOS**、または**Windows**で動作するマシン
+- そのマシンにインストール済みのDroid CLI
+- Factoryでの認証済み状態（対話セッションで`/login`）
+- Factory API、特に`relay.factory.ai`へのネットワークアクセス
+
+
+
+<Aside kind="note">
+受信ポートを開く必要はありません。`--remote-access`でデーモンを起動すると、BYOMマシンはFactoryのリレーサービス経由で接続します。
+</Aside>
+
+
+
+## Factory Appで登録する {#register-with-the-factory-app}
+
+Factory Appを使用している場合、マシンはシステムのホスト名を使って自動的に登録されます。リモートのDroid Computerとして有効化するには、**設定 → Droid Computers**に移動し、**Remote Access**トグルをオンにします。これにより、ローカルマシンがFactoryのリレーサービスに自動接続され、他のデバイスから到達できるようになります。接続はFactory Appが実行されている間維持されます。
+
+## CLIで登録する {#register-with-the-cli}
+
+```bash
+droid daemon --remote-access
+```
+
+未登録の場合は、Droid Computer名の入力を求められ、マシンが自動登録されます。
+
+先に手動でマシンを登録したい場合は、`droid computer register [name]`を実行してから、`droid daemon --remote-access`を開始してFactoryのリレーサービス経由で接続できます。
+
+
+
+<Aside kind="note">
+1台のマシンにつき、同時に許可されるDroid Computer登録は1つだけです。再登録が必要な場合は、先に`droid computer remove`を実行するか、設定ページからマシンを削除してください。
+</Aside>
+
+
+
+## 可用性のトラブルシューティング {#troubleshooting-availability}
+
+リモート利用可能なマシンとして表示されない場合：
+
+- **設定 → Droid Computers**でマシンが一覧に表示されていることを確認する
+- **設定 → Droid Computers**で、そのマシンの**Remote Access**が有効になっていることを確認する
+- デーモンが`droid daemon --remote-access`で実行されていることを確認する
+
+**Droid Computers**ページ自体が表示されない場合は、組織管理者またはFactoryサポートにお問い合わせください。
+
+## BYOMマシンの管理と更新 {#managing-and-updating-a-byom-machine}
+
+- 登録済みのDroid Computersを確認するには`droid computer list`を使用
+- Droid ComputerへのSSHセッションを開くには`droid computer ssh <name>`を使用
+- 現在のマシンの登録を解除し、ローカル設定をクリーンアップするには`droid computer remove`を使用
+- マシン上でDroid CLIを手動更新してから、デーモンプロセスを再起動
+
+BYOM Droid Computersは、そのマシンにすでに設定されているgit認証情報を使用します。
+
+## セキュリティとネットワークに関する注意事項 {#security-and-networking-notes}
+
+- **リレーモード** — BYOMマシンのトラフィックはFactoryのリレーサービス経由でルーティングされるため、公開ポートは露出しません
+- **認証情報** — BYOMマシン上のgit認証情報はFactoryでは管理されません。マシン上の既存のgit設定が使用されます
+- **所有権** — 基盤となるマシンの強化と保守は利用者の責任です
+
+## 関連項目 {#see-also}
+
+- [[jp/cli/features/droid-computers|Droid Computers]] — プラットフォーム管理コンピューターと共通概念の概要

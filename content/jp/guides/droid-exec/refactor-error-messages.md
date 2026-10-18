@@ -1,0 +1,470 @@
+---
+id: jp/guides/droid-exec/refactor-error-messages
+title: "エラーメッセージの改善"
+status: published
+summary: "Droid Execを使ってコードベース全体のエラーメッセージを自動改善する"
+parent: jp/guides/droid-exec/index
+tags: [guides, error-messages, refactor, automation, error-handling, droid-exec]
+relations: [relates_to=guides/droid-exec/refactor-error-messages]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">エラーメッセージの改善</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Droid Execを使ってコードベース全体のエラーメッセージを自動改善する</p>
+
+
+このチュートリアルでは、Droid Execを使用して数百のファイル全体でエラーメッセージを同時にリファクタリングする方法を説明します。このスクリプトは、すべてのResponseErrorインスタンス化を賢く見つけ出し、より説明的で実用的、かつユーザーフレンドリーなメッセージに改善します。
+
+
+
+<Aside kind="info">
+`ResponseError`は、特定のステータスコードを持つHTTP形式のエラーをthrowするために使用されるFactory内部のエラー処理クラスです。これらのエラークラスは、APIエラーを処理するためにコードベース全体で使用されています。
+</Aside>
+
+
+
+## 仕組み {#how-it-works}
+
+スクリプトの動作：
+
+1. **ファイル検索**: ResponseErrorクラスを含むすべての`.ts`および`.tsx`ファイルを検索します
+2. **賢いフィルタリング**: `node_modules`、`.git`、`dist`、`build`、`.next`ディレクトリを除外します
+3. **エラー特定**: すべてのResponseErrorインスタンス化（400、401、403、404など）を特定します
+4. **メッセージ改善**: より説明的で実用的なものにします
+5. **コンテキスト追加**: 何が問題だったかと潜在的な修正方法を含めます
+6. **ユーザーフレンドリーな言語**: 技術的な専門用語を取り除きます
+7. **メタデータ保持**: エラーコードとメタデータをそのまま保ちます
+
+## スクリプトの取得 {#get-the-script}
+
+
+
+<Details summary="完全なスクリプトソースを表示">
+```bash
+#!/bin/bash
+
+# Droid Error Message Improvement Script
+
+# Automatically improves ResponseError messages across the codebase
+
+#
+
+# Usage: ./droid-improve-errors.sh [directory]
+
+# Example: ./droid-improve-errors.sh apps
+
+set -e
+
+# Configuration
+
+CONCURRENCY=${CONCURRENCY:-5}
+DRY_RUN=${DRY_RUN:-false}
+TARGET_DIR="${1:-.}"
+
+# Colors for output
+
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+# Temp files for tracking
+
+TEMP_DIR=$(mktemp -d)
+FILES_LIST="$TEMP_DIR/files.txt"
+ERRORS_FOUND="$TEMP_DIR/errors_found.txt"
+MODIFIED_COUNT=0
+PROCESSED_COUNT=0
+ERRORS_IMPROVED=0
+
+# Cleanup on exit
+
+trap "rm -rf $TEMP_DIR" EXIT
+
+# Function to process a single file
+
+process_file() {
+local filepath="$1"
+    local filename=$(basename "$filepath")
+
+    # Check if file contains ResponseError instantiations
+    if ! grep -qE "new ResponseError[0-9]+|throw new ResponseError" "$filepath" 2>/dev/null; then
+        return 0
+    fi
+
+    # Count error instances for reporting
+    local error_count=$(grep -cE "new ResponseError[0-9]+" "$filepath" 2>/dev/null || echo 0)
+
+    echo -e "${BLUE}Processing: $filepath${NC}"
+    echo -e "  Found $error_count error instantiation(s)"
+
+    # The AI prompt for improving error messages
+    local prompt="Improve the error messages in $filepath:
+
+Find all ResponseError instantiations (ResponseError400BadRequest, ResponseError401Unauthorized, etc.)
+and improve their error messages following these guidelines:
+
+1. Make messages more descriptive and actionable
+2. Include context about what went wrong
+3. Suggest potential fixes when appropriate
+4. Use user-friendly language (avoid technical jargon)
+5. Include relevant details without exposing sensitive data
+
+Examples of improvements:
+
+- 'Invalid api key format' → 'API key must be a 32-character alphanumeric string starting with \"fac\_\"'
+- 'Organization not found' → 'Organization with ID {orgId} not found. Please verify the organization exists and you have access.'
+- 'Invalid CSRF token' → 'Security validation failed. Please refresh the page and try again.'
+- 'Invalid request parameters' → 'Missing required field \"email\". Please provide a valid email address.'
+- 'User is already a member' → 'This user is already a member of the organization and cannot be invited again.'
+
+Only modify the error message strings, preserve all other code including metadata parameters.
+Return the complete file with improved error messages."
+
+    if [ "$DRY_RUN" = "true" ]; then
+        echo -e "${YELLOW}  [DRY RUN] Would improve $error_count error message(s)${NC}"
+        echo "$error_count" >> "$ERRORS_FOUND"
+        return 0
+    fi
+
+    # Get original file hash for comparison
+    local original_hash=$(md5sum "$filepath" 2>/dev/null | cut -d' ' -f1 || md5 -q "$filepath")
+
+    # Run droid to improve error messages
+    if droid exec --auto low "$prompt" 2>/dev/null; then
+        # Check if file was modified
+        local new_hash=$(md5sum "$filepath" 2>/dev/null | cut -d' ' -f1 || md5 -q "$filepath")
+        if [ "$original_hash" != "$new_hash" ]; then
+            echo -e "${GREEN}  ✓ Improved error messages${NC}"
+            ((MODIFIED_COUNT++))
+            ((ERRORS_IMPROVED+=error_count))
+        else
+            echo -e "  No changes needed"
+        fi
+        ((PROCESSED_COUNT++))
+    else
+        echo -e "${RED}  ✗ Failed to process${NC}"
+    fi
+
+}
+
+# Export function and variables for parallel execution
+
+export -f process_file
+export DRY_RUN GREEN YELLOW BLUE RED NC ERRORS_FOUND
+
+# Main execution
+
+echo -e "${BLUE}=== Droid Error Message Improvement ===${NC}"
+echo -e "${BLUE}Directory: $TARGET_DIR${NC}"
+echo -e "${BLUE}Concurrency: $CONCURRENCY${NC}"
+[ "$DRY_RUN" = "true" ] && echo -e "${YELLOW}DRY RUN MODE${NC}"
+echo ""
+
+# Find TypeScript files containing ResponseError
+
+find "$TARGET_DIR" -type f \( -name "*.ts" -o -name "*.tsx" \) \
+    ! -path "*/node_modules/*" \
+    ! -path "*/.git/*" \
+    ! -path "*/dist/*" \
+    ! -path "*/build/*" \
+    ! -path "*/.next/*" \
+    ! -path "*/coverage/*" \
+    -exec grep -l "ResponseError[0-9]" {} \; 2>/dev/null > "$FILES_LIST" || true
+
+FILE_COUNT=$(wc -l < "$FILES_LIST" | tr -d ' ')
+
+if [ "$FILE_COUNT" -eq 0 ]; then
+echo -e "${YELLOW}No files with ResponseError found${NC}"
+exit 0
+fi
+
+echo -e "${BLUE}Found $FILE_COUNT files with ResponseError classes${NC}\n"
+
+# Process files in parallel
+
+cat "$FILES_LIST" | xargs -n 1 -P "$CONCURRENCY" -I {} bash -c 'process_file "$@"' _ {}
+
+# Calculate total errors found in dry run
+
+if [ "$DRY_RUN" = "true" ] && [ -f "$ERRORS_FOUND" ]; then
+TOTAL_ERRORS=$(awk '{sum+=$1} END {print sum}' "$ERRORS_FOUND" 2>/dev/null || echo 0)
+fi
+
+# Show summary
+
+echo -e "\n${BLUE}=== Summary ===${NC}"
+echo -e "${GREEN}Files scanned: $FILE_COUNT${NC}"
+echo -e "${GREEN}Files processed: $PROCESSED_COUNT${NC}"
+
+if [ "$DRY_RUN" = "true" ]; then
+[ -n "$TOTAL_ERRORS" ] && echo -e "${YELLOW}Error messages to improve: $TOTAL_ERRORS${NC}"
+else
+echo -e "${GREEN}Files modified: $MODIFIED_COUNT${NC}"
+[ "$ERRORS_IMPROVED" -gt 0 ] && echo -e "${GREEN}Error messages improved: ~$ERRORS_IMPROVED${NC}"
+fi
+
+if [ "$DRY_RUN" = "false" ] && [ "$MODIFIED_COUNT" -gt 0 ]; then
+echo -e "\n${BLUE}Next steps:${NC}"
+echo " git diff # Review changes"
+echo " npm run typecheck # Verify types"
+echo " npm run test # Run tests"
+echo " git add -A # Stage changes"
+echo " git commit -m 'refactor: improve error messages for better UX'"
+fi
+
+````
+</Details>
+
+
+
+## 前提条件 {#prerequisites}
+
+開始する前に、[[jp/cli/droid-exec/overview#installation|Droid Exec installation]]を完了してください。
+
+## 基本的な使用方法 {#basic-usage}
+
+### 変更のプレビュー（ドライラン） {#preview-changes-dry-run}
+
+
+
+<Aside kind="warning">
+ファイルを変更する前に、改善が必要なエラーメッセージ数を確認するため、必ずドライランから始めてください。
+</Aside>
+
+
+
+ドライラン機能では、ResponseErrorインスタンス化を含むファイルとその数を正確に表示します：
+
+```bash
+# Preview what would happen (no changes made)
+DRY_RUN=true ./droid-improve-errors.sh apps/factory-admin/src/app/api/_utils/middleware.ts
+
+# Example output:
+# === Droid Error Message Improvement ===
+# Directory: apps/factory-admin/src/app/api/_utils/middleware.ts
+# Concurrency: 5
+# DRY RUN MODE
+#
+# Found 1 files with ResponseError classes
+#
+# Processing: apps/factory-admin/src/app/api/_utils/middleware.ts
+#   Found 6 error instantiation(s)
+#   [DRY RUN] Would improve 6 error message(s)
+#
+# === Summary ===
+# Files scanned: 1
+# Files processed: 0
+# Error messages to improve: 6
+````
+
+**ドライランの仕組み：**
+
+- `DRY_RUN=true`の場合：変更を加えずにすべてのResponseErrorインスタンス化をカウントします
+- `DRY_RUN=false`の場合（デフォルト）：AIを使用して実際にエラーメッセージを改善します
+
+これにより以下が可能になります：
+
+- 必要な変更の範囲を見積もる
+- まず小さなディレクトリでテストする
+- リファクタリング戦略を計画する
+
+### リファクタリングの適用 {#apply-refactoring}
+
+準備ができたら、実際のエラーメッセージ改善を実行します：
+
+```bash
+# Actually improve the error messages (default behavior)
+./droid-improve-errors.sh apps/factory-admin
+
+# Or explicitly set DRY_RUN=false
+DRY_RUN=false ./droid-improve-errors.sh apps/factory-admin
+
+# Adjust concurrency for faster processing
+CONCURRENCY=10 ./droid-improve-errors.sh packages
+```
+
+実際の実行例：
+
+```bash
+% ./scripts/droid-improve-errors.sh apps/factory-admin/src/app/api/_utils/middleware.ts
+=== Droid Error Message Improvement ===
+Directory: apps/factory-admin/src/app/api/_utils/middleware.ts
+Concurrency: 5
+
+Found 1 files with ResponseError classes
+
+Processing: apps/factory-admin/src/app/api/_utils/middleware.ts
+  Found 6 error instantiation(s)
+## Summary
+
+I've successfully improved all error messages in the `apps/factory-admin/src/app/api/_utils/middleware.ts` file. The improvements include making the messages more descriptive, actionable, and user-friendly while providing helpful context and suggestions for resolution. All 7 error instantiations were updated, and the TypeScript compilation verified that the changes are syntactically correct.
+```
+
+## 実際の変換例 {#real-world-transformations}
+
+### 例1：セッション認証 {#example-1-session-authentication}
+
+
+
+<div class="factory-tabs">
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">変更前</div>
+
+```typescript
+// middleware.ts
+if (!sessionCookie?.value) {
+  throw new ResponseError401Unauthorized('No session');
+}
+
+if (!userRecord) {
+  throw new ResponseError401Unauthorized('Invalid session');
+}
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">変更後</div>
+
+```typescript
+// middleware.ts
+if (!sessionCookie?.value) {
+  throw new ResponseError401Unauthorized(
+    'Session cookie not found. Please sign in again to access the admin dashboard.'
+  );
+}
+
+if (!userRecord) {
+  throw new ResponseError401Unauthorized(
+    'Session is invalid or has expired. Please sign in again to continue.'
+  );
+}
+```
+
+
+<Aside kind="note">
+何が問題で、どう修正するかについての明確な指示
+</Aside>
+
+
+
+</div>
+
+</div>
+
+
+
+### 例2：Bearer Token認証 {#example-2-bearer-token-authorization}
+
+
+
+<div class="factory-tabs">
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">変更前</div>
+
+```typescript
+// middleware.ts
+if (!authHeader) {
+  throw new ResponseError401Unauthorized('Missing auth header');
+}
+
+if (authHeader !== `Bearer ${secret}`) {
+  throw new ResponseError401Unauthorized('Invalid token');
+}
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-tab-panel">
+
+<div class="factory-tab-heading">変更後</div>
+
+```typescript
+// middleware.ts
+if (!authHeader) {
+  throw new ResponseError401Unauthorized(
+    'Authorization header is missing. Please include a valid Bearer token in the Authorization header.'
+  );
+}
+
+if (authHeader !== `Bearer ${secret}`) {
+  throw new ResponseError401Unauthorized(
+    'Invalid or expired authorization token. Please verify your API credentials and ensure the token is properly formatted as "Bearer <token>".'
+  );
+}
+```
+
+
+<Aside kind="note">
+具体的な形式要件とトラブルシューティングのヒントを追加
+</Aside>
+
+
+
+</div>
+
+</div>
+
+
+
+## ベストプラクティス {#best-practices}
+
+
+
+<Aside kind="note">
+安全で効果的なエラーメッセージ改善のため、これらのベストプラクティスに従ってください。
+</Aside>
+
+
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">ドライランから始める</div>
+
+まず変更範囲を必ずプレビューしてください:
+```bash
+# See how many errors need improvement
+DRY_RUN=true ./droid-improve-errors.sh packages
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">段階的に処理する</div>
+
+大規模なコードベースでは、一度に1つのモジュールに取り組みます:
+```bash
+# Process each app separately for easier review
+./droid-improve-errors.sh apps/factory-admin
+git add -A && git commit -m "refactor(factory-admin): improve error messages"
+
+./droid-improve-errors.sh apps/factory-app
+git add -A && git commit -m "refactor(factory-app): improve error messages"
+```
+
+</div>
+
+</div>

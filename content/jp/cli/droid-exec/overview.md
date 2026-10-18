@@ -1,0 +1,625 @@
+---
+id: jp/cli/droid-exec/overview
+title: "Droid Exec（ヘッドレス）"
+status: published
+summary: "CI/CDパイプラインと自動化スクリプト用の非対話実行モード。"
+parent: jp/cli/droid-exec/index
+tags: [cli, droid-exec, headless, ci-cd, automation, pipeline, github-actions, scripts]
+relations: [relates_to=cli/droid-exec/overview]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Droid Exec（ヘッドレス）</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">CI/CDパイプラインと自動化スクリプト用の非対話実行モード。</p>
+
+
+Droid ExecはFactory自動化ワークフロー向けに設計されたヘッドレス実行モードです。インタラクティブなCLIとは異なり、`droid exec`はタスクを完了して終了するワンショットコマンドとして動作するため、CI/CDパイプライン、シェルスクリプト、バッチ処理に最適です。
+
+
+
+<Aside kind="tip">
+[[jp/guides/droid-exec/code-review|Droid Execクックブック]]をご覧ください。
+</Aside>
+
+
+
+## 概要と目的 {#summary-and-goals}
+
+Droid Execは以下を目的として設計されたワンショットタスクランナーです：
+
+- 読みやすいログと、要求時に構造化された成果物を生成
+- 変更/コマンド実行に対してオプトインを強制（デフォルトで安全）
+- 権限違反時に明確なエラーでファストフェイル
+- バッチおよび並列処理のためのシンプルな構成をサポート
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**非インタラクティブ**
+
+CI/CD統合のためにstdout/stderrに書き込むシングル実行
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**デフォルトで安全**
+
+デフォルトで読み取り専用、自律レベルによる変更への明示的オプトイン
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**構成可能**
+
+シェルスクリプト、並列実行、パイプライン統合用に設計
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**クリーンな出力**
+
+自動処理のための構造化出力フォーマットと成果物
+
+</div>
+
+</div>
+
+
+
+## 実行モデル {#execution-model}
+
+- stdout/stderrに書き込む非インタラクティブなシングル実行。
+- デフォルトはspecモード：エージェントは読み取り専用操作の実行のみ許可。
+- `--auto`を追加して編集とコマンドを有効化；リスクティアが実行可能な内容を制御。
+
+CLIヘルプ（抜粋）：
+```
+Usage: droid exec [options] [prompt]
+
+Execute a single command (non-interactive mode)
+
+Arguments:
+  prompt                          The prompt to execute
+
+Options:
+  -o, --output-format <format>          Output format (default: "text")
+  --input-format <format>               Input format: stream-jsonrpc for multi-turn sessions
+  -f, --file <path>                     Read prompt from file
+  --auto <level>                        Autonomy level: low|medium|high
+  --skip-permissions-unsafe             Skip ALL permission checks - allows all permissions (unsafe)
+  -s, --session-id <id>                 Existing session to continue (requires a prompt)
+  --fork <id>                           Fork an existing session and continue from it
+  -m, --model <id>                      Model ID to use
+  -r, --reasoning-effort <level>        Reasoning effort (defaults per model)
+  --spec-model <id>                     Model ID to use for spec mode
+  --spec-reasoning-effort <level>       Reasoning effort for spec mode
+  --use-spec                            Start in spec mode
+  --restrict-tools <ids>                Restrict the run to only the specified tools (comma or space separated list)
+  --additional-tools <ids>              Enable additional tools beyond the defaults (comma or space separated list)
+  --disabled-tools <ids>                Disable specific tools (comma or space separated list)
+  --list-tools                          List available tools for the selected model and exit
+  --cwd <path>                          Working directory path
+  -w, --worktree [name]                 Run in a git worktree
+  --worktree-dir <path>                 Directory for worktree creation
+  --tag <spec>                          Session tag (name or JSON, repeatable)
+  --log-group-id <id>                   Log group ID for filtering logs
+  --append-system-prompt <text>         Append custom text to end of system prompt
+  --append-system-prompt-file <path>    Append file contents to end of system prompt
+  --mission                             Run in mission mode (multi-agent orchestration)
+  --worker-model <id>                   Model for mission workers
+  --worker-reasoning-effort <level>     Reasoning effort for mission workers
+  --validator-model <id>                Model for mission validators
+  --validator-reasoning-effort <level>  Reasoning effort for mission validators
+  -h, --help                            display help for command
+```
+`--model`または`--spec-model`には、任意の[[jp/models|利用可能なモデルID]]を使用できます。カスタムモデルについては、[[jp/cli/byok/overview|Bring Your Own Key (BYOK)]]を参照してください。
+
+## インストール {#installation}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">Droid CLIをインストール</div>
+
+
+
+<div class="factory-codegroup">
+<div class="factory-codegroup-bar"><button type="button" class="factory-codegroup-tab is-active" data-tab-idx="0">macOS/Linux</button><button type="button" class="factory-codegroup-tab" data-tab-idx="1">Windows</button></div>
+
+<div class="factory-codegroup-panel is-active" data-panel-idx="0">
+
+```bash
+curl -fsSL https://app.factory.ai/cli | sh
+```
+
+</div>
+
+<div class="factory-codegroup-panel" data-panel-idx="1">
+
+```powershell
+irm https://app.factory.ai/cli/windows | iex
+```
+
+</div>
+
+</div>
+
+
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">Factory APIキーの取得</div>
+
+[Factory設定ページ](https://app.factory.ai/settings/api-keys)からAPIキーを生成します
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">環境変数の設定</div>
+
+APIキーを環境変数としてエクスポートします：
+```bash
+export FACTORY_API_KEY=fk-...
+```
+
+</div>
+
+</div>
+
+
+
+## クイックスタート {#quickstart}
+
+- 直接プロンプト:
+  - `droid exec "analyze code quality"`
+  - `droid exec "fix the bug in src/main.js" --auto low`
+- ファイルから:
+  - `droid exec -f prompt.md`
+- パイプ:
+  - `echo "summarize repo structure" | droid exec`
+- セッション継続:
+  - `droid exec --session-id <session-id> "continue with next steps"`
+
+## 自律性レベル {#autonomy-levels}
+
+Droid execは階層化された自律性システムを使用して、エージェントが実行できる操作を制御します。デフォルトでは、読み取り専用モードで実行され、変更を有効にするには明示的なフラグが必要です。
+
+### DEFAULT（フラグなし）- 読み取り専用モード {#default-no-flags---read-only-mode}
+実行せずに計画された変更をレビューするための最も安全なモード:
+- ✅ ファイルやログの読み取り: cat, less, head, tail, systemctl status
+- ✅ 表示コマンド: echo, pwd
+- ✅ 情報収集: whoami, date, uname, ps, top
+- ✅ Git読み取り操作: git status, git log, git diff
+- ✅ ディレクトリリスト: ls, find（-deleteや-execなし）
+- ❌ ファイルやシステムの変更は不可
+- **使用例:** どのような変更が行われるかを安全にレビューする場合
+```bash
+# Analyze and plan refactoring without making changes
+droid exec "Analyze the authentication system and create a detailed plan for migrating from session-based auth to OAuth2. List all files that would need changes and describe the modifications required."
+
+# Review code quality and generate report
+droid exec "Review the codebase for security vulnerabilities, performance issues, and code smells. Generate a prioritized list of improvements needed."
+
+# Understand project structure
+droid exec "Analyze the project architecture and create a dependency graph showing how modules interact with each other."
+```
+### `--auto low` - 低リスクな操作 {#auto-low---low-risk-operations}
+基本的なファイル操作を有効にし、システム変更をブロックします：
+- ✅ プロジェクトディレクトリ内でのファイル作成/編集
+- ❌ システム変更やパッケージインストールは不可
+- **使用例:** ドキュメント更新、コード整形、コメント追加
+```bash
+# Safe file operations
+droid exec --auto low "add JSDoc comments to all functions"
+droid exec --auto low "fix typos in README.md"
+```
+### `--auto medium` - 開発オペレーション {#auto-medium---development-operations}
+重大な副作用を持つ可能性があるオペレーションですが、これらの副作用は通常無害で、簡単に復旧できます。
+低リスクオペレーションに一般的な開発タスクを追加します：
+- 信頼できるソースからのパッケージインストール：npm install、pip install（sudoなし）
+- 信頼できるエンドポイントへのネットワークリクエスト：既知のAPIへのcurl、wget
+- ローカルリポジトリを変更するGitオペレーション：git commit、git checkout、git pull（git pushは除く）
+- make、npm run build、mvn compileなどのツールによるコードビルド
+- ❌ git push、sudoコマンド、本番環境の変更は不可
+- **使用例：** ローカル開発、テスト、依存関係管理
+```bash
+# Development tasks
+droid exec --auto medium "install deps, run tests, fix issues"
+droid exec --auto medium "update packages and resolve conflicts"
+```
+### `--auto high` - 本番運用 {#auto-high---production-operations}
+信頼できないソースからのデータ転送や未知のコードの実行などセキュリティに影響を与える可能性のあるコマンド、または不可逆的なデータ損失や本番システム・デプロイメントの変更などの重大な副作用を伴うコマンド。
+- 任意/信頼できないコードの実行: curl | bash、eval、ダウンロードしたスクリプトの実行
+- 外部アクセスを許可する可能性のあるポートの公開やファイアウォールルールの変更
+- リモートリポジトリを変更するGitプッシュ操作: git push、git push --force
+- 本番デプロイメント、データベースマイグレーション、その他の機密操作への不可逆的な操作
+- パスワードや鍵などの機密情報にアクセスまたは変更するコマンド
+- ❌ 引き続きブロック: sudo rm -rf /、システム全体の変更
+- **使用例:** CI/CDパイプライン、自動デプロイメント
+```bash
+# Full workflow automation
+droid exec --auto high "fix bug, test, commit, and push to main"
+droid exec --auto high "deploy to staging after running tests"
+```
+### `--skip-permissions-unsafe` - すべてのチェックをバイパス {#skip-permissions-unsafe---bypass-all-checks}
+
+
+<Aside kind="warning">
+危険: このモードは確認なしですべての操作を許可します。Dockerコンテナや使い捨てVMなどの完全に隔離された環境でのみ使用してください。
+</Aside>
+
+
+
+- ⚠️ 確認なしですべての操作を許可
+- ⚠️ 不可逆的な操作を実行可能
+- --autoフラグと組み合わせることはできません
+- **使用例:** 隔離された環境
+```bash
+# In a disposable Docker container for CI testing
+docker run --rm -v $(pwd):/workspace alpine:latest sh -c "
+  apk add curl bash &&
+  curl -fsSL https://app.factory.ai/cli | sh &&
+  droid exec --skip-permissions-unsafe 'Install all system dependencies, modify system configs, run integration tests that require root access, and clean up test databases'
+"
+
+# In ephemeral GitHub Actions runner for rapid iteration
+# where the runner is destroyed after each job
+droid exec --skip-permissions-unsafe "Modify /etc/hosts for test domains, install custom kernel modules, run privileged container tests, and reset network interfaces"
+
+# In a temporary VM for security testing
+droid exec --skip-permissions-unsafe "Run penetration testing tools, modify firewall rules, test privilege escalation scenarios, and generate security audit reports"
+```
+### フェイルファースト動作 {#fail-fast-behavior}
+
+リクエストされたアクションが現在の自律レベルを超える場合、droid execは以下を実行します：
+1. 明確なエラーメッセージと共に即座に停止
+2. 非ゼロの終了コードを返す
+3. 部分的な変更を一切実行しない
+
+これにより、自動化スクリプトやCI/CDパイプラインでの予測可能な動作が保証されます。
+
+## 出力形式とアーティファクト {#output-formats-and-artifacts}
+
+Droid execは異なる用途に対応する3つの出力形式をサポートします：
+
+### text（デフォルト） {#text-default}
+直接使用やログ用の人間が読みやすい出力：
+```bash
+$ droid exec --auto low "create a python file that prints 'hello world'"
+Perfect! I've created a Python file named `hello_world.py` in your home directory that prints 'hello world' when executed.
+```
+### json {#json}
+スクリプトや自動化での解析用の構造化JSON出力：
+```bash
+$ droid exec "summarize this repository" --output-format json
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "duration_ms": 5657,
+  "num_turns": 1,
+  "result": "This is a Factory documentation repository containing guides for CLI tools, web platform features, and onboarding procedures...",
+  "session_id": "8af22e0a-d222-42c6-8c7e-7a059e391b0b"
+}
+```
+JSON形式を使用する場面：
+- スクリプトで結果を解析する必要がある場合
+- プログラム的に成功/失敗をチェックする場合
+- 継続のためにセッションIDを抽出する場合
+- パイプラインで結果を処理する場合
+
+### 生の JSON-RPC でカスタムフローを構築 {#build-custom-flows-on-raw-json-rpc}
+
+カスタム統合では、Droid を長時間動作するサブプロセスとして起動し、stdin/stdout 経由で完全な JSON-RPC 制御インターフェースを操作できます：
+```bash
+droid exec --input-format stream-jsonrpc --output-format stream-jsonrpc
+```
+
+この長時間動作する JSON-RPC モードでは、`--auto`、`--model`、
+`--reasoning-effort`、`--disable-builtin-skills` などの CLI フラグは検証されますが、
+セッションの設定には適用されません。自律レベル、モデル、推論努力、スキルの設定は
+JSON-RPC のセッションリクエストで指定してください。特に、起動コマンドに
+`--auto low` を追加しても、セッションの権限は制限されません。
+
+これは、Droid のまわりに独自の対話モデルを構築するための最も低レベルな統合方法です。プロセス側からターン送信、アシスタント出力のストリーミング、権限処理、設定更新、MCP/ツール管理、作業の割り込み、セッションの再開や fork を行えます。
+
+stdin の各行は 1 つの JSON-RPC リクエストです。stdout の各行は JSON-RPC レスポンス、サーバーリクエスト、または通知です。一般的なカスタムクライアントでは、次のような処理を行います：
+
+- プロジェクトの `cwd` と必要なフラグを指定して `droid exec` を起動
+- 一意な ID を持つ改行区切りの JSON-RPC リクエストを書き込む
+- `droid.initialize_session` または `droid.load_session` から開始
+- `droid.add_user_message` でターンを送信
+- stdout を 1 行ずつ読み取り、`id` でレスポンスを対応付ける
+- アシスタントテキストの差分、ツールイベント、トークン使用量、エラー、ターン完了に関する `droid.session_notification` イベントを処理
+- `droid.request_permission` や `droid.ask_user` などの server-to-client リクエストに応答
+- 作業の割り込み、設定更新、MCP サーバー/ツール管理、コンテキスト確認、セッションの fork、履歴圧縮のためにほかのセッションメソッドを呼び出す
+- タイムアウト、プロセスのクリーンアップ、セッション永続化を実装
+
+生の stdin/stdout を土台にして、たとえば次のようなカスタム対話フローを構築できます：
+
+- 独自の UX と操作系を持つ Web、デスクトップ、IDE のエージェント体験
+- ユーザー操作を Droid のターンにルーティングするチャットや copiloting UI
+- Droid タスクを実行し、進捗をビルドログに出力する CI や workflow runner
+- 作業をキューイングし、セッションを再開し、会話を fork し、結果を永続化するオーケストレーター
+- ツール権限リクエストを承認、拒否、変換、監査するポリシーレイヤー
+- Droid イベントを独自のプロトコル、メッセージバス、telemetry、ストレージ層へ橋渡しするブリッジ
+
+プロトコルのリファレンスと実装パターンについては、[TypeScript SDK](https://github.com/Factory-AI/droid-sdk-typescript) の low-level client と process transport を参照してください。
+
+可能であれば SDK を優先してください：
+
+- **TypeScript**: Node.js アプリ向けの [`@factory/droid-sdk`](https://github.com/Factory-AI/droid-sdk-typescript)。ストリーミング、マルチターンセッション、構造化出力、権限、ツール制御、SDK ベースの MCP ツールに対応
+- **Python**: asyncio アプリ向けの [`droid-sdk`](https://github.com/Factory-AI/droid-sdk-python)。ストリーミング、クライアントの直接制御、通知、権限、型付きイベント処理に対応
+
+自動化されたパイプラインの場合、エージェントに特定のアーティファクトを書くよう指示することもできます：
+```bash
+droid exec --auto low "Analyze dependencies and write to deps.json"
+droid exec --auto low "Generate metrics report in CSV format to metrics.csv"
+```
+## 作業ディレクトリ {#working-directory}
+
+- `--cwd` を使用して実行範囲を指定する：
+```
+droid exec --cwd /home/runner/work/repo "Map internal packages and dump graphviz DOT to deps.dot"
+```
+
+- `-w, --worktree [name]` を使うと、専用ブランチを持つ隔離された [[jp/reference/cli-reference#git-worktrees|Gitワークツリー]] の中でタスクを実行できます。同じリポジトリに対して、ファイル競合なしで `droid exec` ジョブを並列展開するのに便利です：
+
+```bash
+droid exec --worktree codemod-a --auto medium "apply codemod A" &
+droid exec --worktree codemod-b --auto medium "apply codemod B" &
+wait
+```
+
+クリーンなワークツリーは終了時に自動削除され、未コミット変更があるワークツリーは作業を確認して push できるよう保持されます。
+## モデルと推論力 {#models-and-reasoning-effort}
+
+モデルを `-m` で選択し、推論力を `-r` で調整してください。利用可能なモデルについては[[jp/models|利用可能なモデル]]をご覧ください。
+```bash
+droid exec -m claude-sonnet-4-5-20250929 -r medium -f plan.md
+```
+`--use-spec` を使用して仕様モードで開始します。このモードでは、エージェントが実行前に計画を立てます：
+```bash
+droid exec --use-spec --auto low "refactor the auth module"
+```
+仕様フェーズで異なるモデルを使用することもできます：
+```bash
+droid exec --use-spec --spec-model claude-haiku-4-5-20251001 --auto medium "implement feature X"
+```
+### ツール制御 {#tool-controls}
+
+モデルで利用可能なツールを一覧表示する：
+```bash
+droid exec --list-tools
+droid exec --model gpt-5-codex --list-tools --output-format json
+```
+特定のツールを有効または無効にする:
+```bash
+# Restrict to only specific tools
+droid exec --restrict-tools ApplyPatch "refactor files"
+
+# Enable additional tools
+droid exec --additional-tools ApplyPatch "refactor files"
+
+# Disable specific tools
+droid exec --auto medium --disabled-tools execute-cli "run edits only"
+```
+### カスタムモデル {#skill-controls}
+
+`~/.factory/settings.json`ファイルにカスタムモデルを追加することで、`droid exec`で使用するカスタムモデルを設定できます：
+```json
+{
+  "customModels": [
+    {
+      "model": "gpt-5.1-codex-custom",
+      "displayName": "My Custom Model",
+      "baseUrl": "https://api.openai.com/v1",
+      "apiKey": "your-api-key-here",
+      "provider": "openai"
+    }
+  ]
+}
+```
+カスタムモデルを使用するには、`custom:` プレフィックスの後に表示名（スペースをダッシュで置き換えたもの）とインデックスを続けます：
+```bash
+droid exec --model "custom:My-Custom-Model-0" "analyze this codebase"
+```
+複数のカスタムモデルを設定している場合：
+```json
+{
+  "customModels": [
+    {
+      "model": "kimi-k2",
+      "displayName": "Kimi K2 [Groq]",
+      "baseUrl": "https://api.groq.com/openai/v1",
+      "apiKey": "your-groq-key",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 16384
+    },
+    {
+      "model": "openai/gpt-oss-20b",
+      "displayName": "GPT-OSS-20B [OpenRouter]",
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "apiKey": "YOUR_OPENROUTER_KEY",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 32000
+    }
+  ]
+}
+```
+次のように参照します：
+- `--model "custom:Kimi-K2-[Groq]-0"`
+- `--model "custom:GPT-OSS-20B-[OpenRouter]-1"`
+
+インデックスは`customModels`配列の位置に対応します（0ベース）。
+
+
+
+<Aside kind="note">
+推論努力（`-r` / `--reasoning-effort`）はカスタムモデルではまだサポートされていませんが、近日対応予定です。
+</Aside>
+
+
+
+## セッション、タグ付け、ログ {#custom-models}
+
+Forkを使うと、元のセッションを乱すことなく既存セッションから分岐できます。新しい実行は分岐元セッションの履歴から開始され、新しいセッションIDが割り当てられます。
+
+```bash
+# Continue a session in-place
+droid exec --session-id <session-id> "next steps"
+
+# Branch off a session into a new run
+droid exec --fork <session-id> --auto low "try an alternative refactor"
+```
+
+`--tag` を使うと、実行に検索可能なラベルを付与できます。このフラグは繰り返し指定でき、プレーンな名前または構造化メタデータ用のJSONオブジェクトを受け付けます。`--log-group-id` と組み合わせて関連する実行のログを同じグループにまとめると、後段のフィルタリングや集計が容易になります。
+
+```bash
+droid exec \
+  --tag release-v2 \
+  --tag '{"name":"team","value":"platform"}' \
+  --log-group-id ci-nightly \
+  --auto low "run nightly checks and write report.md"
+```
+
+## システムプロンプトのカスタマイズ {#sessions-tagging-and-logs}
+
+`--append-system-prompt` を使うと、単一実行のシステムプロンプトの末尾に追加テキストを付加できます。`--append-system-prompt-file` はファイルの内容を末尾に追加します。両方のフラグは組み合わせて使用でき、グローバル設定を変更することなくプロジェクト固有のガイダンス、スタイルガイド、不変条件を注入するのに便利です。
+
+```bash
+droid exec \
+  --append-system-prompt "Always prefer functional React components." \
+  --auto low "review src/components for class-based components"
+
+droid exec \
+  --append-system-prompt-file ./docs/style-guide.md \
+  --auto low "lint prose in README.md against the style guide"
+```
+
+## ミッションモード {#customizing-the-system-prompt}
+
+ミッションモードは、`droid exec` を作業を計画し、ワーカーエージェントに委任し、結果を検証するマルチエージェントオーケストレーターとして実行します。`--mission` で有効化し、ワーカーおよびバリデーターロール用の専用モデルと推論努力レベルをオプションで選択できます。
+
+```bash
+droid exec --mission \
+  --worker-model claude-sonnet-4-5-20250929 \
+  --worker-reasoning-effort medium \
+  --validator-model claude-sonnet-4-5-20250929 \
+  --validator-reasoning-effort high \
+  --auto medium \
+  "ship the new billing webhook end-to-end"
+```
+
+### ミッションモードのフラグ {#mission-mode}
+
+| フラグ | 説明 |
+|------|-------------|
+| `--mission` | ミッションモード（マルチエージェントオーケストレーション）で実行します。 |
+| `--worker-model <id>` | ミッションワーカーエージェントが使用するモデルID。 |
+| `--worker-reasoning-effort <level>` | ミッションワーカーの推論努力。 |
+| `--validator-model <id>` | ミッションバリデーターエージェントが使用するモデルID。 |
+| `--validator-reasoning-effort <level>` | ミッションバリデーターの推論努力。 |
+
+最上位の `-m, --model` と `-r, --reasoning-effort` フラグは引き続きオーケストレーター自体に適用されます。ワーカーおよびバリデーターのオーバーライドは、オーケストレーターが生成するエージェントにのみ影響します。
+
+## バッチと並列パターン {#mission-mode-flags}
+
+シェルループ（制限された並行性）：
+```bash
+# Process files in parallel (GNU xargs -P)
+find src -name "*.ts" -print0 | xargs -0 -P 4 -I {} \
+  droid exec --auto low "Refactor file: {} to use modern TS patterns"
+```
+バックグラウンドジョブの並列化:
+```bash
+# Process multiple directories in parallel with job control
+for path in packages/ui packages/models apps/factory-app; do
+  (
+    cd "$path" &&
+    droid exec --auto low "Run targeted analysis and write report.md"
+  ) &
+done
+wait  # Wait for all background jobs to complete
+```
+チャンク化された入力：
+```bash
+# Split large file lists into manageable chunks
+git diff --name-only origin/main...HEAD | split -l 50 - /tmp/files_
+for f in /tmp/files_*; do
+  list=$(tr '\n' ' ' < "$f")
+  droid exec --auto low "Review changed files: $list and write to review.json"
+done
+rm /tmp/files_*  # Clean up temporary files
+```
+ワークフロー自動化 (CI/CD):
+```yaml
+# Dead code detection and cleanup suggestions
+name: Code Cleanup Analysis
+on:
+  schedule:
+    - cron: '0 1 * * 0' # Weekly on Sundays
+  workflow_dispatch:
+jobs:
+  cleanup-analysis:
+    strategy:
+      matrix:
+        module: ['src/components', 'src/services', 'src/utils', 'src/hooks']
+    steps:
+      - uses: actions/checkout@v4
+      - run: droid exec --cwd "${{ matrix.module }}" --auto low "Identify unused exports, dead code, and deprecated patterns. Generate cleanup recommendations in cleanup-report.md"
+```
+## ユニークな使用例 {#batch-and-parallel-patterns}
+
+ライセンスヘッダー執行機能：
+```bash
+git ls-files "*.ts" | xargs -I {} \
+  droid exec --auto low "Ensure {} begins with the Apache-2.0 header; add it if missing"
+```
+APIコントラクト差分チェック（読み取り専用）：
+```bash
+droid exec "Compare openapi.yaml operations to our TypeScript client methods and write drift.md with any mismatches"
+```
+セキュリティスイープ:
+```bash
+droid exec --auto low "Run a quick audit for sync child_process usage and propose fixes; write findings to sec-audit.csv"
+```
+## 終了動作 {#unique-usage-examples}
+
+- 0: 成功
+- 0以外: 失敗（権限違反、ツールエラー、目標未達成）。CIでは0以外を失敗として扱う。
+
+## ベストプラクティス {#exit-behavior}
+
+- `--auto low`を優先し、変更を最小限に抑えてスクリプト化されたステップでcommit/pushする。
+- 完全にサンドボックス化されていない限り、`--skip-permissions-unsafe`の使用は避ける。
+- パイプラインで検証可能なアーティファクトを出力するようエージェントに指示する。
+- モノレポでスコープを制限するために`--cwd`を使用する。

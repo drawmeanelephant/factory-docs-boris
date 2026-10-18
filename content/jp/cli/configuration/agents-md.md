@@ -1,0 +1,407 @@
+---
+id: jp/cli/configuration/agents-md
+title: "AGENTS.md"
+status: published
+summary: "単一のMarkdownファイルで、プロジェクトについてエージェントが知るべきことをすべて教える。"
+parent: jp/cli/configuration/index
+tags: [cli, agents-md, project-context, instructions, conventions, guidelines, project-setup, configuration-file]
+relations: [relates_to=cli/configuration/agents-md]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">AGENTS.md</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">単一のMarkdownファイルで、プロジェクトについてエージェントが知るべきことをすべて教える。</p>
+
+
+## 1 · **AGENTS.md**とは何ですか？ {#1-what-is-agentsmd}
+
+**AGENTS.md**は、あなたのリポジトリ（またはホームディレクトリ）に置かれるMarkdownファイルで、AIコーディングエージェントの_ブリーフィングパケット_として機能します。
+
+### なぜAGENTS.mdなのか？ {#why-agentsmd}
+
+**README.md**ファイルは人間のためのものです：クイックスタート、プロジェクト説明、貢献ガイドラインなどです。
+
+**AGENTS.md**は、これを補完するものとして、コーディングエージェントが必要とする追加の、時には詳細なコンテキストを含みます：ビルドステップ、テスト、READMEを煩雑にしたり人間の貢献者には関係ないかもしれない規約などです。
+
+私たちが意図的に分離した理由は：
+
+- エージェントに明確で予測可能な指示の場所を提供する
+- READMEを簡潔に保ち、人間の貢献者に焦点を当てる
+- 既存のREADMEやドキュメントを補完する、精密でエージェント向けのガイダンスを提供する
+
+### 含まれる内容： {#what-it-contains}
+
+- プロジェクトの**ビルド、テスト、実行**方法を説明
+- アーキテクチャパターンと規約を説明
+- 外部サービス、環境変数、設計ドキュメントを一覧化
+- ドメイン固有の語彙とコードスタイルルールを提供
+
+エージェントは変更を計画する_前に_AGENTS.mdを読み、シニアエンジニアが既に頭の中に持っている部族知識と同じものを得ます。
+
+---
+
+## 2 · 一つのAGENTS.mdが多くのエージェントで動作 {#2-one-agentsmd-works-across-many-agents}
+
+あなたのAGENTS.mdファイルは、成長するAIコーディングエージェントとツールのエコシステムと互換性があります：
+
+- **Droids** - FactoryのAIコーディングエージェント
+- **Cursor** - AI駆動のコードエディタ
+- **Aider** - あなたのターミナルでのAIペアプログラミング
+- **Gemini CLI** - GoogleのコマンドラインAIアシスタント
+- **Jules** - Googleのコーディングアシスタント
+- **Codex** - OpenAIのコード生成モデル
+- **Zed** - AI強化エディタ
+- **Phoenix** - AI開発プラットフォーム
+- その他多くの新興ツール
+
+別の独自ファイル形式を導入するのではなく、AGENTS.mdはAI開発エコシステム全体で動作する標準を使用します。
+
+---
+
+## 3 · ファイルの場所と発見階層 {#3-file-locations-discovery-hierarchy}
+
+エージェントはこの順序でAGENTS.mdを探します（最初にマッチしたものが優先）：
+
+1. **現在の作業ディレクトリ**の`./AGENTS.md`
+2. リポジトリルートまでの最も近い親ディレクトリ
+3. エージェントが作業しているサブフォルダ内の任意の`AGENTS.md`
+4. 個人の上書き設定：`~/.factory/AGENTS.md`
+
+
+
+<Aside kind="note">
+複数のファイルを併用できます。編集対象のファイルに近いものが優先されます。
+</Aside>
+
+
+
+---
+
+## 4 · ファイル構造と構文 {#4-file-structure-syntax}
+
+AGENTS.mdはプレーンなMarkdownです；見出しはセマンティックなヒントを提供します。
+
+```md
+# Build & Test ← exact commands for compiling and testing
+
+# Architecture Overview ← short description of major modules
+
+# Security ← auth flows, API keys, sensitive data
+
+# Git Workflows ← branching, commit conventions, PR requirements
+
+# Conventions & Patterns ← naming, folder layout, code style
+```
+
+エージェントは以下を認識します：
+
+- **トップレベルの見出し**（`#`）をセクションとして
+- **箇条書き**をコマンドやルールとして
+- **インラインコード**（`` ``）を正確なコマンド、ファイル名、環境変数として
+- **リンク**を外部ドキュメント（GitHub、Figma、Confluence…）として
+
+---
+
+## 5 · 一般的なセクション {#5-common-sections}
+
+| セクション                  | 目的                                                           |
+| -------------------------- | ------------------------------------------------------------- |
+| **ビルドとテスト**           | コンパイルとテストスイート実行のための正確なコマンド。            |
+| **アーキテクチャ概要**  | 主要なモジュールとデータフローの一段落要約。                      |
+| **Security**               | APIキー、エンドポイント、認証フロー、レート制限、機密データ。      |
+| **Git Workflows**          | ブランチ戦略、コミット規約、PR要件。                            |
+| **Conventions & Patterns** | フォルダ構造、命名パターン、コードスタイル、lintルール。          |
+
+_将来のあなた_が気にかけることだけを含めてください—簡潔さは百科事典のような長いファイルに勝ります。
+
+---
+
+## 6 · テンプレートと例 {#6-templates-examples}
+
+### Factory風の包括的な例 {#factory-style-comprehensive-example}
+
+```md
+# MyProject
+
+This is an overview of My Project. It's an example app used to highlight AGENTS.md files utility.
+
+## Core Commands
+
+• Type-check and lint: `pnpm check`
+• Auto-fix style: `pnpm check:fix`
+• Run full test suite: `pnpm test --run --no-color`
+• Run a single test file: `pnpm test --run <path>.test.ts`
+• Start dev servers (frontend + backend): `pnpm dev`
+• Build for production: `pnpm build` then `pnpm preview`
+
+All other scripts wrap these six tasks.
+
+## Project Layout
+
+├─ client/ → React + Vite frontend
+├─ server/ → Express backend
+
+• Frontend code lives **only** in `client/`
+• Backend code lives **only** in `server/`
+• Shared, environment-agnostic helpers belong in `src/`
+
+## Development Patterns & Constraints
+
+Coding style
+• TypeScript strict mode, single quotes, trailing commas, no semicolons.
+• 100-char line limit, tabs for indent (2-space YAML/JSON/MD).
+• Use interfaces for public APIs; avoid `@ts-ignore`.
+• Tests first when fixing logic bugs.
+• Visual diff loop for UI tweaks.
+• Never introduce new runtime deps without explanation in PR description.
+
+## Git Workflow Essentials
+
+1. Branch from `main` with a descriptive name: `feature/<slug>` or `bugfix/<slug>`.
+2. Run `pnpm check` locally **before** committing.
+3. Force pushes **allowed only** on your feature branch using
+   `git push --force-with-lease`. Never force-push `main`.
+4. Keep commits atomic; prefer checkpoints (`feat: …`, `test: …`).
+
+## Evidence Required for Every PR
+
+A pull request is reviewable when it includes:
+
+- All tests green (`pnpm test`)
+- Lint & type check pass (`pnpm check`)
+- Diff confined to agreed paths (see section 2)
+- **Proof artifact**
+  • Bug fix → failing test added first, now passes
+  • Feature → new tests or visual snapshot demonstrating behavior
+- One-paragraph commit / PR description covering intent & root cause
+- No drop in coverage, no unexplained runtime deps
+```
+
+### Node + Reactモノレポ {#node-react-monorepo}
+
+```md
+# Build & Test
+
+- Build: `npm run build`
+- Test: `npm run test -- --runInBand`
+
+# Run Locally
+
+- API: `npm run dev --workspace=api`
+- Web: `npm run dev --workspace=web`
+- Storybook: `npm run storybook`
+
+# Conventions
+
+- All backend code in `packages/api/src`
+- React components in `packages/web/src/components`
+- Use `zod` for request validation
+
+# Architecture Overview
+
+The API is GraphQL (Apollo). Web uses Next.js with SSR.
+
+# External Services
+
+- Stripe for payments (`STRIPE_KEY`)
+- S3 for uploads (`AWS_BUCKET`)
+
+# Gotchas
+
+- Test snapshot paths are absolute—run `npm run test -- --updateSnapshot` after refactors.
+```
+
+### Pythonマイクロサービス {#python-microservice}
+
+```md
+# Build & Test
+
+- Build: `pip install -e .`
+- Test: `pytest`
+
+# Run Locally
+
+- `uvicorn app.main:app --reload`
+
+# Conventions
+
+- Config via Pydantic settings (`settings.py`)
+- CELERY tasks live in `tasks/`
+```
+
+---
+
+## 7 · ベストプラクティス {#7-best-practices}
+
+
+
+
+
+<Details summary="短く保つ">
+**150行以下**を目安にします。長いファイルはエージェントを遅くし、重要な情報を埋もれさせます。
+</Details>
+
+
+
+{" "}
+
+
+
+<Details summary="具体的なコマンドを使う">
+エージェントが推測せずにコピー&ペーストできるよう、コマンドはバッククォートで囲みます。
+</Details>
+
+
+
+{" "}
+
+
+
+<Details summary="コードと一緒に更新する">
+AGENTS.mdはコードのように扱い、ビルド手順が変わったらPRレビューで更新を促します。
+</Details>
+
+
+
+{" "}
+
+
+
+<Details summary="信頼できる唯一の情報源にする">
+重複するドキュメントを避け、貼り付ける代わりにREADMEや設計ドキュメントへリンクします。
+</Details>
+
+
+
+{" "}
+
+
+
+<Details summary="リクエストを具体的にする">
+目の前のタスクに対するガイダンスが具体的であるほど、エージェントは期待どおりに遂行しやすくなります。
+</Details>
+
+
+
+  
+
+<Details summary="マージ前に確認">
+テスト、lint、型チェック、合意したパス内に収まるdiffなど、客観的な証拠を求めます。
+</Details>
+
+
+
+
+
+---
+
+## 8 · エージェントがAGENTS.mdを使用する方法 {#8-how-agents-use-agentsmd}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">取り込み</div>
+
+タスク開始時、エージェントは最も近いAGENTS.mdをコンテキストウィンドウに読み込みます。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">計画</div>
+
+ビルド/テストコマンドは実行計画の作成に使われます（例: 編集後にテストを実行）。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">ツール選択</div>
+
+フォルダと命名規則は、`edit_file`や`create_file`などのツールの使い方を導きます。
+
+</div>
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">検証</div>
+
+注意点とドメイン語彙は推論を改善し、ハルシネーションを減らします。
+
+</div>
+
+</div>
+
+
+
+---
+
+## 9 · 問題が発生したとき {#9-when-things-go-wrong}
+
+あらゆる開発作業と同様に、スコープが拡大したり、前提が間違っていることが判明したりしたとき、エージェントのタスクには軌道修正が必要になることがあります。人間の協力者と連携するときに機能するのと同じ反復パターンがここでも適用されます。
+
+### エージェントのドリフトの警告サイン： {#warning-signs-of-agent-drift}
+
+- 実行中に自分自身を書き換える計画
+- 宣言されたパスの外での編集
+- 動作することを証明する失敗テストなしに主張される修正
+- 関連のない変更で膨れ上がった差分
+
+### 復旧プレイブック： {#recovery-playbook}
+
+1. **仕様を厳密にする**：エージェントが触れることのできるディレクトリやテストを狭める
+2. **良い部分を救出する**：失敗テストなどの有効な成果物を保持；ノイズの多い編集をリバート
+3. **クリーンに再開する**：改善された指示で新しいセッションを開始
+4. **引き継ぐ**：エージェントが失敗していることがわかったら、最終変更をペアプログラミングする
+
+---
+
+## 10 · 始め方 {#10-getting-started}
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**[[jp/cli/user-guides/specification-mode|Specification Mode]]**
+
+仕様 + AGENTS.md = 新機能の即時コンテキスト。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**[[jp/cli/user-guides/auto-run|自律レベル]]**
+
+信頼できる自動化は、正確なビルド/テストコマンドに依存します。
+
+</div>
+
+</div>
+
+
+
+### まとめ {#summary}
+
+1. リポジトリルート（必要に応じてサブモジュールも）に**AGENTS.md**を追加。
+2. ビルド/テストコマンド、規約、注意事項を文書化—_簡潔で実行可能に_。
+3. エージェントは自動的にそれを読みます；追加のフラグは不要。
+
+バックログから一つの控えめなバグまたは小さな機能を選んでください。どこから始めるか、問題を再現する方法、完了の合図となる証拠を述べる3つの明確な文を書いてください。エージェントを探索 → 計画 → コード → 検証のプロセスで実行し、証拠をレビューして、マージしてください。
+
+エージェントに必要なプレイブックを提供して、より少ない驚きでより速くシップしましょう！

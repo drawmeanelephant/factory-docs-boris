@@ -1,0 +1,775 @@
+---
+id: jp/guides/hooks/session-automation
+title: "セッション自動化"
+status: published
+summary: "コンテキスト読み込み、環境設定、依存関係管理でセッションセットアップを自動化する"
+parent: jp/guides/hooks/index
+tags: [guides, session, automation, setup, environment, context, dependencies, hook]
+relations: [relates_to=guides/hooks/session-automation]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">セッション自動化</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">コンテキスト読み込み、環境設定、依存関係管理でセッションセットアップを自動化する</p>
+
+
+このクックブックは、SessionStartフックを使用してDroidの起動時に開発環境を自動的に準備し、時間を節約して一貫性を確保する方法を説明します。
+
+## 仕組み {#how-it-works}
+
+SessionStartフック:
+
+1. **セッション開始時に実行**: 新しいセッションの開始時または再開時にトリガーされます
+2. **コンテキストの読み込み**: 関連するプロジェクト情報を会話に追加します
+3. **環境のセットアップ**: パス、環境変数、ツールを設定します
+4. **依存関係の確認**: 必要なツールとパッケージが利用可能であることを確認します
+5. **状態の永続化**: セッション全体の環境変数を設定します
+
+## 前提条件 {#prerequisites}
+
+自動化のための基本ツール:
+
+
+
+<div class="factory-codegroup">
+<div class="factory-codegroup-bar"><button type="button" class="factory-codegroup-tab is-active" data-tab-idx="0">macOS/Linux</button><button type="button" class="factory-codegroup-tab" data-tab-idx="1">Git/GitHub CLI</button></div>
+
+<div class="factory-codegroup-panel is-active" data-panel-idx="0">
+
+```bash
+# jq for JSON processing
+brew install jq  # macOS
+sudo apt-get install jq  # Ubuntu/Debian
+```
+
+</div>
+
+<div class="factory-codegroup-panel" data-panel-idx="1">
+
+```bash
+# For loading Git context
+git --version
+gh --version  # Optional: GitHub CLI
+```
+
+</div>
+
+</div>
+
+
+
+## 基本的なセッション自動化 {#basic-session-automation}
+
+### プロジェクトコンテキストの読み込み {#load-project-context}
+
+Droidにプロジェクト情報を自動的に提供します。
+
+`.factory/hooks/load-context.sh`を作成:
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+source_type=$(echo "$input" | jq -r '.source')
+
+# Only load context on startup and resume
+if [ "$source_type" != "startup" ] && [ "$source_type" != "resume" ]; then
+  exit 0
+fi
+
+cwd=$(echo "$input" | jq -r '.cwd')
+cd "$cwd"
+
+echo "📋 Loading project context..."
+echo ""
+
+# Project overview
+if [ -f "README.md" ]; then
+  echo "## Project Overview"
+  echo ""
+  head -n 20 README.md
+  echo ""
+fi
+
+# Recent git activity
+if [ -d ".git" ]; then
+  echo "## Recent Changes"
+  echo ""
+  echo "Latest commits:"
+  git log --oneline -5
+  echo ""
+
+  echo "Current branch: $(git branch --show-current)"
+  echo "Uncommitted changes: $(git status --short | wc -l | tr -d ' ') files"
+  echo ""
+fi
+
+# Project structure
+if [ -f "package.json" ]; then
+  echo "## Package Info"
+  echo ""
+  echo "Name: $(jq -r '.name' package.json)"
+  echo "Version: $(jq -r '.version' package.json)"
+  echo ""
+
+  echo "Scripts available:"
+  jq -r '.scripts | keys[]' package.json | head -n 10 | sed 's/^/  - /'
+  echo ""
+fi
+
+# TODO/FIXME comments
+echo "## Open TODOs"
+echo ""
+echo "Found $(grep -r "TODO\|FIXME" src/ 2>/dev/null | wc -l | tr -d ' ') TODO/FIXME comments in src/"
+echo ""
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/load-context.sh
+```
+
+`.factory/hooks.json`に追加:
+
+```json
+{
+  "SessionStart": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"$DROID_PROJECT_DIR\"/.factory/hooks/load-context.sh",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 開発環境のセットアップ {#setup-development-environment}
+
+ツールとパスを自動的に設定します。
+
+`.factory/hooks/setup-env.sh`を作成:
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+cwd=$(echo "$input" | jq -r '.cwd')
+cd "$cwd"
+
+echo "🔧 Setting up development environment..."
+
+# Detect and setup Node.js version
+if [ -f ".nvmrc" ] && command -v nvm &> /dev/null; then
+  NODE_VERSION=$(cat .nvmrc)
+  echo "📦 Switching to Node.js $NODE_VERSION"
+
+  # Persist environment changes using DROID_ENV_FILE
+  if [ -n "$DROID_ENV_FILE" ]; then
+    # Capture environment before nvm
+    ENV_BEFORE=$(export -p | sort)
+
+    # Source nvm and switch version
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    nvm use
+
+    # Capture changes and persist them
+    ENV_AFTER=$(export -p | sort)
+    comm -13 <(echo "$ENV_BEFORE") <(echo "$ENV_AFTER") >> "$DROID_ENV_FILE"
+
+    echo "✓ Node.js environment configured"
+  fi
+fi
+
+# Setup Python virtual environment
+if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+  if [ ! -d "venv" ]; then
+    echo "⚠️ Virtual environment not found. Consider creating one:"
+    echo "   python -m venv venv"
+  else
+    echo "🐍 Python virtual environment detected"
+
+    if [ -n "$DROID_ENV_FILE" ]; then
+      # Activate venv for session
+      echo "source \"$cwd/venv/bin/activate\"" >> "$DROID_ENV_FILE"
+      echo "✓ Virtual environment will be activated for Bash commands"
+    fi
+  fi
+fi
+
+# Add project binaries to PATH
+if [ -d "node_modules/.bin" ] && [ -n "$DROID_ENV_FILE" ]; then
+  echo "export PATH=\"\$PATH:$cwd/node_modules/.bin\"" >> "$DROID_ENV_FILE"
+  echo "✓ Added node_modules/.bin to PATH"
+fi
+
+# Setup Go workspace
+if [ -f "go.mod" ]; then
+  echo "🔷 Go module detected"
+  if [ -n "$DROID_ENV_FILE" ]; then
+    echo "export GO111MODULE=on" >> "$DROID_ENV_FILE"
+    echo "export GOPATH=$HOME/go" >> "$DROID_ENV_FILE"
+  fi
+fi
+
+echo ""
+echo "✓ Environment setup complete"
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/setup-env.sh
+```
+
+
+## 高度な自動化 {#advanced-automation}
+
+### 最新のLinear/GitHubイシューの読み込み {#load-recent-lineargithub-issues}
+
+現在の作業に関するコンテキストをDroidに提供します。
+
+`.factory/hooks/load-issues.sh`を作成:
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+source_type=$(echo "$input" | jq -r '.source')
+
+if [ "$source_type" != "startup" ]; then
+  exit 0
+fi
+
+echo "📋 Loading recent issues..."
+echo ""
+
+# Load GitHub issues if gh CLI is available
+if command -v gh &> /dev/null; then
+  echo "## Recent GitHub Issues"
+  echo ""
+
+  # Get assigned issues
+  gh issue list --assignee @me --limit 5 --json number,title,state | \
+    jq -r '.[] | "  - #\(.number): \(.title) [\(.state)]"'
+  echo ""
+fi
+
+# Load Linear issues if linear CLI is available
+if command -v linear &> /dev/null; then
+  echo "## Recent Linear Issues"
+  echo ""
+
+  # Get assigned issues
+  linear issue list --assignee @me --limit 5 2>/dev/null | head -n 10
+  echo ""
+fi
+
+# Check for CHANGELOG or ROADMAP
+if [ -f "CHANGELOG.md" ]; then
+  echo "## Recent Changelog"
+  echo ""
+  head -n 15 CHANGELOG.md
+  echo ""
+fi
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/load-issues.sh
+```
+
+### 依存関係の確認とインストール {#check-and-install-dependencies}
+
+依存関係が最新であることを自動的に確認します。
+
+`.factory/hooks/check-dependencies.sh`を作成:
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+cwd=$(echo "$input" | jq -r '.cwd')
+cd "$cwd"
+
+echo "📦 Checking dependencies..."
+echo ""
+
+# Node.js projects
+if [ -f "package.json" ]; then
+  if [ ! -d "node_modules" ]; then
+    echo "⚠️ node_modules not found"
+    echo "Suggestion: Run 'npm install' or 'yarn install'"
+    echo ""
+  else
+    # Check if package.json is newer than node_modules
+    if [ "package.json" -nt "node_modules" ]; then
+      echo "⚠️ package.json modified since last install"
+      echo "Suggestion: Run 'npm install' to update dependencies"
+      echo ""
+    else
+      echo "✓ Node dependencies up to date"
+      echo ""
+    fi
+  fi
+fi
+
+# Python projects
+if [ -f "requirements.txt" ]; then
+  if [ ! -d "venv" ]; then
+    echo "⚠️ Python virtual environment not found"
+    echo "Suggestion: Run 'python -m venv venv && source venv/bin/activate && pip install -r requirements.txt'"
+    echo ""
+  else
+    echo "✓ Python virtual environment exists"
+    echo ""
+  fi
+fi
+
+# Go projects
+if [ -f "go.mod" ]; then
+  if [ ! -d "vendor" ] && ! command -v go &> /dev/null; then
+    echo "⚠️ Go not found in PATH"
+    echo "Suggestion: Install Go from https://go.dev"
+    echo ""
+  else
+    echo "✓ Go environment ready"
+    echo ""
+  fi
+fi
+
+# Ruby projects
+if [ -f "Gemfile" ]; then
+  if ! command -v bundle &> /dev/null; then
+    echo "⚠️ Bundler not found"
+    echo "Suggestion: gem install bundler"
+    echo ""
+  else
+    if ! bundle check &>/dev/null; then
+      echo "⚠️ Ruby gems out of date"
+      echo "Suggestion: bundle install"
+      echo ""
+    else
+      echo "✓ Ruby gems up to date"
+      echo ""
+    fi
+  fi
+fi
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/check-dependencies.sh
+```
+
+### カスタムプロジェクトガイドラインの読み込み {#load-custom-project-guidelines}
+
+プロジェクト固有の指示を自動的に提供します。
+
+プロジェクトガイドラインを含む`.factory/AGENTS.md`を作成:
+
+```markdown
+# Project Guidelines for Droid
+
+## Code Style
+- Use TypeScript for all new files
+- Follow ESLint configuration strictly
+- Prefer functional components in React
+- Use async/await over promises
+
+## Testing
+- Write tests for all new features
+- Run `npm test` before committing
+- Maintain >80% code coverage
+
+## Architecture
+- Keep components under 200 lines
+- Use Redux for global state
+- Local state for component-specific data
+- No direct API calls from components (use services)
+
+## Git Workflow
+- Create feature branches from `dev`
+- Name branches: `feature/FAC-123-description`
+- Write descriptive commit messages
+- Squash commits before merging
+```
+
+`.factory/hooks/load-guidelines.sh`を作成:
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+source_type=$(echo "$input" | jq -r '.source')
+
+if [ "$source_type" != "startup" ]; then
+  exit 0
+fi
+
+cwd=$(echo "$input" | jq -r '.cwd')
+
+# Load project-specific guidelines
+if [ -f "$cwd/.factory/AGENTS.md" ]; then
+  echo "## Project Guidelines"
+  echo ""
+  cat "$cwd/.factory/AGENTS.md"
+  echo ""
+fi
+
+# Load PR templates
+if [ -f "$cwd/.github/PULL_REQUEST_TEMPLATE.md" ]; then
+  echo "## PR Template Reference"
+  echo ""
+  head -n 20 "$cwd/.github/PULL_REQUEST_TEMPLATE.md"
+  echo ""
+fi
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/load-guidelines.sh
+```
+
+
+### Gitブランチに基づくスマートコンテキスト {#smart-context-based-on-git-branch}
+
+現在のブランチに基づいて異なるコンテキストを読み込みます:
+
+
+
+`.factory/hooks/branch-context.sh`を作成:
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+cwd=$(echo "$input" | jq -r '.cwd')
+cd "$cwd"
+
+if [ ! -d ".git" ]; then
+  exit 0
+fi
+
+branch=$(git branch --show-current)
+
+echo "## Current Context: $branch"
+echo ""
+
+case "$branch" in
+  main|master)
+    echo "⚠️ Working on production branch!"
+    echo "Extra care needed - changes go to production"
+    echo ""
+
+    # Show recent production issues
+    if command -v gh &> /dev/null; then
+      echo "Recent production issues:"
+      gh issue list --label production --limit 3 --json number,title | \
+        jq -r '.[] | "  - #\(.number): \(.title)"'
+      echo ""
+    fi
+    ;;
+
+  dev|develop)
+    echo "📦 Working on development branch"
+    echo "Standard development workflow applies"
+    echo ""
+    ;;
+
+  feature/*)
+    feature_name="${branch#feature/}"
+    echo "🔨 Feature branch: $feature_name"
+    echo ""
+
+    # Try to find related issue
+    if [[ $feature_name =~ FAC-[0-9]+ ]]; then
+      issue_id="${BASH_REMATCH[0]}"
+      echo "Related Linear issue: $issue_id"
+
+      # Fetch issue details if linear CLI available
+      if command -v linear &> /dev/null; then
+        linear issue view "$issue_id" 2>/dev/null || true
+        echo ""
+      fi
+    fi
+
+    # Show uncommitted changes
+    if [ -n "$(git status --short)" ]; then
+      echo "Uncommitted changes:"
+      git status --short | head -n 10
+      echo ""
+    fi
+    ;;
+
+  hotfix/*)
+    echo "🚨 HOTFIX BRANCH"
+    echo "Critical bug fix - expedite review and deployment"
+    echo ""
+    ;;
+esac
+
+exit 0
+```
+
+```bash
+chmod +x .factory/hooks/branch-context.sh
+```
+
+
+## 実際の例 {#real-world-examples}
+
+### 例1: モノレポワークスペースのセットアップ {#example-1-monorepo-workspace-setup}
+
+適切なパッケージに自動的に切り替えます:
+
+
+
+`.factory/hooks/monorepo-setup.sh`を作成:
+
+```bash
+#!/bin/bash
+set -e
+
+input=$(cat)
+cwd=$(echo "$input" | jq -r '.cwd')
+
+# Check if this is a monorepo
+if [ ! -f "$cwd/package.json" ] || ! grep -q '"workspaces"' "$cwd/package.json"; then
+  exit 0
+fi
+
+echo "## Monorepo Structure"
+echo ""
+
+# List workspaces
+if command -v npm &> /dev/null; then
+  echo "Available workspaces:"
+  npm ls --workspaces --depth=0 2>/dev/null | grep -E "^[├└]" | sed 's/^[├└]── /  - /'
+  echo ""
+fi
+
+# Show recent changes by workspace
+if [ -d ".git" ]; then
+  echo "Recently modified workspaces:"
+  git diff --name-only HEAD~5..HEAD | \
+    grep -E "^(packages|apps)/" | \
+    cut -d/ -f1-2 | \
+    sort -u | \
+    head -n 5 | \
+    sed 's/^/  - /'
+  echo ""
+fi
+
+exit 0
+```
+
+
+### 例2: Docker環境の確認 {#example-2-docker-environment-check}
+
+Dockerサービスが実行中であることを確認します:
+
+
+
+`.factory/hooks/check-docker.sh`を作成:
+
+```bash
+#!/bin/bash
+
+if ! command -v docker &> /dev/null; then
+  exit 0
+fi
+
+# Check if Docker daemon is running
+if ! docker info &>/dev/null; then
+  echo "⚠️ Docker daemon not running"
+  echo "Suggestion: Start Docker Desktop or run 'sudo systemctl start docker'"
+  echo ""
+  exit 0
+fi
+
+echo "## Docker Environment"
+echo ""
+
+# Check for docker-compose.yml
+if [ -f "docker-compose.yml" ] || [ -f "docker-compose.yaml" ]; then
+  echo "Docker Compose configuration found"
+
+  # Check if services are running
+  if docker-compose ps &>/dev/null; then
+    echo ""
+    echo "Running services:"
+    docker-compose ps --format "table {{.Name}}\t{{.Status}}" | tail -n +2 | sed 's/^/  /'
+  else
+    echo "Suggestion: Start services with 'docker-compose up -d'"
+  fi
+  echo ""
+fi
+
+exit 0
+```
+
+
+## ベストプラクティス {#best-practices}
+
+
+
+<div class="factory-steps">
+
+<div class="factory-step">
+
+<div class="factory-step-title">コンテキストを簡潔に保つ</div>
+
+重要な情報のみを読み込みます:
+```bash
+# Show summary, not full content
+echo "Found $(wc -l < README.md) lines in README"
+# Instead of: cat README.md
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">高コストな処理をキャッシュする</div>
+
+高コストなチェックの繰り返しを避けます:
+```bash
+CACHE_FILE="/tmp/droid-context-$(date +%Y%m%d)"
+if [ -f "$CACHE_FILE" ]; then
+  cat "$CACHE_FILE"
+  exit 0
+fi
+
+# Generate context...
+echo "$context" | tee "$CACHE_FILE"
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">環境にはDROID_ENV_FILEを使用</div>
+
+環境変数を正しく永続化します:
+```bash
+if [ -n "$DROID_ENV_FILE" ]; then
+  echo 'export NODE_ENV=development' >> "$DROID_ENV_FILE"
+  echo 'export API_URL=http://localhost:3000' >> "$DROID_ENV_FILE"
+fi
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">不足しているツールを適切に処理する</div>
+
+外部コマンドを使用する前に確認します:
+```bash
+if command -v gh &> /dev/null; then
+  gh issue list
+else
+  echo "GitHub CLI not installed (skip with: brew install gh)"
+fi
+```
+
+</div>
+
+
+
+  
+
+<div class="factory-step">
+
+<div class="factory-step-title">実行可能な提案を提供する</div>
+
+次に何をすべきかをユーザーに伝えます:
+```bash
+echo "⚠️ Dependencies out of date"
+echo "Action: Run 'npm install' to update"
+echo "Or: Let me handle this - just ask 'install dependencies'"
+```
+
+</div>
+
+</div>
+
+
+
+## トラブルシューティング {#troubleshooting}
+
+
+
+    **問題**: 読み込まれる情報が多すぎる
+
+    **解決策**: 要約して詳細にリンクします:
+    ```bash
+    echo "README.md exists ($(wc -l < README.md) lines)"
+    echo "Run 'cat README.md' to view full content"
+    ```
+
+
+
+    **問題**: Bashコマンドで変数が利用できない
+
+    **解決策**: DROID_ENV_FILEの使用方法を確認します:
+    ```bash
+    if [ -z "$DROID_ENV_FILE" ]; then
+      echo "DROID_ENV_FILE not available" >&2
+      exit 1
+    fi
+
+    # Append, don't overwrite
+    echo 'export VAR=value' >> "$DROID_ENV_FILE"
+    ```
+
+
+
+    **問題**: セッション開始に時間がかかりすぎる
+
+    **解決策**: 負荷の高い操作を非同期で実行します:
+    ```bash
+    # Start background job for slow operations
+    (
+      sleep 1  # Let Droid start first
+      expensive_operation > /tmp/droid-context.txt
+    ) &
+
+    # Return immediately with basic context
+    echo "Loading detailed context in background..."
+    ```
+
+
+
+## 関連項目 {#see-also}
+
+- [[jp/reference/hooks-reference|フックリファレンス]] - 完全なフックAPI文書
+- [[jp/cli/configuration/hooks-guide|Get started with hooks]] - 基本的なフックの紹介
+- [[jp/guides/hooks/notifications|Custom notifications]] - イベントに関する通知を受け取る
+- [[jp/guides/hooks/logging-analytics|Logging and analytics]] - セッションメトリクスを追跡する

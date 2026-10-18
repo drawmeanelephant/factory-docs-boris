@@ -1,0 +1,192 @@
+---
+id: jp/enterprise/index
+title: "Droidによるエンタープライズ"
+status: published
+summary: "世界最高水準のセキュリティ環境でDroidをデプロイ、保護、運用する方法。"
+parent: jp/index
+tags: [enterprise]
+relations: [relates_to=enterprise/index]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">Droidによるエンタープライズ</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">世界最高水準のセキュリティ環境でDroidをデプロイ、保護、運用する方法。</p>
+
+
+Factoryのエンタープライズプラットフォームは、**最高レベルのセキュリティを要求する顧客**—システム上重要な銀行、政府機関、ヘルスケア、国家安全保障、その他の規制対象組織—向けに設計されています。
+
+単一のクラウドIDEに縛るのではなく、Droidは**どこでも実行できるCLIおよびエージェントランタイム**です：
+
+- 開発者のラップトップで、任意のターミナルやIDEで
+- CI/CDパイプライン内で（GitHub、GitLab、内部ランナー）
+- VM、Kubernetesクラスター、強化されたdevcontainer内で
+- アウトバウンドインターネットアクセスのない**完全にエアギャップされた環境**で
+
+このセクションでは、Droidを安全にデプロイし、使用可能なモデルとツールを管理し、エンタープライズ規模でその動作を観察する方法について説明します。
+
+---
+
+## このセクションでカバーする内容 {#what-this-section-covers}
+
+これらのページを、Droidsのためのエンタープライズプレイブックとして併用してください：
+
+
+
+<div class="factory-card-group">
+
+<div class="factory-card">
+
+**アイデンティティとアクセス**
+
+組織、プロジェクト、フォルダ、ユーザーがどのように識別され、SSO/SCIMとRBACが誰がどの権限でDroidを実行できるかをどのように決定するか。
+[[jp/enterprise/identity-and-access|アイデンティティとアクセス管理]]を参照してください。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**プライバシーとデータフロー**
+
+クラウド、ハイブリッド、完全エアギャップデプロイメントにおけるコード、プロンプト、テレメトリの正確なデータフロー。
+[[jp/enterprise/privacy-and-data-flows|プライバシー、データフロー、ガバナンス]]を参照してください。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**ネットワークとデプロイ**
+
+クラウド管理、ハイブリッド、完全エアギャップデプロイメントのリファレンスアーキテクチャと、プロキシおよびmTLS設定。
+[[jp/enterprise/network-and-deployment|ネットワークとデプロイ設定]]を参照してください。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**LLM安全性と制御**
+
+Droidがコマンドリスクを分類し、許可/拒否リストを適用し、Droid Shieldでシークレットをスキャンし、フックやサンドボックスと連携する方法。
+[[jp/enterprise/llm-safety-and-agent-controls|LLM安全性とエージェント制御]]を参照してください。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**モデルと連携**
+
+階層型モデル許可/拒否、LLMゲートウェイ、BYOK、MCPサーバー、droid、コマンド、そしてDroidが既存AIスタックに接続する方法。
+[[jp/enterprise/models-llm-gateways-and-integrations|モデル、LLMゲートウェイ、連携]]を参照してください。
+
+</div>
+
+
+  
+
+<div class="factory-card">
+
+**分析とコンプライアンス**
+
+OTELネイティブのテレメトリ、分析、監査ログ、およびFactoryがSOC2、ISO 27001、ISO 42001、社内規制レビューをどう支援するか。
+[[jp/enterprise/usage-cost-and-analytics|利用状況、コスト、生産性分析]]と[[jp/enterprise/compliance-audit-and-monitoring|コンプライアンス、監査、監視]]を参照してください。
+
+</div>
+
+</div>
+
+
+
+---
+
+## エンタープライズの基盤 {#enterprise-foundations}
+
+### 設計によるマルチデプロイメント {#multideployment-by-design}
+
+Factoryは、すべて同じコアバイナリと設定モデルに基づいて構築された、Droidの3つのデプロイメントパターンをサポートしています：
+
+1. **クラウド管理型** – Droidは開発者マシンとCIで実行されますが、調整とオプションの分析にはFactoryのクラウドを使用します。モデルはFactory仲介型またはお客様持ち込み型のいずれかです。
+2. **ハイブリッドエンタープライズ** – Droidは完全にお客様のインフラストラクチャ（VM、CIランナー、コンテナ）で実行され、UXのためにFactoryクラウドにオプションで接続しますが、すべてのLLMとテレメトリはお客様のネットワーク内で終端されます。
+3. **完全エアギャップ型** – Droidは**アウトバウンドインターネットアクセスのない**ネットワークで実行されます。モデルとOTELコレクターはこの環境内で完全にホストされ、Factoryがトラフィックを受信することはありません。
+
+クラウド管理型モードで開始し、開発者がDroidと対話する方法を変更することなく、重要なワークロードをハイブリッドまたはエアギャップ環境に移行できます。
+
+### デバイス単位のドリフトではなく、階層制御 {#hierarchical-control-not-perdevice-drift}
+
+エンタープライズポリシーは**階層設定モデル**を通じて表現されます：
+
+- **組織** → グローバルデフォルトと厳格なセキュリティポリシー
+- **プロジェクト** → `.factory/`にコミットされたリポジトリレベルの設定
+- **フォルダー** → リポジトリ内のより狭いチームまたはサブシステムの上書き
+- **ユーザー** → 上位レベルが指定されていない場合のみの個人設定
+
+上位レベルは下位レベルによって**上書きされることはありません**。組織およびプロジェクト設定は下方に拡張されます。ユーザーはより厳格な制御を選択できますが、それらを弱めることはできません。この階層はモデル、ツール、MCPサーバー、droid、コマンド、自律レベル、およびテレメトリ送信先を管理します。
+
+詳細は[[jp/enterprise/hierarchical-settings-and-org-control|階層設定と組織管理]]をご覧ください。
+
+### 多層防御エージェント安全性 {#defenseindepth-agent-safety}
+
+LLMは確率的であり、Factoryはそれらを強力だが信頼できないコンポーネントとして扱います。Droidの安全性ストーリーは以下を組み合わせています：
+
+- **決定論的制御** – コマンドリスク分類、許可/拒否リスト、ファイルとリポジトリ保護、サンドボックス境界
+- **Droid Shield** – プロンプト、ファイル、コマンド全体でのシークレットスキャニングとDLPスタイルのチェック
+- **フック** – お客様独自のセキュリティシステムと統合するためのプログラム可能な実行ポイント（プロンプト前、ツール前、コマンド前、git前、編集後）
+- **サンドボックス化されたランタイム** – 高リスク作業のためのdevcontainerと強化されたVM内でのDroid実行
+
+これらの層は、開発者が好むLLMやIDEとは独立しています。
+
+### OTELネイティブ可観測性 {#otelnative-observability}
+
+すべての本格的なエンタープライズデプロイメントでは、*「エージェントが何を、どこで、どのようなコストで行っているか？」*に答える必要があります。
+
+Droidは**OpenTelemetryメトリクス、トレース、ログ**を発出するため、以下が可能です：
+
+- 既存のコレクター（Prometheus、Datadog、Splunk、Jaeger等）に直接テレメトリを送信
+- 組織/チーム/ユーザーごとのセッション、LLM使用状況、コード編集、ツール呼び出し、エラーの追跡
+- Droidの活動を既に使用しているSDLCメトリクスと関連付け
+
+Factoryのクラウドアナリティクスは**任意**です。高セキュリティ顧客は、すべてのテレメトリを独占的に自身のインフラストラクチャにルーティングできます。
+
+[[jp/enterprise/usage-cost-and-analytics|利用状況、コスト、生産性分析]]と[[jp/enterprise/compliance-audit-and-monitoring|コンプライアンス、監査、モニタリング]]をご覧ください。
+
+---
+
+## 信頼とコンプライアンス {#trust-compliance}
+
+Factoryは、最も要求の厳しい組織に適したセキュリティとコンプライアンス体制を維持しています：
+
+- **SOC 2**
+- **ISO 27001**
+- **ISO 42001**
+
+最新のレポート、サブプロセッサーリスト、セキュリティアーキテクチャの詳細は、**[Trust Center](https://trust.factory.ai)**でご確認いただけます。
+
+Droidがお客様の規制要件と監査要件にどのように適合するかの詳細については、[[jp/enterprise/compliance-audit-and-monitoring|コンプライアンス、監査、モニタリング]]から始めてください。
+
+
+## Section Directory {#section-directory}
+
+- [[jp/enterprise/compliance-audit-and-monitoring|コンプライアンス、監査、モニタリング]]
+- [[jp/enterprise/enterprise-plugin-registry|エンタープライズプラグインレジストリ]]
+- [[jp/enterprise/eu-deployment|EUデプロイメント]]
+- [[jp/enterprise/github-integration-security|GitHubインテグレーションセキュリティ]]
+- [[jp/enterprise/hierarchical-settings-and-org-control|階層設定と組織管理]]
+- [[jp/enterprise/identity-and-access|アイデンティティとアクセス管理]]
+- [[jp/enterprise/identity-sso-and-scim|アイデンティティ、ドメイン、SSO、SCIM]]
+- [[jp/enterprise/llm-safety-and-agent-controls|LLMの安全性とエージェント制御]]
+- [[jp/enterprise/models-llm-gateways-and-integrations|モデル、LLMゲートウェイ、インテグレーション]]
+- [[jp/enterprise/network-and-deployment|ネットワークとデプロイ設定]]
+- [[jp/enterprise/privacy-and-data-flows|プライバシー、データフロー、ガバナンス]]
+- [[jp/enterprise/security-review|セキュリティレビュー]]
+- [[jp/enterprise/service-accounts|サービスアカウント]]
+- [[jp/enterprise/telemetry-export|テレメトリエクスポート（OTEL）]]
+- [[jp/enterprise/usage-cost-and-analytics|使用量、コスト、生産性分析]]

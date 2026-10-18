@@ -1,0 +1,184 @@
+---
+id: jp/cli/configuration/custom-slash-commands
+title: "カスタムスラッシュコマンド"
+status: published
+summary: "チャット入力から実行できる再利用可能なMarkdownプロンプトや実行可能スクリプトでCLIを拡張する。"
+parent: jp/cli/configuration/index
+tags: [cli, slash-commands, custom-commands, commands, shortcuts, prompts, scripts, automation]
+relations: [relates_to=cli/configuration/custom-slash-commands]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">カスタムスラッシュコマンド</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">チャット入力から実行できる再利用可能なMarkdownプロンプトや実行可能スクリプトでCLIを拡張する。</p>
+
+
+カスタムスラッシュコマンドは、繰り返し可能なプロンプトやセットアップ手順を`/shortcuts`に変換します。Droidは`.factory/commands`フォルダのペアをスキャンし、各ファイルをコマンドに変換して、結果を会話またはターミナルセッションに直接パイプします。
+
+
+
+<Aside kind="note">
+**スキルはスラッシュコマンドとしてユーザーから呼び出せるようになりました。** `.factory/skills/`に、スラッシュコマンド（ユーザー起動）としてもDroidが呼び出せる機能としても動作するスキルを作成できます。既存の`.factory/commands/`ファイルはそのまま動作します。新しいコマンドでは、補助ファイルや[[jp/cli/configuration/skills#control-who-invokes-a-skill|呼び出し制御]]などの追加機能を備えた[[jp/cli/configuration/skills|スキル]]の使用を検討してください。
+</Aside>
+
+
+
+---
+
+## 1 · 検出と命名 {#1-discovery-naming}
+
+| スコープ         | 場所                   | 目的                                                                                             |
+| ------------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
+| **ワークスペース** | `<repo>/.factory/commands` | チームメイトと共有するプロジェクト固有のコマンド。同じスラッグを持つ個人コマンドをオーバーライドします。 |
+| **個人**  | `~/.factory/commands`      | 常にスキャンされます。プライベートまたはクロスプロジェクトのショートカットを保存します。                                          |
+
+- Markdown（`*.md`）ファイルと先頭にshebang（`#!`）があるファイルのみが登録されます。
+- ファイル名はスラッグ化されます（小文字、スペース → `-`、URL安全でない文字は削除）。`Code Review.mdx`は`/code-review`になります。
+- チャットから`/command-name optional arguments`でコマンドを呼び出します。スラッシュ候補はファイルから取得した説明を使用します。
+- `/commands`を実行して、コマンドの閲覧、リロード（`R`）、またはインポート用の**カスタムコマンド**マネージャーUIを開きます。
+- コマンドは`commands`ディレクトリのトップレベルに配置する必要があります。ネストしたフォルダは現在無視されます。
+
+---
+
+## 2 · Markdownコマンド {#2-markdown-commands}
+
+Markdownファイルは、droidの次のターンをシードするシステム通知にレンダリングされます。オプションのYAMLフロントマターがオートコンプリートメタデータを制御します。
+
+```md
+---
+description: Send a code review checklist
+argument-hint: <branch-name>
+---
+
+Please review `$ARGUMENTS` and summarize any merge blockers, test gaps, and risky areas.
+
+- Highlight security or performance concerns
+- Suggest follow-up tasks with owners
+- List files that need attention
+```
+
+| フロントマターキー | 目的                                                          |
+| --------------- | ---------------------------------------------------------------- |
+| `description`   | スラッシュ候補に表示される生成された要約をオーバーライドします。      |
+| `argument-hint` | インライン使用法ヒントを追加します（例：`/code-review <branch-name>`）。 |
+| `allowed-tools` | 将来の使用のために予約されています。省略しても安全です。                           |
+
+`$ARGUMENTS`はコマンド名の後に入力されたすべてに展開されます。`$ARGUMENTS`を参照しない場合、本文は変更されずに送信されます。
+
+
+
+<Aside kind="tip">
+Markdown出力はシステム通知にラップされるため、次のエージェントターンで
+  すぐにプロンプトを確認できます。
+</Aside>
+
+
+
+
+
+<Aside kind="note">
+`$1`や`$2`のような位置プレースホルダーはまだサポートされていません。
+  構造化入力が必要な場合は`$ARGUMENTS`を使用し、プロンプト内で解析してください。
+</Aside>
+
+
+
+---
+
+## 3 · 実行可能コマンド {#3-executable-commands}
+
+実行可能ファイルは、CLIがインタープリターを呼び出せるように、有効なshebangで始まる必要があります。
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Preparing $1"
+npm install
+npm run lint
+echo "Ready to deploy $1"
+```
+
+- 実行可能ファイルはコマンド引数を受け取ります（`/deploy feature/login` → `$1=feature/login`）。
+- スクリプトは現在の作業ディレクトリから実行され、あなたの環境を継承するため、あなたと同じ権限を持ちます。
+- 標準出力と標準エラー出力（最大64 KB）およびスクリプトの内容は、透明性のためにチャットトランスクリプトに投稿されます。失敗してもログは表示されます。
+
+---
+
+## 4 · コマンドの管理 {#4-managing-commands}
+
+- **編集または追加**：`.factory/commands`でファイルを直接編集します。CLIは起動時に再スキャンします。再起動せずにリロードするには、`/commands`内で`R`を押してください。
+- **インポート**：既存の`.agents`または`.claude`コマンドをインポートします：`/commands`を開き、`I`を押し、エントリを選択すると、Factoryディレクトリにコピーされます。
+- **削除**：ファイルを削除してコマンドを削除します。ワークスペースコマンドが優先されるため、リポジトリバージョンを削除すると、存在する場合は個人のフォールバックが表示されます。
+
+---
+
+## 5 · 使用パターン {#5-usage-patterns}
+
+- チームメイトが同じショートカットを共有できるように、リポジトリの`.factory/commands`内でプロジェクトワークフローをバージョン管理下に置きます。
+- 再実行しても安全な冪等スクリプトを作成し、クリーンアップ手順はファイル自体に文書化します。
+- チェックリスト、コードレビューのルーブリック、オンボーディング指示、またはdroidに頻繁に提供するコンテキストパケット用にMarkdownテンプレートを使用します。
+- 実行可能コマンドを他のソースコードと同様にレビューし、秘密情報は慎重に扱い、すでにシェルにロードされている環境変数を参照することを推奨します。
+
+---
+
+## 6 · 例 {#6-examples}
+
+### コードレビューのルーブリック（Markdown） {#code-review-rubric-markdown}
+
+```md
+---
+description: Ask droid for a structured code review
+argument-hint: <branch-or-PR>
+---
+
+Review `$ARGUMENTS` and respond with:
+
+1. **Summary** – What changed and why it matters.
+2. **Correctness** – Tests, edge cases, and regressions to check.
+3. **Risks** – Security, performance, or migration concerns.
+4. **Follow-up** – Concrete TODOs for the author.
+
+Include file paths alongside any specific feedback.
+```
+
+`/review feature/login-flow`で呼び出して、diffを検査する前にdroidに一貫したチェックリストをシードします。
+
+### 日次スタンドアップヘルパー（Markdown） {#daily-standup-helper-markdown}
+
+```md
+---
+description: Summarize progress for standup
+---
+
+Draft a standup update using:
+
+- **Yesterday:** Key wins, merged PRs, or blockers cleared.
+- **Today:** Planned work items and their goals.
+- **Risks:** Anything at risk of slipping, support needed, or cross-team dependencies.
+
+Keep it to three short bullet sections.
+```
+
+gitヒストリーやTODOリストをdroidがレビューした後に`/standup`を使用して、洗練されたアップデートを生成します。
+
+### リグレッションスモークテスト（実行可能） {#regression-smoke-test-executable}
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+target=${1:-"src"}
+
+echo "Running lint + unit tests for $target"
+npm run lint -- "$target"
+npm test -- --runTestsByPath "$target"
+
+echo "Collecting git status"
+git status --short
+
+echo "Done"
+```
+
+`smoke.sh`として保存すると、`/smoke`として表示されます。パス（`/smoke src/widgets/__tests__/widget.test.tsx`）を渡してチェックを制限し、集約された出力をスレッドの全員と共有します。
+
+一度セットアップすると、カスタムスラッシュコマンドは複数ステップのプロンプトや環境セットアップを単一のキーストロークに圧縮し、定型文を繰り返すのではなくdroidのガイドに集中できるようになります。

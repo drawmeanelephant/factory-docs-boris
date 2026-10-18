@@ -1,0 +1,906 @@
+---
+id: jp/reference/hooks-reference
+title: "フックリファレンス"
+status: published
+summary: "Droidでフックを実装するためのリファレンスドキュメント"
+parent: jp/reference/index
+tags: [reference]
+relations: [relates_to=reference/hooks-reference]
+---
+<div class="factory-page-title-row"><h1 class="factory-page-title">フックリファレンス</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+
+<p class="factory-page-subtitle">Droidでフックを実装するためのリファレンスドキュメント</p>
+
+
+
+
+<Aside kind="tip">
+例付きのクイックスタートガイドは、[[jp/cli/configuration/hooks-guide|フックを始める]]を参照してください。
+</Aside>
+
+
+
+## 設定 {#configuration}
+
+Droidフックは各スコープの`hooks.json`に保存され、[[jp/cli/configuration/settings|settings.json]]と並んで配置されます：
+
+* `~/.factory/hooks.json` – ユーザー（全プロジェクトに適用）
+* `.factory/hooks.json` – プロジェクト（共有のためコミット）
+* Enterprise管理ポリシーフック
+
+`hooks.json`が存在しない場合、Droidは対応する`settings.json`の`hooks`キーで宣言されたフックにフォールバックします。
+
+
+
+<Aside kind="note">
+**`.factory/hooks/hooks.json`からの移行。** Droidは以前、ネストされた`hooks/hooks.json`ファイルにフックを書き込んでいました。既存ファイルは変更なしで引き続き動作します。次回の保存時にスコープルートに`hooks.json`を書き込み、旧ファイルを`hooks/hooks.migrated.json`としてアーカイブします。
+</Aside>
+
+
+
+### 組織管理フック {#org-managed-hooks}
+
+組織は、[Enterprise Controls](https://app.factory.ai) の **Hooks Policy** セクションを通じて、組織管理設定に保存される強制力のあるフックを一元的に定義できます。これにより、管理者は標準フックをすべてのマシンに配布し、必要に応じて非管理フックをすべて無視できます。
+
+| フィールド | 型 | 説明 |
+| :---- | :--- | :---------- |
+| `hooks` | `object` | [[jp/reference/hooks-reference#hook-events|フックイベント]] をキーとする組織定義フック。各イベントは、`hooks.json` ファイルと同じ [[jp/reference/hooks-reference#structure|構造]] を使用するマッチャーグループの配列にマッピングされます。常に読み込まれ、下位レベルで削除したり弱めたりすることはできません。 |
+| `allowManagedHooksOnly` | `boolean` | `true` の場合、組織管理フックとプラグインフックのみが読み込まれます。ユーザーレベルおよびプロジェクトレベルのフック（ローカルで有効化されたプラグインのフックを含む）は無視されます。デフォルトは `false` で、すべてのレベルのフックが通常どおりマージされます。 |
+
+**組織管理設定の例:**
+
+```json
+{
+  "allowManagedHooksOnly": true,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Execute",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/local/bin/audit-command.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+
+
+<Aside kind="note">
+`hooks` と `allowManagedHooksOnly` は [[jp/enterprise/hierarchical-settings-and-org-control|管理設定]] を通じて適用されるエンタープライズ/組織レベルの設定です。個々のユーザーがこれらを上書きしたり弱めたりすることはできません。他のレベルとのマージ方法については [[jp/enterprise/hierarchical-settings-and-org-control#settings-json-schema|完全なスキーマ]] を参照してください。
+</Aside>
+
+
+
+### 構造 {#structure}
+
+フックはマッチャーによって整理され、各マッチャーは複数のフックを持つことができます：
+
+```json
+{
+  "hooks": {
+    "EventName": [
+      {
+        "matcher": "ToolPattern",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "your-command-here"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+* **matcher**: ツール名にマッチするパターン、大文字小文字を区別（`PreToolUse`と`PostToolUse`にのみ適用）
+  * 単純な文字列は完全一致：`Create`はCreateツールのみにマッチ
+  * 正規表現をサポート：`Edit|Create`または`Notebook.*`
+  * `*`を使用してすべてのツールにマッチ。空文字列（`""`）を使用するか、`matcher`を空白のままにすることもできます。
+* **hooks**: パターンがマッチしたときに実行するコマンドの配列
+  * `type`：現在`"command"`のみサポート
+  * `command`：実行するbashコマンド（`$FACTORY_PROJECT_DIR`環境変数を使用可能）
+  * `timeout`：（オプション）その特定のコマンドをキャンセルするまでの実行時間（秒）
+
+
+
+<Aside kind="warning">
+フックコマンドとスクリプトには相対パスではなく、**必ず絶対パスを使用してください**。
+  フックはDroidの現在の作業ディレクトリから実行されます。このディレクトリは実行中に変わる可能性があります。
+  プロジェクト相対スクリプトには`"$FACTORY_PROJECT_DIR"/path/to/script.sh`を使用し、グローバルスクリプトには次のようなフルパスを使用します:
+  `/usr/local/bin/script.sh`または`~/.factory/hooks/script.sh`。
+</Aside>
+
+
+
+`UserPromptSubmit`、`Notification`、`Stop`、`SubagentStop`などのマッチャーを使用しないイベントについては、matcherフィールドを省略できます：
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/prompt-validator.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### プロジェクト固有のフックスクリプト {#project-specific-hook-scripts}
+
+環境変数`FACTORY_PROJECT_DIR`（DroidがフックコマンドをSpawnしたときのみ利用可能）を使用して、プロジェクトに保存されたスクリプトを参照できます。これにより、Droidの現在のディレクトリに関係なくスクリプトが動作することを保証します：
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Create|Edit|ApplyPatch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$FACTORY_PROJECT_DIR\"/.factory/hooks/check-style.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### プラグインフック {#plugin-hooks}
+
+プラグインは、ユーザーおよびプロジェクトフックとシームレスに統合されるフックを提供できます。プラグインフックは、プラグインが有効になると自動的に設定にマージされます。
+
+**プラグインフックの仕組み**：
+
+* プラグインフックはプラグインの`hooks/hooks.json`ファイルまたは`hooks`フィールドのカスタムパスで指定されたファイルで定義されます
+* プラグインが有効になると、そのフックはユーザーおよびプロジェクトフックとマージされます
+* 異なるソースからの複数のフックが同じイベントに応答できます
+* プラグインフックは`${DROID_PLUGIN_ROOT}`環境変数を使用してプラグインファイルを参照します
+
+**プラグインフック設定の例**：
+
+```json
+{
+  "description": "Automatic code formatting",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Create|Edit|ApplyPatch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${DROID_PLUGIN_ROOT}/scripts/format.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+
+
+<Aside kind="note">
+プラグインフックは通常のフックと同じ形式を使用し、フックの目的を説明する任意の`description`フィールドを指定できます。
+</Aside>
+
+
+
+
+
+<Aside kind="note">
+プラグインフックはカスタムフックと並行して実行されます。複数のフックが同じイベントに一致した場合、それらはすべて並列に実行されます。
+</Aside>
+
+
+
+**プラグインの環境変数**：
+
+* `${DROID_PLUGIN_ROOT}`：プラグインディレクトリの絶対パス
+* `${FACTORY_PROJECT_DIR}`：プロジェクトルートディレクトリ（プロジェクトフックと同じ）
+* すべての標準環境変数が利用可能
+
+プラグインフックの作成については、プラグインコンポーネントリファレンスを参照してください。
+
+## フックイベント {#hook-events}
+
+### PreToolUse {#pretooluse}
+
+Droidがツールパラメータを作成した後、ツール呼び出しを処理する前に実行されます。
+
+**一般的なマッチャー：**
+
+* `Task` - サブdroidタスク（[[jp/cli/user-guides/specification-mode|subagents documentation]]を参照）
+* `Execute` - シェルコマンド
+* `Glob` - ファイルパターンマッチング
+* `Grep` - コンテンツ検索
+* `Read` - ファイル読み取り
+* `Edit` - ファイル編集
+* `Create` - ファイル作成
+* `FetchUrl`、`WebSearch` - Web操作
+
+### PostToolUse {#posttooluse}
+
+ツールが正常に完了した直後に実行されます。
+
+PreToolUseと同じマッチャー値を認識します。
+
+### Notification {#notification}
+
+Droidが通知を送信するときに実行されます。通知は以下の場合に送信されます：
+
+1. Droidがツールを使用する許可を必要とする場合。例：「DroidはExecuteの使用許可を必要としています」
+2. プロンプト入力が少なくとも60秒間アイドル状態の場合。「Droidはあなたの入力を待っています」
+
+### UserPromptSubmit {#userpromptsubmit}
+
+ユーザーがプロンプトを送信したときに、Droidが処理する前に実行されます。これにより、プロンプト/会話に基づいて追加のコンテキストを追加したり、プロンプトを検証したり、特定のタイプのプロンプトをブロックしたりできます。
+
+### Stop {#stop}
+
+Droidが応答を完了したときに実行されます。ユーザーの割り込みによって停止が発生した場合は実行されません。
+
+### SubagentStop {#subagentstop}
+
+サブdroid（Taskツール呼び出し）が応答を完了したときに実行されます。
+
+### PreCompact {#precompact}
+
+Droidがコンパクト操作を実行しようとする前に実行されます。
+
+**マッチャー：**
+
+* `manual` - `/compact`から呼び出される
+* `auto` - 自動コンパクトから呼び出される（コンテキストウィンドウが満杯のため）
+
+### SessionStart {#sessionstart}
+
+Droidが新しいセッションを開始するか既存のセッションを再開するときに実行されます（現在内部的には新しいセッションを開始します）。既存の問題やコードベースへの最近の変更などの開発コンテキストの読み込み、依存関係のインストール、または環境変数の設定に役立ちます。
+
+**マッチャー：**
+
+* `startup` - スタートアップから呼び出される
+* `resume` - `--resume`、`--continue`、または`/resume`から呼び出される
+* `clear` - `/clear`から呼び出される
+* `compact` - 自動または手動コンパクトから呼び出される
+
+### SessionEnd {#sessionend}
+
+Droidセッションが終了するときに実行されます。クリーンアップタスク、セッション統計のログ記録、またはセッション状態の保存に役立ちます。
+
+フック入力の`reason`フィールドは以下のいずれかになります：
+
+* `clear` - /clearまたは/newコマンドでセッションがクリアされた
+* `logout` - ユーザーがログアウトした
+* `prompt_input_exit` - プロンプト入力が表示されている間にユーザーが終了した
+* `other` - その他の終了理由
+
+## フック入力 {#hook-input}
+
+フックは、セッション情報とイベント固有のデータを含むJSONデータをstdinを通じて受信します：
+
+```typescript
+{
+  // Common fields
+  session_id: string
+  transcript_path: string  // Path to conversation JSON
+  cwd: string              // The current working directory when the hook is invoked
+  permission_mode: string  // Current permission mode: "off", "spec", "auto-low", "auto-medium", or "auto-high"
+
+  // Event-specific fields
+  hook_event_name: string
+  ...
+}
+```
+
+### PreToolUse入力 {#pretooluse-input}
+
+`tool_input`の正確なスキーマはツールに依存します。
+
+```json
+{
+  "session_id": "abc123",
+  "transcript_path": "/Users/.../.factory/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
+  "cwd": "/Users/...",
+  "permission_mode": "off",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Create",
+  "tool_input": {
+    "file_path": "/path/to/file.txt",
+    "content": "file content"
+  }
+}
+```
+
+### PostToolUse入力 {#posttooluse-input}
+
+`tool_input`と`tool_response`の正確なスキーマはツールに依存します。
+
+```json
+{
+  "session_id": "abc123",
+  "transcript_path": "/Users/.../.factory/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
+  "cwd": "/Users/...",
+  "permission_mode": "off",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Create",
+  "tool_input": {
+    "file_path": "/path/to/file.txt",
+    "content": "file content"
+  },
+  "tool_response": {
+    "filePath": "/path/to/file.txt",
+    "success": true
+  }
+}
+```
+
+### Notification入力 {#notification-input}
+
+```json
+{
+  "session_id": "abc123",
+  "transcript_path": "/Users/.../.factory/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
+  "cwd": "/Users/...",
+  "permission_mode": "off",
+  "hook_event_name": "Notification",
+  "message": "Task completed successfully"
+}
+```
+
+### UserPromptSubmit入力 {#userpromptsubmit-input}
+
+```json
+{
+  "session_id": "abc123",
+  "transcript_path": "/Users/.../.factory/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
+  "cwd": "/Users/...",
+  "permission_mode": "off",
+  "hook_event_name": "UserPromptSubmit",
+  "prompt": "Write a function to calculate the factorial of a number"
+}
+```
+
+### StopおよびSubagentStop入力 {#stop-and-subagentstop-input}
+
+`stop_hook_active`は、ストップフックの結果としてDroidがすでに継続している場合にtrueになります。この値をチェックするか、トランスクリプトを処理してDroidが無限に実行されるのを防いでください。
+
+```json
+{
+  "session_id": "abc123",
+  "transcript_path": "~/.factory/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
+  "cwd": "/Users/...",
+  "permission_mode": "off",
+  "hook_event_name": "Stop",
+  "stop_hook_active": true
+}
+```
+
+### PreCompact入力 {#precompact-input}
+
+`manual`の場合、`custom_instructions`はユーザーが`/compact`に渡すものから来ます。`auto`の場合、`custom_instructions`は空です。
+
+```json
+{
+  "session_id": "abc123",
+  "transcript_path": "~/.factory/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
+  "cwd": "/Users/...",
+  "permission_mode": "off",
+  "hook_event_name": "PreCompact",
+  "trigger": "manual",
+  "custom_instructions": ""
+}
+```
+
+### SessionStart入力 {#sessionstart-input}
+
+```json
+{
+  "session_id": "abc123",
+  "transcript_path": "~/.factory/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
+  "cwd": "/Users/...",
+  "permission_mode": "off",
+  "hook_event_name": "SessionStart",
+  "source": "startup"
+}
+```
+
+### SessionEnd入力 {#sessionend-input}
+
+```json
+{
+  "session_id": "abc123",
+  "transcript_path": "~/.factory/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
+  "cwd": "/Users/...",
+  "permission_mode": "off",
+  "hook_event_name": "SessionEnd",
+  "reason": "other"
+}
+```
+
+## フック出力 {#hook-output}
+
+フックがDroidに出力を返す方法は2つあります。出力は、ブロックするかどうかと、Droidとユーザーに表示すべきフィードバックを伝えます。
+
+### シンプル：終了コード {#simple-exit-code}
+
+フックは終了コード、stdout、stderrを通じて状態を伝えます：
+
+* **終了コード0**：成功。`stdout`はトランスクリプトモード（CTRL-R）でユーザーに表示されますが、`UserPromptSubmit`と`SessionStart`では例外で、stdoutがコンテキストに追加されます。
+* **終了コード2**：ブロッキングエラー。`stderr`はDroidに自動的に処理するためにフィードバックされます。以下のフックイベント別の動作を参照してください。
+* **その他の終了コード**：非ブロッキングエラー。`stderr`がユーザーに表示され、実行は継続されます。
+
+
+
+<Aside kind="warning">
+注意: 終了コードが0の場合、`UserPromptSubmit`フックを除いてDroidはstdoutを確認しません。
+  `UserPromptSubmit`フックではstdoutがコンテキストとして注入されます。
+</Aside>
+
+
+
+#### 終了コード2の動作 {#exit-code-2-behavior}
+
+| フックイベント | 動作 |
+| -------------- | ---- |
+| `PreToolUse` | ツール呼び出しをブロックし、stderrをDroidに表示 |
+| `PostToolUse` | stderrをDroidに表示（ツールはすでに実行済み） |
+| `Notification` | N/A、stderrをユーザーのみに表示 |
+| `UserPromptSubmit` | プロンプト処理をブロック、プロンプトを消去、stderrをユーザーのみに表示 |
+| `Stop` | 停止をブロック、stderrをDroidに表示 |
+| `SubagentStop` | 停止をブロック、stderrをサブdroidに表示 |
+| `PreCompact` | N/A、stderrをユーザーのみに表示 |
+| `SessionStart` | N/A、stderrをユーザーのみに表示 |
+| `SessionEnd` | N/A、stderrをユーザーのみに表示 |
+
+### 上級：JSON出力 {#advanced-json-output}
+
+フックは、より洗練された制御のために`stdout`で構造化JSONを返すことができます：
+
+#### 共通JSONフィールド {#common-json-fields}
+
+すべてのフックタイプは以下のオプションフィールドを含めることができます：
+
+```json
+{
+  "continue": true, // Whether Droid should continue after hook execution (default: true)
+  "stopReason": "string", // Message shown when continue is false
+
+  "suppressOutput": true, // フックが終了コード0で終了した場合、フックブロックをチャットビューから非表示にします（デフォルト: false）。詳細トランスクリプト（Ctrl+O）には引き続き表示され、失敗したフック（非ゼロ終了コード）は常に表示されます。
+  "systemMessage": "string" // Optional warning message shown to the user
+}
+```
+
+`continue`がfalseの場合、Droidはフック実行後に処理を停止します。
+
+* `PreToolUse`の場合、これは`"permissionDecision": "deny"`とは異なり、特定のツール呼び出しのみをブロックしてDroidに自動フィードバックを提供します。
+* `PostToolUse`の場合、これは`"decision": "block"`とは異なり、Droidに自動フィードバックを提供します。
+* `UserPromptSubmit`の場合、これはプロンプトの処理を防ぎます。
+* `Stop`と`SubagentStop`の場合、これは任意の`"decision": "block"`出力より優先されます。
+* すべての場合において、`"continue" = false`は任意の`"decision": "block"`出力より優先されます。
+
+`stopReason`は`continue`に付随し、ユーザーに表示される理由を示しますが、Droidには表示されません。
+
+#### `PreToolUse`決定制御 {#pretooluse-decision-control}
+
+`PreToolUse`フックはツール呼び出しを実行するかどうかを制御できます。
+
+* `"allow"`は許可システムをバイパスします。`permissionDecisionReason`はユーザーに表示されますが、Droidには表示されません。
+* `"deny"`はツール呼び出しの実行を防ぎます。`permissionDecisionReason`はDroidに表示されます。
+* `"ask"`はUIでツール呼び出しの確認をユーザーに求めます。`permissionDecisionReason`はユーザーに表示されますが、Droidには表示されません。
+
+さらに、フックは`updatedInput`を使用して実行前にツール入力を変更できます：
+
+* `updatedInput`により、ツールが実行される前にツールの入力パラメータを変更できます。これは変更または追加したいフィールドを含む`Record<string, unknown>`オブジェクトです。
+* これは`"permissionDecision": "allow"`と組み合わせてツール呼び出しを変更および承認する際に最も有用です。
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow",
+    "permissionDecisionReason": "My reason here",
+    "updatedInput": {
+      "field_to_modify": "new value"
+    }
+  }
+}
+```
+
+
+
+<Aside kind="note">
+PreToolUseフックでは`decision`フィールドと`reason`フィールドは非推奨です。
+  `hookSpecificOutput.permissionDecision`と
+  代わりに`hookSpecificOutput.permissionDecisionReason`を使用してください。非推奨フィールド
+  `"approve"`と`"block"`はそれぞれ`"allow"`と`"deny"`にマッピングされます。
+</Aside>
+
+
+
+#### `PostToolUse`決定制御 {#posttooluse-decision-control}
+
+`PostToolUse`フックはツール実行後にDroidにフィードバックを提供できます。
+
+* `"block"`は自動的にDroidに`reason`でプロンプトします。
+* `undefined`は何もしません。`reason`は無視されます。
+* `"hookSpecificOutput.additionalContext"`はDroidが考慮するコンテキストを追加します。
+
+```json
+{
+  "decision": "block" | undefined,
+  "reason": "Explanation for decision",
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "additionalContext": "Additional information for Droid"
+  }
+}
+```
+
+#### `UserPromptSubmit`決定制御 {#userpromptsubmit-decision-control}
+
+`UserPromptSubmit`フックはユーザープロンプトが処理されるかどうかを制御できます。
+
+* `"block"`はプロンプトの処理を防ぎます。送信されたプロンプトはコンテキストから消去されます。`"reason"`はユーザーに表示されますが、コンテキストには追加されません。
+* `undefined`はプロンプトを正常に続行させます。`"reason"`は無視されます。
+* `"hookSpecificOutput.additionalContext"`はブロックされない場合に文字列をコンテキストに追加します。
+
+```json
+{
+  "decision": "block" | undefined,
+  "reason": "Explanation for decision",
+  "hookSpecificOutput": {
+    "hookEventName": "UserPromptSubmit",
+    "additionalContext": "My additional context here"
+  }
+}
+```
+
+#### `Stop`/`SubagentStop`決定制御 {#stopsubagentstop-decision-control}
+
+`Stop`と`SubagentStop`フックはDroidが継続する必要があるかどうかを制御できます。
+
+* `"block"`はDroidの停止を防ぎます。Droidが続行方法を知るために`reason`を入力する必要があります。
+* `undefined`はDroidの停止を許可します。`reason`は無視されます。
+
+```json
+{
+  "decision": "block" | undefined,
+  "reason": "Must be provided when Droid is blocked from stopping"
+}
+```
+
+#### `SessionStart`決定制御 {#sessionstart-decision-control}
+
+`SessionStart`フックにより、セッション開始時にコンテキストを読み込むことができます。
+
+* `"hookSpecificOutput.additionalContext"`は文字列をコンテキストに追加します。
+* 複数のフックの`additionalContext`値が連結されます。
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "My additional context here"
+  }
+}
+```
+
+#### `SessionEnd`決定制御 {#sessionend-decision-control}
+
+`SessionEnd`フックはセッション終了時に実行されます。セッション終了をブロックすることはできませんが、クリーンアップタスクを実行できます。
+
+#### 終了コード例：Executeコマンド検証 {#exit-code-example-execute-command-validation}
+
+```python
+#!/usr/bin/env python3
+import json
+import re
+import sys
+
+# Define validation rules as a list of (regex pattern, message) tuples
+VALIDATION_RULES = [
+    (
+        r"\bgrep\b(?!.*\|)",
+        "Use 'rg' (ripgrep) instead of 'grep' for better performance and features",
+    ),
+    (
+        r"\bfind\s+\S+\s+-name\b",
+        "Use 'rg --files | rg pattern' or 'rg --files -g pattern' instead of 'find -name' for better performance",
+    ),
+]
+
+
+def validate_command(command: str) -> list[str]:
+    issues = []
+    for pattern, message in VALIDATION_RULES:
+        if re.search(pattern, command):
+            issues.append(message)
+    return issues
+
+
+try:
+    input_data = json.load(sys.stdin)
+except json.JSONDecodeError as e:
+    print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+    sys.exit(1)
+
+tool_name = input_data.get("tool_name", "")
+tool_input = input_data.get("tool_input", {})
+command = tool_input.get("command", "")
+
+if tool_name != "Execute" or not command:
+    sys.exit(1)
+
+# Validate the command
+issues = validate_command(command)
+
+if issues:
+    for message in issues:
+        print(f"• {message}", file=sys.stderr)
+    # Exit code 2 blocks tool call and shows stderr to Droid
+    sys.exit(2)
+```
+
+#### JSON出力例：コンテキスト追加と検証のためのUserPromptSubmit {#json-output-example-userpromptsubmit-to-a816cb1d}
+
+
+
+<Aside kind="note">
+`UserPromptSubmit`フックでは、どちらの方法でもコンテキストを注入できます:
+
+  * stdout付きの終了コード0: Droidがコンテキストを確認します（`UserPromptSubmit`の特別なケース）
+  * JSON出力: 動作をより細かく制御できます
+</Aside>
+
+
+
+```python
+#!/usr/bin/env python3
+import json
+import sys
+import re
+import datetime
+
+# Load input from stdin
+try:
+    input_data = json.load(sys.stdin)
+except json.JSONDecodeError as e:
+    print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+    sys.exit(1)
+
+prompt = input_data.get("prompt", "")
+
+# Check for sensitive patterns
+sensitive_patterns = [
+    (r"(?i)\b(password|secret|key|token)\s*[:=]", "Prompt contains potential secrets"),
+]
+
+for pattern, message in sensitive_patterns:
+    if re.search(pattern, prompt):
+        # Use JSON output to block with a specific reason
+        output = {
+            "decision": "block",
+            "reason": f"Security policy violation: {message}. Please rephrase your request without sensitive information."
+        }
+        print(json.dumps(output))
+        sys.exit(0)
+
+# Add current time to context
+context = f"Current time: {datetime.datetime.now()}"
+print(context)
+
+"""
+The following is also equivalent:
+print(json.dumps({
+  "hookSpecificOutput": {
+    "hookEventName": "UserPromptSubmit",
+    "additionalContext": context,
+  },
+}))
+"""
+
+# Allow the prompt to proceed with the additional context
+sys.exit(0)
+```
+
+#### JSON出力例：承認付きPreToolUse {#json-output-example-pretooluse-with-approval}
+
+```python
+#!/usr/bin/env python3
+import json
+import sys
+
+# Load input from stdin
+try:
+    input_data = json.load(sys.stdin)
+except json.JSONDecodeError as e:
+    print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
+    sys.exit(1)
+
+tool_name = input_data.get("tool_name", "")
+tool_input = input_data.get("tool_input", {})
+
+# Example: Auto-approve file reads for documentation files
+if tool_name == "Read":
+    file_path = tool_input.get("file_path", "")
+    if file_path.endswith((".md", ".mdx", ".txt", ".json")):
+        # Use JSON output to auto-approve the tool call
+        output = {
+            "decision": "approve",
+            "reason": "Documentation file auto-approved",
+            "suppressOutput": True  # チャットビューからフックブロックを非表示にします（トランスクリプトには表示）
+        }
+        print(json.dumps(output))
+        sys.exit(0)
+
+# For other cases, let the normal permission flow proceed
+sys.exit(0)
+```
+
+## MCPツールとの連携 {#working-with-mcp-tools}
+
+Droidフックは[[jp/cli/configuration/mcp|Model Context Protocol (MCP) tools]]とシームレスに動作します。MCPサーバーがツールを提供する場合、フックでマッチできる特別な命名パターンで表示されます。
+
+### MCPツールの命名 {#mcp-tool-naming}
+
+MCPツールは`mcp__<server>__<tool>`のパターンに従います。例：
+
+* `mcp__memory__create_entities` - Memoryサーバーのcreate entitiesツール
+* `mcp__filesystem__read_file` - Filesystemサーバーのread fileツール
+* `mcp__github__search_repositories` - GitHubサーバーのsearchツール
+
+### MCPツール用フックの設定 {#configuring-hooks-for-mcp-tools}
+
+特定のMCPツールまたはMCPサーバー全体をターゲットにできます：
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__memory__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Memory operation initiated' >> ~/mcp-operations.log"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*__write.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/user/scripts/validate-mcp-write.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## 例 {#examples}
+
+
+
+<Aside kind="tip">
+コード整形、通知、ファイル保護などの実践的な例は、入門ガイドの[[jp/cli/configuration/hooks-guide#more-examples|その他の例]]を参照してください。
+</Aside>
+
+
+
+## セキュリティに関する考慮事項 {#security-considerations}
+
+### 免責事項 {#disclaimer}
+
+**自己責任で使用してください**：Droidフックはシステム上で任意のシェルコマンドを自動的に実行します。フックを使用することにより、以下について承認したものとします：
+
+* 設定するコマンドについて全責任を負う
+* フックはユーザーアカウントがアクセスできる任意のファイルを変更、削除、アクセスできる
+* 悪意のあるまたは不適切に記述されたフックは、データ損失やシステム損傷を引き起こす可能性がある
+* Factory AIは一切の保証を提供せず、フック使用によるいかなる損害についても責任を負わない
+* 本番環境で使用する前に、安全な環境でフックを十分にテストすべきである
+
+設定に追加する前に、フックコマンドを必ず確認し理解してください。
+
+### セキュリティのベストプラクティス {#security-best-practices}
+
+より安全なフックを記述するための主要な実践事項：
+
+1. **入力の検証とサニタイズ** - 入力データを盲目的に信頼しない
+2. **シェル変数を常にクォートする** - `$VAR`ではなく`"$VAR"`を使用
+3. **パストラバーサルをブロック** - ファイルパスの`..`をチェック
+4. **絶対パスを使用** - スクリプトには常に完全パスを指定。Droidの現在ディレクトリに応じて不正に解決される可能性があるため、`./script.sh`や`hooks/script.sh`などの相対パスは使用しない。プロジェクトスクリプトには`"$FACTORY_PROJECT_DIR"/path/to/script.sh`を使用するか、グローバルスクリプトには`/usr/local/bin/script.sh`や`~/.factory/hooks/script.sh`などの完全パスを使用する。
+5. **機密ファイルをスキップ** - `.env`、`.git/`、キーなどを避ける
+
+### 設定の安全性 {#configuration-safety}
+
+設定ファイル内のフックの直接編集は即座に有効になりません。Droid：
+
+1. スタートアップ時にフックのスナップショットをキャプチャ
+2. セッション全体でこのスナップショットを使用
+3. フックが外部で変更された場合に警告
+4. 変更を適用するために`/hooks`メニューでのレビューが必要
+
+これにより、悪意のあるフック変更が現在のセッションに影響することを防ぎます。
+
+## フック実行の詳細 {#hook-execution-details}
+
+* **タイムアウト**：デフォルトで60秒の実行制限、コマンドごとに設定可能
+  * 個別のコマンドのタイムアウトは他のコマンドに影響しません
+* **並列化**：マッチするすべてのフックが並列で実行
+* **重複排除**：同一のフックコマンドが複数ある場合は自動的に重複排除
+* **環境**：Droidの環境で現在のディレクトリで実行
+  * `FACTORY_PROJECT_DIR`環境変数が利用可能で、プロジェクトルートディレクトリ（Droidが開始された場所）の絶対パスが含まれます
+* **入力**：stdinを通じてJSON
+* **出力**：
+  * PreToolUse/PostToolUse/Stop/SubagentStop：トランスクリプト（Ctrl-R）で進行状況表示
+  * Notification/SessionEnd：デバッグのみにログ（`--debug`）
+  * UserPromptSubmit/SessionStart：stdoutがDroidのコンテキストとして追加
+
+## デバッグ {#debugging}
+
+### 基本的なトラブルシューティング {#basic-troubleshooting}
+
+フックが動作しない場合：
+
+1. **設定を確認** - `/hooks`を実行してフックが登録されているか確認
+2. **構文を検証** - JSON設定が有効であることを確認
+3. **コマンドをテスト** - 最初にフックコマンドを手動で実行
+4. **権限を確認** - スクリプトが実行可能であることを確認
+5. **ログを確認** - `droid --debug`を使用してフック実行の詳細を確認
+
+一般的な問題：
+
+* **クォートがエスケープされていない** - JSON文字列内で`\"`を使用
+* **間違ったマッチャー** - ツール名が完全に一致することを確認（大文字小文字を区別）
+* **コマンドが見つからない** - スクリプトには完全パスを使用
+
+### 高度なデバッグ {#advanced-debugging}
+
+複雑なフックの問題について：
+
+1. **フック実行を検査** - `droid --debug`を使用して詳細なフック実行を確認
+2. **JSONスキーマを検証** - 外部ツールでフック入力/出力をテスト
+3. **環境変数を確認** - Droidの環境が正しいことを確認
+4. **エッジケースをテスト** - 異常なファイルパスや入力でフックを試行
+5. **システムリソースを監視** - フック実行中のリソース枯渇をチェック
+6. **構造化ログを使用** - フックスクリプトにログを実装
+
+### デバッグ出力例 {#debug-output-example}
+
+`droid --debug`を使用してフック実行の詳細を確認：
+
+```
+[DEBUG] Executing hooks for PostToolUse:Create
+[DEBUG] Getting matching hook commands for PostToolUse with query: Create
+[DEBUG] Found 1 hook matchers in settings
+[DEBUG] Matched 1 hooks for query "Create"
+[DEBUG] Found 1 hook commands to execute
+[DEBUG] Executing hook command: <Your command> with timeout 60000ms
+[DEBUG] Hook command completed with status 0: <Your stdout>
+```
+
+進行状況メッセージはトランスクリプトモード（Ctrl-R）に表示され、以下を示します：
+
+* 実行中のフック
+* 実行されているコマンド
+* 成功/失敗ステータス
+* 出力またはエラーメッセージ
