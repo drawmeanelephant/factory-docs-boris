@@ -4,18 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <title>{{title}} — Factory Documentation</title>
-  <link rel="icon" type="image/svg+xml" href="{{asset-url assets/img/favicon.svg}}">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>{{title}} — Unofficial Boris Demo</title>
+  <link rel="icon" type="image/svg+xml" href="{{asset-url assets/img/unofficial.svg}}">
   <link rel="stylesheet" href="{{asset-url assets/css/factory.css}}">
   {{head}}
 </head>
 <body class="factory-body factory-body--trunk" data-layout="trunk">
   <a class="skip-link" href="#main-content">Skip to content</a>
+  <aside class="factory-unofficial-notice" aria-label="Unofficial site notice" data-boris-search-exclude>
+    <strong>UNOFFICIAL / 非公式 — Independent Boris compiler demo</strong>
+    <p>Not affiliated with, endorsed by, sponsored by, or maintained by Factory, Factory AI, or the makers of Droid. This historical snapshot is not official documentation, pricing, or support.</p>
+    <p lang="ja">これは独立した非公式のコンパイラデモです。Factory、Factory AI、Droid の開発元とは一切関係がなく、承認・協賛・運営も受けていません。公式ドキュメント、料金案内、サポートではありません。</p>
+    <a href="https://docs.factory.ai">Use the official Factory documentation / 公式ドキュメント ↗</a>
+  </aside>
   <header class="factory-topbar" role="banner">
     <div class="factory-topbar-row1">
       <div class="factory-brand-group">
         <a id="boris-ui-brand-link" class="factory-brand" href="#">
-          <img class="factory-logo" src="{{asset-url assets/img/dark.svg}}" alt="Factory">
+          <span class="factory-demo-wordmark">Boris Demo</span>
+          <span class="factory-unofficial-badge">UNOFFICIAL</span>
         </a>
         <div class="factory-lang-switcher" id="boris-ui-lang-switcher">
           <button id="boris-ui-lang-badge" class="factory-lang-pill" type="button" aria-haspopup="listbox" aria-expanded="false">
@@ -41,11 +49,10 @@
       </div>
       <div class="factory-topbar-actions">
         <nav class="factory-topbar-links" id="boris-ui-topbar-links" aria-label="Quick links">
-          <a class="factory-topbar-link" data-topbar-target="pricing" href="#">Plans &amp; Pricing</a>
           <a class="factory-topbar-link" data-topbar-target="models" href="#">Available Models</a>
           <a class="factory-topbar-link" data-topbar-target="enterprise/index" href="#">Enterprise</a>
-          <a class="factory-topbar-link" data-topbar-target="support" href="#">Support</a>
         </nav>
+        <a class="factory-official-link" href="https://docs.factory.ai">Official docs ↗</a>
         <button id="boris-ui-theme-toggle" class="factory-theme-btn" type="button" aria-label="Toggle color theme">☾</button>
       </div>
     </div>
@@ -71,6 +78,7 @@
         <div class="factory-page-eyebrow">{{breadcrumb}}</div>
       </div>
       <article class="factory-article factory-prose">
+        <p class="factory-article-disclaimer" data-boris-search-exclude><strong>Unofficial historical snapshot.</strong> Not affiliated with Factory or Droid. Content may be outdated. For current information, use <a href="https://docs.factory.ai">Factory's official documentation ↗</a>.</p>
         {{content}}
       </article>
       <div class="factory-graph-links" data-boris-search-exclude>{{relations}}{{backlinks}}</div>

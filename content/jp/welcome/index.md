@@ -1,13 +1,13 @@
 ---
 id: jp/welcome/index
-title: "Factoryへようこそ"
+title: "非公式 Boris コンパイラデモ"
 status: published
-summary: "ワークフローに合ったFactoryの出発点、機能、設定ドキュメントを選びましょう。"
+summary: "Boris の検証用に作成した非公式の過去のドキュメントです。Factory、Factory AI、Droid の開発元とは一切関係がありません。"
 parent: jp/index
 tags: [welcome]
 relations: [relates_to=welcome/index]
 ---
-<div class="factory-page-title-row"><h1 class="factory-page-title">Factoryへようこそ</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+<div class="factory-page-title-row"><h1 class="factory-page-title">非公式 Boris コンパイラデモ</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
 
 <p class="factory-page-subtitle">ワークフローに合ったFactoryの出発点、機能、設定ドキュメントを選びましょう。</p>
 
@@ -332,9 +332,9 @@ Droidのコマンド、フラグ、運用の詳細を参照します。
 
 <div class="factory-card">
 
-**[[jp/support|サポート]]**
+**[Factory 公式サポート（外部サイト）](https://docs.factory.ai/jp/support)**
 
-Factoryチームから支援を受けるか、適切なサポート窓口を見つけます。
+この独立した非公式デモでは Factory のサポートを提供していません。公式サイトの窓口をご確認ください。
 
 </div>
 

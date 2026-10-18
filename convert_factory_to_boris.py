@@ -21,6 +21,26 @@ FACTORY_DOCS = os.environ.get("FACTORY_DOCS", "/home/factory-user/repos/factory/
 OPENAPI_SPEC = os.path.join(BORIS_ROOT, "openapi.json") if os.path.exists(os.path.join(BORIS_ROOT, "openapi.json")) else "/tmp/factory-openapi.json"
 CONTENT_DIR = os.path.join(BORIS_ROOT, "content")
 STATIC_DIR = os.path.join(BORIS_ROOT, "static")
+EXCLUDED_MIRROR_PAGES = frozenset({"pricing", "support", "jp/pricing", "jp/support"})
+
+
+def official_only_url(raw_href: str, current_id: str):
+    """Keep pricing and support on Factory's official site, never in this mirror."""
+    parsed = urllib.parse.urlsplit(raw_href)
+    if parsed.scheme or parsed.netloc:
+        if parsed.scheme != "https" or parsed.netloc != "docs.factory.ai":
+            return None
+        target = parsed.path.lstrip("/")
+    elif parsed.path.startswith("/"):
+        target = parsed.path.lstrip("/")
+    else:
+        target = os.path.normpath(os.path.join(os.path.dirname(current_id), parsed.path))
+    target = re.sub(r"\.(?:mdx?|html)$", "", target.rstrip("/"))
+    if not parsed.netloc and current_id.startswith("jp/") and f"jp/{target}" in EXCLUDED_MIRROR_PAGES:
+        target = f"jp/{target}"
+    if target not in EXCLUDED_MIRROR_PAGES:
+        return None
+    return urllib.parse.urlunsplit(("https", "docs.factory.ai", f"/{target}", parsed.query, parsed.fragment))
 
 REDIRECT_MAP = {
     "cli/features/install-github-app": "guides/droid-exec/code-review",
@@ -442,6 +462,8 @@ def resolve_internal_target(raw_href: str, current_id: str, known_ids: set):
     """Resolve a Mintlify href to (target_entity_id, fragment) or None if external/static."""
     if not raw_href:
         return None
+    if official_only_url(raw_href, current_id):
+        return None
     if raw_href.startswith("https://docs.factory.ai"):
         raw_href = raw_href[len("https://docs.factory.ai"):] or "/"
     if raw_href.startswith(("http://", "https://", "mailto:", "tel:")):
@@ -520,6 +542,7 @@ def convert_mdx_body(body: str, current_id: str, known_ids: set) -> str:
         attrs = parse_attrs(attr_str)
         title = attrs.get("title", "Resource")
         href = attrs.get("href", "").strip()
+        href = official_only_url(href, current_id) or href
         inner_clean = dedent_NonFence(inner).strip()
         heading_line = f"**{title}**"
         if href:
@@ -950,7 +973,10 @@ def main():
             if rel == "README.md" or rel.startswith(("snippets/", "jp/snippets/")):
                 continue
             pid = re.sub(r"\.(mdx|md)$", "", rel)
-            raw_text = open(os.path.join(dp, f), encoding="utf-8").read()
+            if pid in EXCLUDED_MIRROR_PAGES:
+                continue
+            with open(os.path.join(dp, f), encoding="utf-8") as source_file:
+                raw_text = source_file.read()
             meta, body = parse_mdx_frontmatter(raw_text)
             body = fix_code_fences(body, rel)
             raw_pages[pid] = {
@@ -960,7 +986,8 @@ def main():
             }
 
     # 2. Load OpenAPI pages
-    openapi_spec = json.load(open(OPENAPI_SPEC, encoding="utf-8"))
+    with open(OPENAPI_SPEC, encoding="utf-8") as source_file:
+        openapi_spec = json.load(source_file)
     openapi_pages = generate_openapi_pages(openapi_spec)
 
     # 3. Determine all directory section hubs needed so every page has a clean parent chain to `index`
@@ -1085,8 +1112,8 @@ def main():
             continue
         if pid == "index":
             parent_id = None
-            title = "Factory Documentation — Agent-Native Software Development"
-            summary = "Official documentation for Factory Droid CLI, Web Platform, Missions, Enterprise Governance, Benchmarks, and Public API."
+            title = "Unofficial Factory Documentation — Boris Compiler Demo"
+            summary = "Independent, unofficial historical documentation snapshot for testing Boris. Not affiliated with, endorsed by, or maintained by Factory or the makers of Droid."
             rel = ["relates_to=jp/index"]
             welcome_body = pages.get("welcome/index", {}).get("body", "")
             if welcome_body:
@@ -1095,8 +1122,8 @@ def main():
                 hub_body = f"Explore the documentation pages and resources in **{title}**.\n"
         elif pid == "jp/index":
             parent_id = "index"
-            title = SECTION_TITLES["jp"]
-            summary = "Factory Droid CLI、Webプラットフォーム、Missions、エンタープライズ管理、ベンチマーク、公開APIの公式ドキュメント。"
+            title = "非公式 Factory ドキュメント — Boris コンパイラデモ"
+            summary = "Boris の検証用に作成した非公式の過去のドキュメントです。Factory、Factory AI、Droid の開発元とは一切関係がありません。"
             rel = ["relates_to=index"]
             jp_welcome_body = pages.get("jp/welcome/index", {}).get("body", "")
             if jp_welcome_body:
@@ -1264,6 +1291,9 @@ def main():
             # Protect inline code spans that wrap an entire [label](href), while allowing [`code`](href)
             def replace_md_link(m):
                 label, href = m.group(1).strip(), m.group(2).strip()
+                official = official_only_url(href, pid)
+                if official:
+                    return f"[{label}]({official})"
                 resolved = resolve_internal_target(href, pid, all_page_ids)
                 if not resolved:
                     return m.group(0)

@@ -21,16 +21,14 @@
         { key: 'api-reference', label: 'API Reference', entry: 'api-reference/index' }
       ],
       topbarLinks: [
-        { id: 'pricing', label: 'Plans & Pricing' },
         { id: 'models', label: 'Available Models' },
-        { id: 'enterprise/index', label: 'Enterprise' },
-        { id: 'support', label: 'Support' }
+        { id: 'enterprise/index', label: 'Enterprise' }
       ],
       sections: {
         docs: [
           {
             group: 'Start Here',
-            pages: ['welcome/index', 'pricing', 'models', 'support']
+            pages: ['welcome/index', 'models']
           },
           {
             group: 'Platform',
@@ -299,10 +297,8 @@
         { key: 'api-reference', label: 'APIリファレンス', entry: 'jp/api-reference/index' }
       ],
       topbarLinks: [
-        { id: 'jp/pricing', label: '料金プラン' },
         { id: 'jp/models', label: '利用可能なモデル' },
-        { id: 'jp/enterprise/index', label: 'エンタープライズ' },
-        { id: 'jp/support', label: 'サポート' }
+        { id: 'jp/enterprise/index', label: 'エンタープライズ' }
       ],
       sections: {
         docs: [
@@ -354,7 +350,6 @@
                   'jp/web/getting-started/quickstart'
                 ]
               },
-              'jp/pricing',
               'jp/models'
             ]
           },
@@ -469,8 +464,7 @@
                   'jp/cli/user-guides/choosing-your-model',
                   'jp/cli/user-guides/implementing-large-features'
                 ]
-              },
-              'jp/support'
+              }
             ]
           }
         ],

@@ -1,17 +1,25 @@
-# Factory Documentation — Boris `0.9.0` Edition
+# Unofficial Factory Documentation — Boris Compiler Demo
+
+> **Unofficial and independent.** This repository, site, and benchmark report
+> are not affiliated with, endorsed by, sponsored by, or maintained by Factory,
+> Factory AI, or the makers of Droid. This historical snapshot is not official
+> documentation, pricing, or support. Names and marks belong to their respective
+> owners. Use https://docs.factory.ai for current official information.
 
 Complete conversion of [`factory-ai/factory/docs`](https://github.com/factory-ai/factory/tree/main/docs) from **Mintlify CLI (`mintlify@4.2.1059`)** to **Boris (`boris/0.9.0`)**, a graph-native publication compiler written in **Zig 0.17.0**.
 
 **Published site:** https://drawmeanelephant.github.io/factory-docs-boris/
 
-This is a documentation migration/demo, not the official Factory documentation
-domain. See [CLOUD-HANDOFF.md](CLOUD-HANDOFF.md) for the remaining visual and
-conversion fixes.
+Pricing and support pages are intentionally excluded in both languages.
+Every published page has static non-affiliation notices and `noindex, nofollow,
+noarchive` metadata. `robots.txt` allows crawling so search engines can read those
+directives; it does not block crawlers from seeing the `noindex` tags.
+See [CLOUD-HANDOFF.md](CLOUD-HANDOFF.md) for the remaining fixes.
 
 ## Contents of This Repository
 
 - `boris.json` — Boris publication profile (`github-pages` target, OpenGraph head defaults, `rss.xml`, `sitemap.xml`, `trunk.html` + `main.html` layout rules).
-- `content/` — **489** validated pages and **10** raw chart includes, including English and Japanese documentation, API references, section hubs, and the migration report.
+- `content/` — **485** validated pages and **10** raw chart includes, including English and Japanese documentation, API references, section hubs, and the migration report, excluding pricing and support.
 - `themes/factory/` — Factory dark theme (`layouts/main.html`, `layouts/trunk.html`, `assets/css/factory.css`, `assets/js/factory.js`) matching Mintlify's 2-row top header, section-scoped sidebar, callout boxes, interactive code groups, and right TOC.
 - `static/` — All copied static media assets (`images/`, diagrams, GIFs, MP4 videos).
 - `screenshots/` — Side-by-side `1440×1080` visual comparison screenshots (`01-quickstart-compare.png` through `06-jp-quickstart-compare.png`) and full-page screenshots of the rendered migration & benchmark report (`07-boris-migration-report-part1.png` – `part3.png`).
@@ -57,6 +65,7 @@ Run the dependency-free client tests with Node.js 18 or later:
 ```bash
 node --test tests/*.test.cjs
 python3 -m unittest discover -s tests -p 'test_*.py'
+python3 scripts/check-site-policy.py --html-dir dist
 ```
 
 ## GitHub Pages

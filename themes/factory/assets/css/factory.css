@@ -84,6 +84,70 @@ a:hover {
   color: var(--accent);
 }
 
+.factory-unofficial-notice {
+  padding: 1rem max(1.5rem, calc((100% - 1395px) / 2));
+  background: #fff4dc;
+  color: #402400;
+  border-bottom: 2px solid #c98720;
+  font-size: 0.88rem;
+}
+
+.factory-unofficial-notice strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.factory-unofficial-notice p {
+  margin: 0.4rem 0;
+}
+
+.factory-unofficial-notice a {
+  color: #6b3100;
+  font-weight: 600;
+}
+
+.factory-demo-wordmark {
+  color: #f5f5f5;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.factory-unofficial-badge {
+  margin-left: 0.55rem;
+  padding: 0.12rem 0.4rem;
+  color: #ffe1b0;
+  border: 1px solid #b9772b;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.factory-official-link {
+  color: #f5f5f5;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.factory-article-disclaimer {
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--fg-secondary);
+  font-size: 0.85rem;
+}
+
+.factory-article-disclaimer strong {
+  color: var(--fg-primary);
+}
+
+.factory-footer-notice {
+  flex-basis: 100%;
+  color: var(--fg-secondary);
+  margin: 0;
+}
+
 /* 2-Row Mintlify-Parity Top Navigation Bar */
 .factory-topbar {
   position: sticky;

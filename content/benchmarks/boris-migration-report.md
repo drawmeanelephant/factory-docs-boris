@@ -6,6 +6,10 @@ summary: "Architecture, compile-speed benchmarks, VM hardware analysis, and hone
 parent: benchmarks/index
 tags: [benchmarks, boris, mintlify, compiler, zig, performance, migration]
 ---
+<Aside kind="warning">
+**Unofficial independent compiler demo.** This report and site are not affiliated with, endorsed by, sponsored by, or maintained by Factory, Factory AI, or the makers of Droid. Measurements describe a historical migration experiment, not official product claims. Pricing and support pages are intentionally not mirrored. Use [Factory's official documentation](https://docs.factory.ai) for current information.
+</Aside>
+
 <div class="factory-page-title-row"><h1 class="factory-page-title">Boris Migration &amp; Benchmark Report</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
 
 <p class="factory-page-subtitle">Architecture, compile-speed benchmarks, VM hardware analysis, and honest trade-offs from migrating Factory Docs from Mintlify to Boris 0.9.0.</p>

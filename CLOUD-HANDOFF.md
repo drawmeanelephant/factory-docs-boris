@@ -5,6 +5,17 @@ The public site is https://drawmeanelephant.github.io/factory-docs-boris/.
 GitHub Actions builds and deploys pushes to `main`; pull requests build and
 validate without deploying.
 
+## Preserve the unofficial-site safeguards
+
+This demo is not affiliated with, endorsed by, sponsored by, or maintained by
+Factory, Factory AI, or the makers of Droid. Keep the static bilingual banner,
+per-article notice, footer disclaimers, unofficial branding/social image, and
+`noindex, nofollow, noarchive` metadata on every page. Do not restore mirrored
+pricing or support pages, links, or search entries in either language.
+`robots.txt` must allow crawling so bots can read the noindex tags.
+The converter intentionally excludes those four pages and sends their links
+to the official Factory site instead.
+
 ## First priority: theme contrast, not a redesign
 
 Keep the existing layout and content. Correct paired foreground/background

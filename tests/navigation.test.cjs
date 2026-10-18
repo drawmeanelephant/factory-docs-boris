@@ -62,3 +62,20 @@ test('ignores navigation paths outside the configured publication root', () => {
   const client = routeClient('cli/getting-started/quickstart', '/factory-docs-boris');
   assert.equal(client.hrefToPageId('https://example.com/other/index.html'), '');
 });
+
+test('pricing and support are not included in either locale navigation', () => {
+  const start = source.indexOf('var NAV_SPEC =');
+  const end = source.indexOf('// 1. Theme toggle');
+  const spec = vm.runInNewContext(source.slice(start, end) + '; NAV_SPEC;');
+  const excluded = new Set(['pricing', 'support', 'jp/pricing', 'jp/support']);
+  function check(items) {
+    for (const item of items) {
+      if (typeof item === 'string') assert.equal(excluded.has(item), false);
+      else if (item.pages) check(item.pages);
+    }
+  }
+  for (const locale of Object.values(spec)) {
+    for (const item of locale.topbarLinks) assert.equal(excluded.has(item.id), false);
+    for (const items of Object.values(locale.sections)) check(items);
+  }
+});

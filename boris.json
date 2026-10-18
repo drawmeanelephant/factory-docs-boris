@@ -4,8 +4,8 @@
   "input": "content",
   "site": {
     "url": "https://drawmeanelephant.github.io/factory-docs-boris",
-    "title": "Factory Documentation",
-    "description": "Agent-Native Software Development Documentation"
+    "title": "Unofficial Boris Compiler Demo",
+    "description": "Independent, unofficial historical documentation demo. Not affiliated with, endorsed by, or maintained by Factory, Factory AI, or the makers of Droid."
   },
   "publication": {
     "target": "github-pages",
@@ -44,11 +44,11 @@
         "base_url": "https://drawmeanelephant.github.io/factory-docs-boris",
         "ogp": "required",
         "defaults": {
-          "description": "Agent-Native Software Development Documentation",
+          "description": "Unofficial independent Boris compiler demo. Not affiliated with Factory, Factory AI, or the makers of Droid. Historical content may be outdated; use docs.factory.ai for official information.",
           "image": {
             "source": "static",
-            "path": "images/FACTORY_SOCIAL.jpg",
-            "alt": "Factory Documentation"
+            "path": "images/unofficial-demo-social.png",
+            "alt": "Unofficial Boris compiler demo — not affiliated with Factory or Droid"
           },
           "twitter_card": "summary_large_image"
         }

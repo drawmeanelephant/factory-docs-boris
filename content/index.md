@@ -1,12 +1,12 @@
 ---
 id: index
-title: "Factory Documentation — Agent-Native Software Development"
+title: "Unofficial Factory Documentation — Boris Compiler Demo"
 status: published
-summary: "Official documentation for Factory Droid CLI, Web Platform, Missions, Enterprise Governance, Benchmarks, and Public API."
+summary: "Independent, unofficial historical documentation snapshot for testing Boris. Not affiliated with, endorsed by, or maintained by Factory or the makers of Droid."
 tags: [index]
 relations: [relates_to=jp/index]
 ---
-<div class="factory-page-title-row"><h1 class="factory-page-title">Welcome to Factory</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+<div class="factory-page-title-row"><h1 class="factory-page-title">Unofficial Boris Compiler Demo</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
 
 <p class="factory-page-subtitle">Choose the right Factory starting point, capability, and configuration docs for your workflow.</p>
 
@@ -331,9 +331,9 @@ Stay current with new features, launches, and product improvements.
 
 <div class="factory-card">
 
-**[[support|Support]]**
+**[Official Factory support (external)](https://docs.factory.ai/support)**
 
-Get help from the Factory team or find the right support channel.
+This independent demo does not provide Factory support. Follow the external link to Factory's official site.
 
 </div>
 
@@ -354,8 +354,6 @@ Get help from the Factory team or find the right support channel.
 - [[leaderboards/index|Terminal Bench]]
 - [[models|Available Models]]
 - [[onboarding/index|Role-Based Onboarding]]
-- [[pricing|Plans & Pricing]]
 - [[reference/index|CLI & Configuration Reference]]
-- [[support|Support]]
 - [[web/index|Factory Web Platform]]
 - [[welcome/index|Welcome to Factory]]

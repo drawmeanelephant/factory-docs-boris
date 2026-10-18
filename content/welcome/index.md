@@ -1,13 +1,13 @@
 ---
 id: welcome/index
-title: "Welcome to Factory"
+title: "Unofficial Boris Compiler Demo"
 status: published
-summary: "Choose the right Factory starting point, capability, and configuration docs for your workflow."
+summary: "Independent, unofficial historical documentation snapshot for compiler testing. Not affiliated with Factory or the makers of Droid."
 parent: index
 tags: [welcome]
 relations: [relates_to=jp/welcome/index]
 ---
-<div class="factory-page-title-row"><h1 class="factory-page-title">Welcome to Factory</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
+<div class="factory-page-title-row"><h1 class="factory-page-title">Unofficial Boris Compiler Demo</h1><button class="factory-copy-page-btn" type="button">Copy page ▾</button></div>
 
 <p class="factory-page-subtitle">Choose the right Factory starting point, capability, and configuration docs for your workflow.</p>
 
@@ -332,9 +332,9 @@ Stay current with new features, launches, and product improvements.
 
 <div class="factory-card">
 
-**[[support|Support]]**
+**[Official Factory support (external)](https://docs.factory.ai/support)**
 
-Get help from the Factory team or find the right support channel.
+This independent demo does not provide Factory support. Follow the external link to Factory's official site.
 
 </div>
 
