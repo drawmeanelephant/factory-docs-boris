@@ -55,12 +55,12 @@ jobs:
       - name: Cache Zig dependencies
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
-          path: ~/.cache/zig
+          path: .zig-cache
           key: zig-${{ runner.os }}-0.17.0-boris-66efcfb586b4342fe69d5a51962cb6d201e4dfc2
 
       - name: Build the pinned compiler
         working-directory: .tools/boris
-        run: zig build -Doptimize=ReleaseFast -j 4
+        run: zig build -Doptimize=ReleaseFast -j4
 
       - name: Resolve Pages location
         id: pages
