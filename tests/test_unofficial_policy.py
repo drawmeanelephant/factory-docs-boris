@@ -9,6 +9,8 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED = {"pricing", "support", "jp/pricing", "jp/support"}
+BANNER = ("Unofficial mirror. Converted from docs.factory.ai with Boris for a benchmark comparison. "
+          "Not affiliated with Factory. All content belongs to Factory.")
 spec = importlib.util.spec_from_file_location("converter", ROOT / "convert_factory_to_boris.py")
 converter = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(converter)
@@ -21,7 +23,7 @@ class UnofficialSitePolicyTests(unittest.TestCase):
                 text = (ROOT / "themes/factory/layouts" / name).read_text()
                 self.assertIn('name="robots" content="noindex, nofollow, noarchive"', text)
                 self.assertIn("UNOFFICIAL / 非公式", text)
-                self.assertIn("Not affiliated with, endorsed by, sponsored by, or maintained by", text)
+                self.assertIn(f"<p>{BANNER}</p>", text)
                 self.assertIn('class="factory-article-disclaimer"', text)
                 self.assertIn("Unofficial Boris Demo</title>", text)
                 self.assertNotIn('data-topbar-target="pricing"', text)
@@ -41,6 +43,7 @@ class UnofficialSitePolicyTests(unittest.TestCase):
         self.assertNotRegex(robots, r"(?m)^Disallow:\s*/")
         self.assertIn('name="robots" content="noindex, nofollow, noarchive"',
                       (ROOT / "static/404.html").read_text())
+        self.assertIn(f"<p>{BANNER}</p>", (ROOT / "static/404.html").read_text())
 
     def test_converter_sends_pricing_and_support_to_official_site(self):
         for href, current, expected in [

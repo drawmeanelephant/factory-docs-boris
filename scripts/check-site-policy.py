@@ -8,6 +8,8 @@ from pathlib import Path
 
 
 EXCLUDED = {"pricing.html", "support.html", "jp/pricing.html", "jp/support.html"}
+BANNER = ("Unofficial mirror. Converted from docs.factory.ai with Boris for a benchmark comparison. "
+          "Not affiliated with Factory. All content belongs to Factory.")
 
 
 class PagePolicy(HTMLParser):
@@ -40,8 +42,8 @@ def check_site(html_dir):
         policy.feed(text)
         if not {"noindex", "nofollow", "noarchive"} <= policy.robots:
             raise ValueError(f"Missing crawler policy: {record['path']}")
-        if "not affiliated with" not in text.lower():
-            raise ValueError(f"Missing non-affiliation notice: {record['path']}")
+        if f"<p>{BANNER}</p>" not in text:
+            raise ValueError(f"Missing approved mirror banner: {record['path']}")
         if record["kind"] == "html-page" and not {
             "factory-unofficial-notice", "factory-article-disclaimer"
         } <= policy.notices:
