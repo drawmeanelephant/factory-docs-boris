@@ -19,6 +19,53 @@ def load_script(name):
 
 profile_script = load_script("pages-profile")
 artifact_script = load_script("prepare-pages")
+media_script = load_script("restore-media")
+
+
+class MediaRestoreTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        chunks = self.root / ".media-chunks"
+        chunks.mkdir()
+        content = b"original video bytes"
+        self.target = self.root / "static/video.mp4"
+        parts = []
+        for number, data in enumerate([content[:8], content[8:]]):
+            path = chunks / f"{number}.part"
+            path.write_bytes(data)
+            parts.append({"path": path.relative_to(self.root).as_posix(), "bytes": len(data),
+                          "sha256": hashlib.sha256(data).hexdigest()})
+        self.content = content
+        (chunks / "manifest.json").write_text(json.dumps([{
+            "path": "static/video.mp4", "bytes": len(content),
+            "sha256": hashlib.sha256(content).hexdigest(), "chunks": parts,
+        }]))
+
+    def test_original_bytes_are_restored_and_repeatable(self):
+        media_script.restore_media(self.root)
+        self.assertEqual(self.target.read_bytes(), self.content)
+        media_script.restore_media(self.root)
+        self.assertEqual(self.target.read_bytes(), self.content)
+
+    def test_corrupt_chunks_do_not_publish_partial_media(self):
+        (self.root / ".media-chunks/0.part").write_bytes(b"bad")
+        with self.assertRaises(ValueError):
+            media_script.restore_media(self.root)
+        self.assertFalse(self.target.exists())
+        self.assertEqual(list(self.target.parent.iterdir()), [])
+
+    def test_existing_modified_media_is_preserved(self):
+        self.target.parent.mkdir()
+        self.target.write_bytes(b"user changes")
+        with self.assertRaises(ValueError):
+            media_script.restore_media(self.root)
+        self.assertEqual(self.target.read_bytes(), b"user changes")
+
+    def test_path_escape_is_rejected(self):
+        with self.assertRaises(ValueError):
+            media_script.media_path(self.root, "../outside")
 
 
 class PagesProfileTests(unittest.TestCase):

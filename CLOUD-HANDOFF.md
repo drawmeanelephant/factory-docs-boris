@@ -30,6 +30,8 @@ Deployment-prefix handling supports the `/factory-docs-boris/` Pages path.
 Run:
 
 ```bash
+git lfs pull
+python3 scripts/restore-media.py
 node --test tests/*.test.cjs
 python3 -m unittest discover -s tests -p 'test_*.py'
 boris validate --profile boris.json

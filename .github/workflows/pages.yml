@@ -1,0 +1,117 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.event_name == 'pull_request' && github.ref || 'publish' }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          lfs: true
+
+      - name: Restore the original large video
+        run: python3 scripts/restore-media.py
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+
+      - name: Test navigation and search
+        run: |
+          node --test tests/*.test.cjs
+          python3 -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Check out Boris 0.9.0
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: drawmeanelephant/boris
+          ref: 66efcfb586b4342fe69d5a51962cb6d201e4dfc2
+          path: .tools/boris
+          persist-credentials: false
+
+      - name: Set up Zig 0.17.0
+        uses: drawmeanelephant/zig-zouave@2d8510d62b517fa786279562cf8b1bdcf0c47b9f
+        with:
+          version: 0.17.0
+
+      - name: Cache Zig dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/zig
+          key: zig-${{ runner.os }}-0.17.0-boris-66efcfb586b4342fe69d5a51962cb6d201e4dfc2
+
+      - name: Build the pinned compiler
+        working-directory: .tools/boris
+        run: zig build -Doptimize=ReleaseFast -j 4
+
+      - name: Resolve Pages location
+        id: pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+
+      - name: Configure the publication profile
+        env:
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          BASE_URL="${PAGES_BASE_URL:-https://drawmeanelephant.github.io/factory-docs-boris}"
+          python3 scripts/pages-profile.py --base-url "$BASE_URL"
+
+      - name: Validate, compile, and enforce proof checks
+        run: |
+          .tools/boris/zig-out/bin/boris validate --profile .boris-pages-profile.json
+          .tools/boris/zig-out/bin/boris build --profile .boris-pages-profile.json -j 4 --quiet
+          .tools/boris/zig-out/bin/boris proof verify --html-dir dist \
+            --max-errors 0 --max-warnings 0 --block-code HTML_DUPLICATE_ID
+
+      - name: Prepare the verified public artifact
+        run: python3 scripts/prepare-pages.py
+
+      - name: Upload proof evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: boris-proof-${{ github.run_id }}
+          path: |
+            dist/_boris/proof/
+            .pages-evidence/
+          include-hidden-files: true
+          retention-days: 14
+
+      - name: Upload the Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: public-site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

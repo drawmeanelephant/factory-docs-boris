@@ -16,3 +16,5 @@ public-site/
 .pages-evidence/
 LOCAL-*-REPORT.md
 screenshots/local-*/
+# Reconstructed byte-for-byte from the verified Git LFS chunks before builds.
+static/images/getting-started-overview.mp4

@@ -1,0 +1,64 @@
+[
+  {
+    "path": "static/images/getting-started-overview.mp4",
+    "bytes": 87299470,
+    "sha256": "df217b19747e9dab64d6e1c07506032ea3769dab9ad3bd568f35bd8f76e0ce7f",
+    "chunks": [
+      {
+        "path": ".media-chunks/getting-started-overview/part-000.part",
+        "bytes": 8388608,
+        "sha256": "2b0c0a66892141ac537055d8284b982671cba629208cd6f7560fef0f99b83957"
+      },
+      {
+        "path": ".media-chunks/getting-started-overview/part-001.part",
+        "bytes": 8388608,
+        "sha256": "2f215bb0688dc13993ea8c75917b31c897d9d6b40f21535db26fc9699efb20ed"
+      },
+      {
+        "path": ".media-chunks/getting-started-overview/part-002.part",
+        "bytes": 8388608,
+        "sha256": "db7e156e8afb46edc21f5063ae8c3cbb5a6a99481013f31feadb2b1d32edc276"
+      },
+      {
+        "path": ".media-chunks/getting-started-overview/part-003.part",
+        "bytes": 8388608,
+        "sha256": "000a68015cc7fdd68128f0d6c1109ab2e6d9651825f282bfa1e9e5e3738ddc2a"
+      },
+      {
+        "path": ".media-chunks/getting-started-overview/part-004.part",
+        "bytes": 8388608,
+        "sha256": "d6f1d09c323619a8441da64ad292ecf70c2a93c5f4a82e54c298351e3c5fa3c9"
+      },
+      {
+        "path": ".media-chunks/getting-started-overview/part-005.part",
+        "bytes": 8388608,
+        "sha256": "68780ffc9df655fdd7a85cd46afb0d46069d55a9183d9d4e4727d0875a873b09"
+      },
+      {
+        "path": ".media-chunks/getting-started-overview/part-006.part",
+        "bytes": 8388608,
+        "sha256": "87432d43897d2a737bf7cd7b89bfc612f816afec479375e0a8a6bb16febd82f0"
+      },
+      {
+        "path": ".media-chunks/getting-started-overview/part-007.part",
+        "bytes": 8388608,
+        "sha256": "1492c5e6c094bc7e1a3ccf07843478c113933bac48d34e636f703e51658facba"
+      },
+      {
+        "path": ".media-chunks/getting-started-overview/part-008.part",
+        "bytes": 8388608,
+        "sha256": "bf8696f09ed78467e3f20174c2ee103c8c3d6e941d07bff58548a85c436d0b91"
+      },
+      {
+        "path": ".media-chunks/getting-started-overview/part-009.part",
+        "bytes": 8388608,
+        "sha256": "50771490509003899ce09e20ad18fb70fb1c86c2e3529fc00140d9d426758957"
+      },
+      {
+        "path": ".media-chunks/getting-started-overview/part-010.part",
+        "bytes": 3413390,
+        "sha256": "9a74707d04282ecc1af6c77222b453b9dd4300f7b3c52185221d2638337eb31f"
+      }
+    ]
+  }
+]

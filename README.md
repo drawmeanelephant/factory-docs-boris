@@ -24,6 +24,10 @@ conversion fixes.
 With `boris` (`0.9.0`) on your `PATH`:
 
 ```bash
+# Fetch the videos and GIFs stored in Git LFS after cloning
+git lfs pull
+python3 scripts/restore-media.py
+
 # 1. Config & schema preflight (~98 ms)
 boris check
 
